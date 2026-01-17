@@ -18,7 +18,7 @@ type WeekCardProps = {
 
 const statusCopy: Record<WeekStatus, string> = {
   available: "Available",
-  comingSoon: "Coming soon",
+  comingSoon: "Releasing next",
   completed: "Completed",
 };
 
@@ -128,7 +128,7 @@ export default function Home() {
       weekNumber: 2,
       title: "Planning & Prep",
       description:
-        "Speed up lesson planning with AI-assisted outlines, differentiation, and resource curation.",
+        "Plan lessons with AI-supported outlines, differentiation options, and resource shortlists you review and refine.",
       minutes: 30,
       status: "comingSoon",
     },
@@ -136,7 +136,7 @@ export default function Home() {
       weekNumber: 3,
       title: "Prompting Basics",
       description:
-        "Craft clear, reliable prompts and learn quick checks for accuracy and bias.",
+        "Write clear prompts, check outputs for accuracy and bias, and decide what fits your students.",
       minutes: 30,
       status: "comingSoon",
     },
@@ -144,7 +144,7 @@ export default function Home() {
       weekNumber: 4,
       title: "Classroom Workflows",
       description:
-        "Build repeatable routines for feedback, communication, and classroom management support.",
+        "Design repeatable routines for feedback notes, family communication drafts, and classroom management supports you finalize.",
       minutes: 35,
       status: "comingSoon",
     },
@@ -152,7 +152,7 @@ export default function Home() {
       weekNumber: 5,
       title: "Assessment & Feedback",
       description:
-        "Generate rubric-aligned feedback and exemplars while keeping your professional voice.",
+        "Draft rubric-aligned feedback and exemplars, then edit to match your expectations and voice.",
       minutes: 35,
       status: "comingSoon",
     },
@@ -160,7 +160,7 @@ export default function Home() {
       weekNumber: 6,
       title: "Safety, Policy & Norms",
       description:
-        "Set guardrails, privacy expectations, and classroom norms for AI use.",
+        "Establish guardrails, privacy expectations, and classroom norms with your professional judgment at the center.",
       minutes: 25,
       status: "comingSoon",
     },
