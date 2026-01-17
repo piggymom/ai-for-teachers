@@ -12,6 +12,8 @@ type WeekCardProps = {
   minutes: number;
   status: WeekStatus;
   href?: string;
+  statusLabel?: string;
+  variant?: "default" | "orientation";
 };
 
 const statusCopy: Record<WeekStatus, string> = {
@@ -27,12 +29,17 @@ const WeekCard = ({
   minutes,
   status,
   href,
+  statusLabel,
+  variant = "default",
 }: WeekCardProps) => {
   const isInteractive = status !== "comingSoon" && href;
+  const statusText = statusLabel ?? statusCopy[status];
   const cardClasses =
     "group relative flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left transition";
   const interactiveClasses =
     "hover:-translate-y-0.5 hover:border-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30";
+  const variantClasses =
+    variant === "orientation" ? "border-white/8 bg-white/[0.03]" : "";
   const comingSoonClasses = "opacity-60";
   const content = (
     <div className="flex h-full flex-col gap-5">
@@ -48,7 +55,7 @@ const WeekCard = ({
             {minutes} min
           </span>
           <span className="rounded-full border border-white/10 px-3 py-1">
-            {statusCopy[status]}
+            {statusText}
           </span>
         </div>
       </div>
@@ -60,7 +67,7 @@ const WeekCard = ({
     return (
       <div
         aria-disabled="true"
-        className={`${cardClasses} ${comingSoonClasses}`}
+        className={`${cardClasses} ${variantClasses} ${comingSoonClasses}`}
       >
         {content}
       </div>
@@ -70,7 +77,7 @@ const WeekCard = ({
   return (
     <Link
       href={href}
-      className={`${cardClasses} ${interactiveClasses}`}
+      className={`${cardClasses} ${variantClasses} ${interactiveClasses}`}
     >
       {content}
     </Link>
@@ -97,6 +104,17 @@ export default function Home() {
   );
 
   const weeks: WeekCardProps[] = [
+    {
+      weekNumber: 0,
+      title: "About This Course",
+      description:
+        "How this course is designed, who it’s for, and how to use AI in a way that supports—rather than replaces—professional judgment.",
+      minutes: 5,
+      status: "available",
+      statusLabel: "Start here",
+      href: "/week-0",
+      variant: "orientation",
+    },
     {
       weekNumber: 1,
       title: "Understanding AI in Teaching",
