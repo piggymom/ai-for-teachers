@@ -7,10 +7,10 @@ type SectionCardProps = {
 };
 
 const SectionCard = ({ title, children }: SectionCardProps) => (
-  <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-[0_12px_40px_-32px_rgba(0,0,0,0.9)] backdrop-blur sm:p-7">
+  <section className="rounded-2xl border border-white/12 bg-white/[0.04] p-6 sm:p-7">
     <div className="flex flex-col gap-3">
       <h2 className="text-xl font-semibold text-white sm:text-2xl">{title}</h2>
-      <div className="text-base leading-relaxed text-white/80 sm:text-[1.05rem]">
+      <div className="text-base leading-relaxed text-white/75 sm:text-[1.05rem]">
         {children}
       </div>
     </div>
@@ -18,13 +18,13 @@ const SectionCard = ({ title, children }: SectionCardProps) => (
 );
 
 const HighlightCard = ({ title, children }: SectionCardProps) => (
-  <section className="rounded-2xl border border-white/15 bg-white/10 p-6 shadow-[0_20px_50px_-38px_rgba(0,0,0,0.85)] sm:p-7">
+  <section className="rounded-2xl border border-white/20 bg-white/[0.06] p-6 sm:p-7">
     <div className="flex flex-col gap-4">
-      <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-white/70">
+      <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-white/60">
         Highlight
       </div>
       <h2 className="text-2xl font-semibold text-white sm:text-3xl">{title}</h2>
-      <div className="text-base leading-relaxed text-white/80 sm:text-[1.05rem]">
+      <div className="text-base leading-relaxed text-white/75 sm:text-[1.05rem]">
         {children}
       </div>
     </div>
@@ -38,29 +38,29 @@ export default function Week1Page() {
         <nav>
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/70 transition hover:border-white/30 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/60 transition hover:border-white/30 hover:text-white/80"
           >
             ← Back to home
           </Link>
         </nav>
 
         <header className="space-y-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white/55">
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white/50">
             Week 1 Module
           </p>
           <div className="space-y-4">
             <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
               Week 1: Understanding AI in Teaching
             </h1>
-            <p className="max-w-2xl text-lg leading-relaxed text-white/80 sm:text-xl">
+            <p className="max-w-2xl text-lg leading-relaxed text-white/75 sm:text-xl">
               Practical guidance for using AI to support your teaching practice—without hype, and
               with clear guardrails.
             </p>
             <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.24em] text-white/55">
-              <span className="rounded-full border border-white/10 px-3 py-1">
+              <span className="rounded-full border border-white/15 px-3 py-1">
                 25 min estimated
               </span>
-              <span className="rounded-full border border-white/10 px-3 py-1">Classroom-safe</span>
+              <span className="rounded-full border border-white/15 px-3 py-1">Classroom-safe</span>
             </div>
           </div>
         </header>
@@ -76,7 +76,7 @@ export default function Week1Page() {
           </SectionCard>
 
           <SectionCard title="2) Real classroom-safe use cases">
-            <ul className="list-disc space-y-2 pl-5 text-white/80">
+            <ul className="list-disc space-y-2 pl-5 text-white/75">
               <li>Draft parent-facing messages and translate tone (keep final judgment with you).</li>
               <li>Create lesson variations (supports, extensions, alternative examples).</li>
               <li>Generate practice questions and exemplar responses you can edit.</li>
@@ -85,8 +85,8 @@ export default function Week1Page() {
           </SectionCard>
 
           <HighlightCard title="3) One simple thing to try this week">
-            <aside className="rounded-xl border border-white/15 bg-black/40 p-4 sm:p-5">
-              <p className="text-base leading-relaxed text-white/85 sm:text-[1.05rem]">
+            <aside className="rounded-xl border border-white/15 bg-white/[0.03] p-4 sm:p-5">
+              <p className="text-base leading-relaxed text-white/75 sm:text-[1.05rem]">
                 Take a lesson you already teach and ask AI for three variations: one with more
                 scaffolds, one with higher rigor, and one with a different hook. Then keep what’s
                 useful and discard the rest.
