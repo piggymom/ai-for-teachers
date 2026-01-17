@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import MarkCompleteButton from "./mark-complete";
 
 type SectionCardProps = {
   title: string;
@@ -91,6 +92,10 @@ export default function Week1Page() {
               </p>
             </aside>
           </HighlightCard>
+        </div>
+
+        <div className="flex justify-start">
+          <MarkCompleteButton />
         </div>
       </div>
     </main>
