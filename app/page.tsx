@@ -137,7 +137,7 @@ export default function Home() {
       title: "Prompting Basics",
       description:
         "Craft clear, reliable prompts and learn quick checks for accuracy and bias.",
-      minutes: 25,
+      minutes: 30,
       status: "comingSoon",
     },
     {
@@ -153,12 +153,12 @@ export default function Home() {
       title: "Assessment & Feedback",
       description:
         "Generate rubric-aligned feedback and exemplars while keeping your professional voice.",
-      minutes: 30,
+      minutes: 35,
       status: "comingSoon",
     },
     {
       weekNumber: 6,
-      title: "Safety & Policy",
+      title: "Safety, Policy & Norms",
       description:
         "Set guardrails, privacy expectations, and classroom norms for AI use.",
       minutes: 25,
