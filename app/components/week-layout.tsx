@@ -43,7 +43,7 @@ export const HighlightCard = ({ title, children }: SectionCardProps) => (
   </section>
 );
 
-const navLinkClasses =
+export const navLinkClasses =
   "inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/60 transition hover:border-white/30 hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30";
 
 export const WeekLayout = ({

@@ -12,6 +12,7 @@ type WeekCardProps = {
   minutes: number;
   status: WeekStatus;
   href?: string;
+  takeawaysHref?: string;
   statusLabel?: string;
   variant?: "default" | "orientation";
 };
@@ -29,11 +30,13 @@ const WeekCard = ({
   minutes,
   status,
   href,
+  takeawaysHref,
   statusLabel,
   variant = "default",
 }: WeekCardProps) => {
   const isInteractive = status !== "comingSoon" && href;
   const statusText = statusLabel ?? statusCopy[status];
+  const takeawaysLink = status === "completed" ? takeawaysHref : undefined;
   const cardClasses =
     "group relative flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left transition";
   const interactiveClasses =
@@ -60,6 +63,17 @@ const WeekCard = ({
         </div>
       </div>
       <p className="text-sm leading-relaxed text-white/70 sm:text-base">{description}</p>
+      {takeawaysLink ? (
+        <div className="mt-auto flex justify-end">
+          <Link
+            href={takeawaysLink}
+            className="text-xs font-semibold text-white/50 transition hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+            aria-label={`View Week ${weekNumber} takeaways`}
+          >
+            View takeaways →
+          </Link>
+        </div>
+      ) : null}
     </div>
   );
 
@@ -74,13 +88,26 @@ const WeekCard = ({
     );
   }
 
+  if (!takeawaysLink) {
+    return (
+      <Link
+        href={href}
+        className={`${cardClasses} ${variantClasses} ${interactiveClasses}`}
+      >
+        {content}
+      </Link>
+    );
+  }
+
   return (
-    <Link
-      href={href}
-      className={`${cardClasses} ${variantClasses} ${interactiveClasses}`}
-    >
-      {content}
-    </Link>
+    <div className={`${cardClasses} ${variantClasses} ${interactiveClasses}`}>
+      <Link
+        href={href}
+        aria-label={`Go to Week ${weekNumber}`}
+        className="absolute inset-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+      />
+      <div className="relative z-10">{content}</div>
+    </div>
   );
 };
 
@@ -123,6 +150,7 @@ export default function Home() {
       minutes: 25,
       status: week1Completed ? "completed" : "available",
       href: "/week-1",
+      takeawaysHref: "/week-1/takeaways",
     },
     {
       weekNumber: 2,
