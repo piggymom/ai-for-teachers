@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
 
-type WeekStatus = "available" | "comingSoon" | "completed";
+type WeekStatus = "available" | "comingSoon";
 
 type WeekCardProps = {
   weekNumber: number;
@@ -11,6 +10,7 @@ type WeekCardProps = {
   description: string;
   minutes: number;
   status: WeekStatus;
+  completed: boolean;
   href?: string;
   statusLabel?: string;
   variant?: "default" | "orientation";
@@ -19,7 +19,6 @@ type WeekCardProps = {
 const statusCopy: Record<WeekStatus, string> = {
   available: "Available",
   comingSoon: "Releasing next",
-  completed: "Completed",
 };
 
 const WeekCard = ({
@@ -28,12 +27,13 @@ const WeekCard = ({
   description,
   minutes,
   status,
+  completed,
   href,
   statusLabel,
   variant = "default",
 }: WeekCardProps) => {
   const isInteractive = status !== "comingSoon" && href;
-  const statusText = statusLabel ?? statusCopy[status];
+  const statusText = completed ? "COMPLETED" : statusLabel ?? statusCopy[status];
   const cardClasses =
     "group relative flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left transition";
   const interactiveClasses =
@@ -41,17 +41,29 @@ const WeekCard = ({
   const variantClasses =
     variant === "orientation" ? "border-white/8 bg-white/[0.03]" : "";
   const comingSoonClasses = "opacity-60";
+  const completedClasses = completed ? "bg-white/[0.035]" : "";
+  const metaTextClass = completed ? "text-white/35" : "text-white/40";
+  const titleTextClass = completed ? "text-white/85" : "text-white";
+  const descriptionTextClass = completed ? "text-white/60" : "text-white/70";
+  const pillTextClass = completed ? "text-white/35" : "text-white/45";
+  const pillBorderClass = completed ? "border-white/10" : "border-white/15";
   const content = (
     <div className="flex h-full flex-col gap-5">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white/40">
+          <p
+            className={`text-xs font-semibold uppercase tracking-[0.32em] ${metaTextClass}`}
+          >
             Week {weekNumber}
           </p>
-          <h2 className="text-xl font-semibold text-white sm:text-2xl">{title}</h2>
+          <h2 className={`text-xl font-semibold ${titleTextClass} sm:text-2xl`}>
+            {title}
+          </h2>
         </div>
-        <div className="flex flex-col items-end gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.28em] text-white/45">
-          <span className="rounded-full border border-white/15 px-3 py-1">
+        <div
+          className={`flex flex-col items-end gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.28em] ${pillTextClass}`}
+        >
+          <span className={`rounded-full border ${pillBorderClass} px-3 py-1`}>
             {minutes} min
           </span>
           <span className="rounded-full border border-white/10 px-3 py-1">
@@ -59,7 +71,14 @@ const WeekCard = ({
           </span>
         </div>
       </div>
-      <p className="text-sm leading-relaxed text-white/70 sm:text-base">{description}</p>
+      <p className={`text-sm leading-relaxed ${descriptionTextClass} sm:text-base`}>
+        {description}
+      </p>
+      {completed ? (
+        <span className="mt-auto text-right text-xs font-semibold text-white/60 underline decoration-white/25 underline-offset-4 transition group-hover:text-white/75">
+          View takeaways →
+        </span>
+      ) : null}
     </div>
   );
 
@@ -67,7 +86,7 @@ const WeekCard = ({
     return (
       <div
         aria-disabled="true"
-        className={`${cardClasses} ${variantClasses} ${comingSoonClasses}`}
+        className={`${cardClasses} ${variantClasses} ${comingSoonClasses} ${completedClasses}`}
       >
         {content}
       </div>
@@ -77,7 +96,7 @@ const WeekCard = ({
   return (
     <Link
       href={href}
-      className={`${cardClasses} ${variantClasses} ${interactiveClasses}`}
+      className={`${cardClasses} ${variantClasses} ${interactiveClasses} ${completedClasses}`}
     >
       {content}
     </Link>
@@ -85,24 +104,6 @@ const WeekCard = ({
 };
 
 export default function Home() {
-  const week1Completed = useSyncExternalStore(
-    (listener) => {
-      if (typeof window === "undefined") {
-        return () => undefined;
-      }
-      window.addEventListener("storage", listener);
-      window.addEventListener("ai4t-storage", listener);
-      return () => {
-        window.removeEventListener("storage", listener);
-        window.removeEventListener("ai4t-storage", listener);
-      };
-    },
-    () =>
-      typeof window !== "undefined" &&
-      window.localStorage.getItem("ai4t_week1_complete") === "true",
-    () => false
-  );
-
   const weeks: WeekCardProps[] = [
     {
       weekNumber: 0,
@@ -111,6 +112,7 @@ export default function Home() {
         "How this course is designed, who it’s for, and how to use AI in a way that supports—rather than replaces—professional judgment.",
       minutes: 5,
       status: "available",
+      completed: false,
       statusLabel: "Start here",
       href: "/week-0",
       variant: "orientation",
@@ -121,7 +123,8 @@ export default function Home() {
       description:
         "Understand what AI is (and isn’t), how it can support you, and the guardrails that keep it classroom-safe.",
       minutes: 25,
-      status: week1Completed ? "completed" : "available",
+      status: "available",
+      completed: true,
       href: "/week-1",
     },
     {
@@ -131,6 +134,7 @@ export default function Home() {
         "Plan lessons with AI-supported outlines, differentiation options, and resource shortlists you review and refine.",
       minutes: 30,
       status: "comingSoon",
+      completed: false,
     },
     {
       weekNumber: 3,
@@ -139,6 +143,7 @@ export default function Home() {
         "Write clear prompts, check outputs for accuracy and bias, and decide what fits your students.",
       minutes: 30,
       status: "comingSoon",
+      completed: false,
     },
     {
       weekNumber: 4,
@@ -147,6 +152,7 @@ export default function Home() {
         "Design repeatable routines for feedback notes, family communication drafts, and classroom management supports you finalize.",
       minutes: 35,
       status: "comingSoon",
+      completed: false,
     },
     {
       weekNumber: 5,
@@ -155,6 +161,7 @@ export default function Home() {
         "Draft rubric-aligned feedback and exemplars, then edit to match your expectations and voice.",
       minutes: 35,
       status: "comingSoon",
+      completed: false,
     },
     {
       weekNumber: 6,
@@ -163,6 +170,7 @@ export default function Home() {
         "Establish guardrails, privacy expectations, and classroom norms with your professional judgment at the center.",
       minutes: 25,
       status: "comingSoon",
+      completed: false,
     },
   ];
 
