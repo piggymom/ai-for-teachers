@@ -35,9 +35,8 @@ const WeekCard = ({
   variant = "default",
 }: WeekCardProps) => {
   const isInteractive = status !== "comingSoon" && Boolean(href);
-  const isCompleted = completed;
-  const takeawaysLink = isCompleted && takeawaysHref ? takeawaysHref : undefined;
-  const statusText = isCompleted ? "Completed" : statusLabel ?? statusCopy[status];
+  const hasTakeawaysLink = completed && Boolean(takeawaysHref);
+  const statusText = completed ? "Completed" : statusLabel ?? statusCopy[status];
   const cardClasses =
     "group relative flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left transition";
   const hoverClasses = "hover:-translate-y-0.5 hover:border-white/25";
@@ -46,12 +45,12 @@ const WeekCard = ({
   const variantClasses =
     variant === "orientation" ? "border-white/8 bg-white/[0.03]" : "";
   const comingSoonClasses = "opacity-60";
-  const completedClasses = isCompleted ? "bg-white/[0.035]" : "";
-  const metaTextClass = isCompleted ? "text-white/35" : "text-white/40";
-  const titleTextClass = isCompleted ? "text-white/85" : "text-white";
-  const descriptionTextClass = isCompleted ? "text-white/60" : "text-white/70";
-  const pillTextClass = isCompleted ? "text-white/35" : "text-white/45";
-  const pillBorderClass = isCompleted ? "border-white/10" : "border-white/15";
+  const completedClasses = completed ? "bg-white/[0.035]" : "";
+  const metaTextClass = completed ? "text-white/35" : "text-white/40";
+  const titleTextClass = completed ? "text-white/85" : "text-white";
+  const descriptionTextClass = completed ? "text-white/60" : "text-white/70";
+  const pillTextClass = completed ? "text-white/35" : "text-white/45";
+  const pillBorderClass = completed ? "border-white/10" : "border-white/15";
   const contentWrapperClass = `relative z-10 flex h-full flex-col gap-5 ${
     isInteractive ? "pointer-events-none" : ""
   }`;
@@ -82,12 +81,12 @@ const WeekCard = ({
       <p className={`text-sm leading-relaxed ${descriptionTextClass} sm:text-base`}>
         {description}
       </p>
-      {takeawaysLink ? (
+      {hasTakeawaysLink ? (
         <div className="mt-auto flex justify-end">
           <Link
             aria-label={`View Week ${weekNumber} takeaways`}
             className="pointer-events-auto rounded-sm text-xs font-semibold text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-            href={takeawaysLink}
+            href={takeawaysHref!}
           >
             View takeaways →
           </Link>
