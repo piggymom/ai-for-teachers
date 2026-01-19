@@ -1,41 +1,27 @@
-import Link from "next/link";
-import { SectionCard, navLinkClasses } from "../../components/week-layout";
-
-const sectionCardClasses = "rounded-2xl border-white/10 bg-white/[0.04]";
+import { TakeawaysPage } from "../../components/takeaways";
 
 export default function Week5TakeawaysPage() {
   return (
-    <main className="min-h-screen bg-neutral-900 text-white">
-      <div className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-14 sm:gap-12 sm:py-16 lg:px-12">
-        <header className="space-y-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white/50">
-            WEEK 5 TAKEAWAYS
-          </p>
-          <div className="space-y-4">
-            <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              Week 5 takeaways
-            </h1>
-            <p className="max-w-2xl text-lg leading-relaxed text-white/75 sm:text-xl">
-              Complete the module to unlock a concise recap and reusable prompts.
-            </p>
-          </div>
-        </header>
-
-        <div className="flex flex-col gap-6 sm:gap-7">
-          <SectionCard title="Coming soon" className={sectionCardClasses}>
-            <p>Takeaways will appear here once you complete this module.</p>
-          </SectionCard>
-        </div>
-
-        <nav className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className={navLinkClasses}>
-            ← Back to course
-          </Link>
-          <Link href="/week-5" className={navLinkClasses}>
-            Back to Week 5 →
-          </Link>
-        </nav>
-      </div>
-    </main>
+    <TakeawaysPage
+      weekNumber={5}
+      coreIdeas={[
+        "Feedback is strongest when tied to a rubric or success criteria.",
+        "Exemplars help students see quality and reduce guesswork.",
+        "AI can polish clarity but should not replace student voice.",
+        "Integrity checks protect authentic learning.",
+        "Human review ensures fairness and accuracy.",
+      ]}
+      teacherMoves={[
+        "Paste rubric language to anchor feedback suggestions.",
+        "Ask for two versions of feedback: strengths and next steps.",
+        "Use exemplars to calibrate tone and expectations.",
+        "Run a quick integrity check: look for style mismatches.",
+      ]}
+      prompts={[
+        "Using this rubric, draft feedback for a 9th-grade persuasive essay: [paste rubric]. Keep it to 5 sentences.",
+        "Create two anonymized exemplar responses to this prompt at different performance levels: [paste prompt].",
+        "Edit this student paragraph for clarity while preserving the student’s voice and ideas: [paste paragraph].",
+      ]}
+    />
   );
 }

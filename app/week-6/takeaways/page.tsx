@@ -1,41 +1,27 @@
-import Link from "next/link";
-import { SectionCard, navLinkClasses } from "../../components/week-layout";
-
-const sectionCardClasses = "rounded-2xl border-white/10 bg-white/[0.04]";
+import { TakeawaysPage } from "../../components/takeaways";
 
 export default function Week6TakeawaysPage() {
   return (
-    <main className="min-h-screen bg-neutral-900 text-white">
-      <div className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-14 sm:gap-12 sm:py-16 lg:px-12">
-        <header className="space-y-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white/50">
-            WEEK 6 TAKEAWAYS
-          </p>
-          <div className="space-y-4">
-            <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              Week 6 takeaways
-            </h1>
-            <p className="max-w-2xl text-lg leading-relaxed text-white/75 sm:text-xl">
-              Complete the module to unlock a concise recap and reusable prompts.
-            </p>
-          </div>
-        </header>
-
-        <div className="flex flex-col gap-6 sm:gap-7">
-          <SectionCard title="Coming soon" className={sectionCardClasses}>
-            <p>Takeaways will appear here once you complete this module.</p>
-          </SectionCard>
-        </div>
-
-        <nav className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className={navLinkClasses}>
-            ← Back to course
-          </Link>
-          <Link href="/week-6" className={navLinkClasses}>
-            Back to Week 6 →
-          </Link>
-        </nav>
-      </div>
-    </main>
+    <TakeawaysPage
+      weekNumber={6}
+      coreIdeas={[
+        "Privacy expectations should be explicit and consistent.",
+        "Acceptable use policies guide both adults and students.",
+        "Disclosure builds trust with families and colleagues.",
+        "Student norms make AI use transparent and safe.",
+        "Safety routines should be reviewed regularly.",
+      ]}
+      teacherMoves={[
+        "Define what data never goes into AI tools.",
+        "Post a short acceptable-use checklist for students.",
+        "Model disclosure language when AI assists planning.",
+        "Revisit norms after new tools or updates roll out.",
+      ]}
+      prompts={[
+        "Draft a classroom AI acceptable-use agreement for middle school students. Keep it to 6 bullet points.",
+        "Write a short disclosure note to families explaining how AI is used for lesson prep and feedback drafts.",
+        "Create a privacy checklist for teachers before using AI tools with classroom materials.",
+      ]}
+    />
   );
 }
