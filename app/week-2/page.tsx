@@ -1,3 +1,4 @@
+import WeekCompletionMarker from "../components/week-completion-marker";
 import { HighlightCard, SectionCard, WeekLayout } from "../components/week-layout";
 
 export default function Week2Page() {
@@ -9,6 +10,7 @@ export default function Week2Page() {
       metadata={["30 min estimated", "Planning"]}
       nextWeek={{ href: "/week-3", label: "Week 3" }}
     >
+      <WeekCompletionMarker weekNumber={2} />
       <SectionCard title="1) What you’ll do">
         <ul className="list-disc space-y-1.5 pl-4 text-white/75 marker:text-white/30">
           <li>Draft a lesson outline from your existing goals and standards.</li>

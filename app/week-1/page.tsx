@@ -1,3 +1,4 @@
+import WeekCompletionMarker from "../components/week-completion-marker";
 import { HighlightCard, SectionCard, WeekLayout } from "../components/week-layout";
 import MarkCompleteButton from "./mark-complete";
 
@@ -10,6 +11,7 @@ export default function Week1Page() {
       metadata={["25 min estimated", "Classroom-safe"]}
       nextWeek={{ href: "/week-2", label: "Week 2" }}
     >
+      <WeekCompletionMarker weekNumber={1} />
       <SectionCard title="1) What AI is (and isn’t)">
         <p>
           Generative AI predicts and produces text, images, and other outputs based on patterns in

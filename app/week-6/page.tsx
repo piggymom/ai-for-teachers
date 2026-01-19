@@ -1,3 +1,4 @@
+import WeekCompletionMarker from "../components/week-completion-marker";
 import { HighlightCard, SectionCard, WeekLayout } from "../components/week-layout";
 
 export default function Week6Page() {
@@ -9,6 +10,7 @@ export default function Week6Page() {
       metadata={["25 min estimated", "Safety & norms"]}
       nextWeek={{ href: "/", label: "Back to course", prefix: "" }}
     >
+      <WeekCompletionMarker weekNumber={6} />
       <SectionCard title="1) What you’ll do">
         <ul className="list-disc space-y-1.5 pl-4 text-white/75 marker:text-white/30">
           <li>Clarify when AI use is appropriate and when it is not.</li>
