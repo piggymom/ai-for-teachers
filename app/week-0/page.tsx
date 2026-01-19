@@ -1,4 +1,5 @@
 import Link from "next/link";
+import WeekCompletionMarker from "../components/week-completion-marker";
 import { SectionCard, WeekLayout } from "../components/week-layout";
 
 export default function Week0Page() {
@@ -10,6 +11,7 @@ export default function Week0Page() {
       metadata={["5 min estimated", "Orientation"]}
       nextWeek={{ href: "/week-1", label: "Week 1" }}
     >
+      <WeekCompletionMarker weekNumber={0} />
       <SectionCard title="Who this is for">
         <p>
           Educators who want practical, classroom-safe ways to use AI for planning, communication,

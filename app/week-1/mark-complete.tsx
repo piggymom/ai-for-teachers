@@ -7,7 +7,7 @@ type MarkCompleteButtonProps = {
 };
 
 export default function MarkCompleteButton({
-  storageKey = "ai4t_week1_complete",
+  storageKey = "week-1-completed",
 }: MarkCompleteButtonProps) {
   const isComplete = useSyncExternalStore(
     (listener) => {

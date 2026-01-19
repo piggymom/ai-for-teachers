@@ -1,3 +1,4 @@
+import WeekCompletionMarker from "../components/week-completion-marker";
 import { HighlightCard, SectionCard, WeekLayout } from "../components/week-layout";
 
 export default function Week4Page() {
@@ -9,6 +10,7 @@ export default function Week4Page() {
       metadata={["35 min estimated", "Workflows"]}
       nextWeek={{ href: "/week-5", label: "Week 5" }}
     >
+      <WeekCompletionMarker weekNumber={4} />
       <SectionCard title="1) What you’ll do">
         <ul className="list-disc space-y-1.5 pl-4 text-white/75 marker:text-white/30">
           <li>Map a weekly task you can draft with AI and finalize yourself.</li>

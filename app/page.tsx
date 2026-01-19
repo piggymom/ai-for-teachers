@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 type WeekStatus = "available" | "comingSoon";
 
@@ -16,6 +17,80 @@ type WeekCardProps = {
   statusLabel?: string;
   variant?: "default" | "orientation";
 };
+
+const weeks: WeekCardProps[] = [
+  {
+    weekNumber: 0,
+    title: "About This Course",
+    description:
+      "How this course is designed, who it’s for, and how to use AI in a way that supports—rather than replaces—professional judgment.",
+    minutes: 5,
+    status: "available",
+    statusLabel: "Start here",
+    href: "/week-0",
+    variant: "orientation",
+  },
+  {
+    weekNumber: 1,
+    title: "Understanding AI in Teaching",
+    description:
+      "Understand what AI is (and isn’t), how it can support you, and the guardrails that keep it classroom-safe.",
+    minutes: 25,
+    status: "available",
+    href: "/week-1",
+    takeawaysHref: "/week-1/takeaways",
+  },
+  {
+    weekNumber: 2,
+    title: "Planning & Prep",
+    description:
+      "Plan lessons with AI-supported outlines, differentiation options, and resource shortlists you review and refine.",
+    minutes: 30,
+    status: "available",
+    href: "/week-2",
+    takeawaysHref: "/week-2/takeaways",
+  },
+  {
+    weekNumber: 3,
+    title: "Prompting Basics",
+    description:
+      "Write clear prompts, check outputs for accuracy and bias, and decide what fits your students.",
+    minutes: 30,
+    status: "available",
+    href: "/week-3",
+    takeawaysHref: "/week-3/takeaways",
+  },
+  {
+    weekNumber: 4,
+    title: "Classroom Workflows",
+    description:
+      "Design repeatable routines for feedback notes, family communication drafts, and classroom management supports you finalize.",
+    minutes: 35,
+    status: "available",
+    href: "/week-4",
+    takeawaysHref: "/week-4/takeaways",
+  },
+  {
+    weekNumber: 5,
+    title: "Assessment & Feedback",
+    description:
+      "Draft rubric-aligned feedback and exemplars, then edit to match your expectations and voice.",
+    minutes: 35,
+    status: "available",
+    href: "/week-5",
+    takeawaysHref: "/week-5/takeaways",
+  },
+  {
+    weekNumber: 6,
+    title: "Safety, Policy & Norms",
+    description:
+      "Establish guardrails, privacy expectations, and classroom norms with your professional judgment at the center.",
+    minutes: 25,
+    status: "available",
+    href: "/week-6",
+    takeawaysHref: "/week-6/takeaways",
+  },
+];
 
 const statusCopy: Record<WeekStatus, string> = {
   available: "Available",
@@ -123,80 +198,20 @@ const WeekCard = ({
 };
 
 export default function Home() {
-  const weeks: WeekCardProps[] = [
-    {
-      weekNumber: 0,
-      title: "About This Course",
-      description:
-        "How this course is designed, who it’s for, and how to use AI in a way that supports—rather than replaces—professional judgment.",
-      minutes: 5,
-      status: "available",
-      statusLabel: "Start here",
-      href: "/week-0",
-      variant: "orientation",
-    },
-    {
-      weekNumber: 1,
-      title: "Understanding AI in Teaching",
-      description:
-        "Understand what AI is (and isn’t), how it can support you, and the guardrails that keep it classroom-safe.",
-      minutes: 25,
-      status: "available",
-      completed: true,
-      href: "/week-1",
-      takeawaysHref: "/week-1/takeaways",
-    },
-    {
-      weekNumber: 2,
-      title: "Planning & Prep",
-      description:
-        "Plan lessons with AI-supported outlines, differentiation options, and resource shortlists you review and refine.",
-      minutes: 30,
-      status: "available",
-      href: "/week-2",
-      takeawaysHref: "/week-2/takeaways",
-    },
-    {
-      weekNumber: 3,
-      title: "Prompting Basics",
-      description:
-        "Write clear prompts, check outputs for accuracy and bias, and decide what fits your students.",
-      minutes: 30,
-      status: "available",
-      href: "/week-3",
-      takeawaysHref: "/week-3/takeaways",
-    },
-    {
-      weekNumber: 4,
-      title: "Classroom Workflows",
-      description:
-        "Design repeatable routines for feedback notes, family communication drafts, and classroom management supports you finalize.",
-      minutes: 35,
-      status: "available",
-      href: "/week-4",
-      takeawaysHref: "/week-4/takeaways",
-    },
-    {
-      weekNumber: 5,
-      title: "Assessment & Feedback",
-      description:
-        "Draft rubric-aligned feedback and exemplars, then edit to match your expectations and voice.",
-      minutes: 35,
-      status: "available",
-      href: "/week-5",
-      takeawaysHref: "/week-5/takeaways",
-    },
-    {
-      weekNumber: 6,
-      title: "Safety, Policy & Norms",
-      description:
-        "Establish guardrails, privacy expectations, and classroom norms with your professional judgment at the center.",
-      minutes: 25,
-      status: "available",
-      href: "/week-6",
-      takeawaysHref: "/week-6/takeaways",
-    },
-  ];
+  const [completedWeeks, setCompletedWeeks] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const storedCompletion: Record<number, boolean> = {};
+    weeks.forEach((week) => {
+      const storageKey = `week-${week.weekNumber}-completed`;
+      storedCompletion[week.weekNumber] =
+        window.localStorage.getItem(storageKey) === "true";
+    });
+    setCompletedWeeks(storedCompletion);
+  }, [weeks]);
 
   return (
     <main className="min-h-screen bg-neutral-900 text-white">
@@ -217,7 +232,11 @@ export default function Home() {
 
         <section className="grid gap-5 sm:gap-6">
           {weeks.map((week) => (
-            <WeekCard key={week.weekNumber} {...week} />
+            <WeekCard
+              key={week.weekNumber}
+              {...week}
+              completed={completedWeeks[week.weekNumber] ?? false}
+            />
           ))}
         </section>
       </div>
