@@ -1,41 +1,27 @@
-import Link from "next/link";
-import { SectionCard, navLinkClasses } from "../../components/week-layout";
-
-const sectionCardClasses = "rounded-2xl border-white/10 bg-white/[0.04]";
+import { TakeawaysPage } from "../../components/takeaways";
 
 export default function Week4TakeawaysPage() {
   return (
-    <main className="min-h-screen bg-neutral-900 text-white">
-      <div className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-14 sm:gap-12 sm:py-16 lg:px-12">
-        <header className="space-y-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white/50">
-            WEEK 4 TAKEAWAYS
-          </p>
-          <div className="space-y-4">
-            <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              Week 4 takeaways
-            </h1>
-            <p className="max-w-2xl text-lg leading-relaxed text-white/75 sm:text-xl">
-              Complete the module to unlock a concise recap and reusable prompts.
-            </p>
-          </div>
-        </header>
-
-        <div className="flex flex-col gap-6 sm:gap-7">
-          <SectionCard title="Coming soon" className={sectionCardClasses}>
-            <p>Takeaways will appear here once you complete this module.</p>
-          </SectionCard>
-        </div>
-
-        <nav className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className={navLinkClasses}>
-            ← Back to course
-          </Link>
-          <Link href="/week-4" className={navLinkClasses}>
-            Back to Week 4 →
-          </Link>
-        </nav>
-      </div>
-    </main>
+    <TakeawaysPage
+      weekNumber={4}
+      coreIdeas={[
+        "Workflow templates make AI use repeatable and reliable.",
+        "Drafting feedback or family comms is faster with clear context.",
+        "Routines keep AI use consistent across a week.",
+        "Human-in-the-loop checks protect tone and accuracy.",
+        "Small pilots reveal what scales in your classroom.",
+      ]}
+      teacherMoves={[
+        "Create a weekly checklist of AI-assisted tasks.",
+        "Draft feedback in batches, then personalize the final lines.",
+        "Use AI to draft family messages and verify details.",
+        "Set a routine for reviewing AI outputs before sharing.",
+      ]}
+      prompts={[
+        "Draft a feedback comment for a student lab report. Focus on evidence, clarity, and one next step. Keep it to 4 sentences.",
+        "Write a warm, concise family update about our upcoming unit on weather. Include dates and a simple at-home conversation starter.",
+        "Design a weekly AI workflow for grading short responses: steps, time estimates, and checkpoints.",
+      ]}
+    />
   );
 }

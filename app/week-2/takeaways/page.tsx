@@ -1,41 +1,27 @@
-import Link from "next/link";
-import { SectionCard, navLinkClasses } from "../../components/week-layout";
-
-const sectionCardClasses = "rounded-2xl border-white/10 bg-white/[0.04]";
+import { TakeawaysPage } from "../../components/takeaways";
 
 export default function Week2TakeawaysPage() {
   return (
-    <main className="min-h-screen bg-neutral-900 text-white">
-      <div className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-14 sm:gap-12 sm:py-16 lg:px-12">
-        <header className="space-y-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white/50">
-            WEEK 2 TAKEAWAYS
-          </p>
-          <div className="space-y-4">
-            <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              Week 2 takeaways
-            </h1>
-            <p className="max-w-2xl text-lg leading-relaxed text-white/75 sm:text-xl">
-              Wrap up the module to unlock a quick recap and ready-to-reuse prompts.
-            </p>
-          </div>
-        </header>
-
-        <div className="flex flex-col gap-6 sm:gap-7">
-          <SectionCard title="Coming soon" className={sectionCardClasses}>
-            <p>Takeaways will appear here once you complete this module.</p>
-          </SectionCard>
-        </div>
-
-        <nav className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className={navLinkClasses}>
-            ← Back to course
-          </Link>
-          <Link href="/week-2" className={navLinkClasses}>
-            Back to Week 2 →
-          </Link>
-        </nav>
-      </div>
-    </main>
+    <TakeawaysPage
+      weekNumber={2}
+      coreIdeas={[
+        "Strong prep starts with clear outcomes and constraints.",
+        "Outlines give AI the structure it needs to stay on target.",
+        "Differentiation works best when you specify supports and stretch goals.",
+        "A short resource list helps the model stay grounded.",
+        "Teacher review remains the final filter for quality and tone.",
+      ]}
+      teacherMoves={[
+        "Define the lesson goal, standard, and time window before prompting.",
+        "Ask for tiered options (support/on-level/extension).",
+        "Provide 2–3 trusted sources or examples to anchor outputs.",
+        "Scan for alignment and adjust pacing or vocabulary as needed.",
+      ]}
+      prompts={[
+        "Create a lesson outline for a 45-minute grade 5 math lesson on fractions. Include warm-up, guided practice, and exit ticket.",
+        "Give me three differentiation options for a middle school reading discussion: support, on-level, and extension.",
+        "Draft a short resource shortlist (3–5 items) to support a high school civics lesson on voting rights with brief annotations.",
+      ]}
+    />
   );
 }
