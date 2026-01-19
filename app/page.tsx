@@ -12,6 +12,7 @@ type WeekCardProps = {
   status: WeekStatus;
   completed: boolean;
   href?: string;
+  takeawaysHref?: string;
   statusLabel?: string;
   variant?: "default" | "orientation";
 };
@@ -29,15 +30,18 @@ const WeekCard = ({
   status,
   completed,
   href,
+  takeawaysHref,
   statusLabel,
   variant = "default",
 }: WeekCardProps) => {
   const isInteractive = status !== "comingSoon" && href;
+  const takeawaysLink = completed && takeawaysHref ? takeawaysHref : undefined;
   const statusText = completed ? "COMPLETED" : statusLabel ?? statusCopy[status];
   const cardClasses =
     "group relative flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left transition";
-  const interactiveClasses =
-    "hover:-translate-y-0.5 hover:border-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30";
+  const hoverClasses = "hover:-translate-y-0.5 hover:border-white/25";
+  const focusClasses =
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30";
   const variantClasses =
     variant === "orientation" ? "border-white/8 bg-white/[0.03]" : "";
   const comingSoonClasses = "opacity-60";
@@ -47,8 +51,11 @@ const WeekCard = ({
   const descriptionTextClass = completed ? "text-white/60" : "text-white/70";
   const pillTextClass = completed ? "text-white/35" : "text-white/45";
   const pillBorderClass = completed ? "border-white/10" : "border-white/15";
+  const contentWrapperClass = takeawaysLink
+    ? "relative z-10 flex h-full flex-col gap-5 pointer-events-none"
+    : "flex h-full flex-col gap-5";
   const content = (
-    <div className="flex h-full flex-col gap-5">
+    <div className={contentWrapperClass}>
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <p
@@ -74,10 +81,15 @@ const WeekCard = ({
       <p className={`text-sm leading-relaxed ${descriptionTextClass} sm:text-base`}>
         {description}
       </p>
-      {completed ? (
-        <span className="mt-auto text-right text-xs font-semibold text-white/60 underline decoration-white/25 underline-offset-4 transition group-hover:text-white/75">
-          View takeaways →
-        </span>
+      {takeawaysLink ? (
+        <div className="mt-auto flex justify-end">
+          <Link
+            className="pointer-events-auto rounded-sm text-xs font-semibold text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+            href={takeawaysLink}
+          >
+            View takeaways →
+          </Link>
+        </div>
       ) : null}
     </div>
   );
@@ -93,10 +105,27 @@ const WeekCard = ({
     );
   }
 
+  if (takeawaysLink) {
+    return (
+      <div
+        className={`${cardClasses} ${variantClasses} ${hoverClasses} ${completedClasses}`}
+      >
+        <Link
+          aria-label={`Open ${title}`}
+          className={`absolute inset-0 z-0 rounded-2xl ${focusClasses}`}
+          href={href}
+        >
+          <span className="sr-only">{title}</span>
+        </Link>
+        {content}
+      </div>
+    );
+  }
+
   return (
     <Link
       href={href}
-      className={`${cardClasses} ${variantClasses} ${interactiveClasses} ${completedClasses}`}
+      className={`${cardClasses} ${variantClasses} ${hoverClasses} ${focusClasses} ${completedClasses}`}
     >
       {content}
     </Link>
@@ -126,6 +155,7 @@ export default function Home() {
       status: "available",
       completed: true,
       href: "/week-1",
+      takeawaysHref: "/week-1/takeaways",
     },
     {
       weekNumber: 2,
