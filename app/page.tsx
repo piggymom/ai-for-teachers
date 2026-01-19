@@ -51,9 +51,7 @@ const WeekCard = ({
   const descriptionTextClass = completed ? "text-white/60" : "text-white/70";
   const pillTextClass = completed ? "text-white/35" : "text-white/45";
   const pillBorderClass = completed ? "border-white/10" : "border-white/15";
-  const contentWrapperClass = takeawaysLink
-    ? "relative z-10 flex h-full flex-col gap-5 pointer-events-none"
-    : "flex h-full flex-col gap-5";
+  const contentWrapperClass = "relative z-10 flex h-full flex-col gap-5";
   const content = (
     <div className={contentWrapperClass}>
       <div className="flex items-start justify-between gap-4">
@@ -84,7 +82,8 @@ const WeekCard = ({
       {takeawaysLink ? (
         <div className="mt-auto flex justify-end">
           <Link
-            className="pointer-events-auto rounded-sm text-xs font-semibold text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+            aria-label={`View Week ${weekNumber} takeaways`}
+            className="relative z-20 rounded-sm text-xs font-semibold text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
             href={takeawaysLink}
           >
             View takeaways →
@@ -111,11 +110,11 @@ const WeekCard = ({
         className={`${cardClasses} ${variantClasses} ${hoverClasses} ${completedClasses}`}
       >
         <Link
-          aria-label={`Open ${title}`}
+          aria-label={`Go to Week ${weekNumber}`}
           className={`absolute inset-0 z-0 rounded-2xl ${focusClasses}`}
           href={href}
         >
-          <span className="sr-only">{title}</span>
+          <span className="sr-only">Go to Week {weekNumber}</span>
         </Link>
         {content}
       </div>
@@ -165,6 +164,7 @@ export default function Home() {
       minutes: 30,
       status: "comingSoon",
       completed: false,
+      takeawaysHref: "/week-2/takeaways",
     },
     {
       weekNumber: 3,
@@ -174,6 +174,7 @@ export default function Home() {
       minutes: 30,
       status: "comingSoon",
       completed: false,
+      takeawaysHref: "/week-3/takeaways",
     },
     {
       weekNumber: 4,
@@ -183,6 +184,7 @@ export default function Home() {
       minutes: 35,
       status: "comingSoon",
       completed: false,
+      takeawaysHref: "/week-4/takeaways",
     },
     {
       weekNumber: 5,
@@ -192,6 +194,7 @@ export default function Home() {
       minutes: 35,
       status: "comingSoon",
       completed: false,
+      takeawaysHref: "/week-5/takeaways",
     },
     {
       weekNumber: 6,
@@ -201,6 +204,7 @@ export default function Home() {
       minutes: 25,
       status: "comingSoon",
       completed: false,
+      takeawaysHref: "/week-6/takeaways",
     },
   ];
 
