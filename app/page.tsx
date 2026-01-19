@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-type WeekStatus = "available" | "comingSoon" | "completed";
+type WeekStatus = "available" | "comingSoon";
 
 type WeekCardProps = {
   weekNumber: number;
@@ -10,6 +10,7 @@ type WeekCardProps = {
   description: string;
   minutes: number;
   status: WeekStatus;
+  completed?: boolean;
   href?: string;
   takeawaysHref?: string;
   statusLabel?: string;
@@ -19,7 +20,6 @@ type WeekCardProps = {
 const statusCopy: Record<WeekStatus, string> = {
   available: "Available",
   comingSoon: "Releasing next",
-  completed: "Completed",
 };
 
 const WeekCard = ({
@@ -28,16 +28,16 @@ const WeekCard = ({
   description,
   minutes,
   status,
+  completed = false,
   href,
   takeawaysHref,
   statusLabel,
   variant = "default",
 }: WeekCardProps) => {
   const isInteractive = status !== "comingSoon" && Boolean(href);
-  const isCompleted = status === "completed";
+  const isCompleted = completed;
   const takeawaysLink = isCompleted && takeawaysHref ? takeawaysHref : undefined;
-  const statusText =
-    status === "completed" ? "Completed" : statusLabel ?? statusCopy[status];
+  const statusText = isCompleted ? "Completed" : statusLabel ?? statusCopy[status];
   const cardClasses =
     "group relative flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left transition";
   const hoverClasses = "hover:-translate-y-0.5 hover:border-white/25";
@@ -142,7 +142,8 @@ export default function Home() {
       description:
         "Understand what AI is (and isn’t), how it can support you, and the guardrails that keep it classroom-safe.",
       minutes: 25,
-      status: "completed",
+      status: "available",
+      completed: true,
       href: "/week-1",
       takeawaysHref: "/week-1/takeaways",
     },
@@ -154,6 +155,7 @@ export default function Home() {
       minutes: 30,
       status: "available",
       href: "/week-2",
+      takeawaysHref: "/week-2/takeaways",
     },
     {
       weekNumber: 3,
@@ -163,6 +165,7 @@ export default function Home() {
       minutes: 30,
       status: "available",
       href: "/week-3",
+      takeawaysHref: "/week-3/takeaways",
     },
     {
       weekNumber: 4,
@@ -172,6 +175,7 @@ export default function Home() {
       minutes: 35,
       status: "available",
       href: "/week-4",
+      takeawaysHref: "/week-4/takeaways",
     },
     {
       weekNumber: 5,
@@ -181,6 +185,7 @@ export default function Home() {
       minutes: 35,
       status: "available",
       href: "/week-5",
+      takeawaysHref: "/week-5/takeaways",
     },
     {
       weekNumber: 6,
@@ -190,6 +195,7 @@ export default function Home() {
       minutes: 25,
       status: "available",
       href: "/week-6",
+      takeawaysHref: "/week-6/takeaways",
     },
   ];
 
