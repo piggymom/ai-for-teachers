@@ -152,7 +152,7 @@ export default function Home() {
       description:
         "Plan lessons with AI-supported outlines, differentiation options, and resource shortlists you review and refine.",
       minutes: 30,
-      status: "comingSoon",
+      status: "available",
       href: "/week-2",
     },
     {
@@ -161,7 +161,7 @@ export default function Home() {
       description:
         "Write clear prompts, check outputs for accuracy and bias, and decide what fits your students.",
       minutes: 30,
-      status: "comingSoon",
+      status: "available",
       href: "/week-3",
     },
     {
@@ -170,7 +170,7 @@ export default function Home() {
       description:
         "Design repeatable routines for feedback notes, family communication drafts, and classroom management supports you finalize.",
       minutes: 35,
-      status: "comingSoon",
+      status: "available",
       href: "/week-4",
     },
     {
@@ -179,7 +179,7 @@ export default function Home() {
       description:
         "Draft rubric-aligned feedback and exemplars, then edit to match your expectations and voice.",
       minutes: 35,
-      status: "comingSoon",
+      status: "available",
       href: "/week-5",
     },
     {
@@ -188,7 +188,7 @@ export default function Home() {
       description:
         "Establish guardrails, privacy expectations, and classroom norms with your professional judgment at the center.",
       minutes: 25,
-      status: "comingSoon",
+      status: "available",
       href: "/week-6",
     },
   ];
