@@ -16,6 +16,7 @@ type WeekLayoutProps = {
   nextWeek?: {
     href: string;
     label: string;
+    prefix?: string;
   };
 };
 
@@ -88,7 +89,8 @@ export const WeekLayout = ({
         </Link>
         {nextWeek ? (
           <Link href={nextWeek.href} className={navLinkClasses}>
-            Next week: {nextWeek.label} →
+            {nextWeek.prefix ?? "Next week: "}
+            {nextWeek.label} →
           </Link>
         ) : null}
       </nav>
