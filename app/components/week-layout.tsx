@@ -4,6 +4,7 @@ import Link from "next/link";
 export type SectionCardProps = {
   title: string;
   children: ReactNode;
+  className?: string;
 };
 
 type WeekLayoutProps = {
@@ -18,8 +19,12 @@ type WeekLayoutProps = {
   };
 };
 
-export const SectionCard = ({ title, children }: SectionCardProps) => (
-  <section className="rounded-lg border border-white/5 bg-white/[0.03] p-5 sm:p-6">
+export const SectionCard = ({ title, children, className }: SectionCardProps) => (
+  <section
+    className={`rounded-lg border border-white/5 bg-white/[0.03] p-5 sm:p-6 ${
+      className ?? ""
+    }`}
+  >
     <div className="flex flex-col gap-2">
       <h2 className="text-xl font-semibold text-white sm:text-2xl">{title}</h2>
       <div className="text-base leading-relaxed text-white/75 sm:text-[1.05rem]">
@@ -43,7 +48,7 @@ export const HighlightCard = ({ title, children }: SectionCardProps) => (
   </section>
 );
 
-const navLinkClasses =
+export const navLinkClasses =
   "inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/60 transition hover:border-white/30 hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30";
 
 export const WeekLayout = ({
