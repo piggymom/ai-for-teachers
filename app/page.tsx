@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-type WeekStatus = "available" | "comingSoon";
+type WeekStatus = "available" | "comingSoon" | "completed";
 
 type WeekCardProps = {
   weekNumber: number;
@@ -10,7 +10,6 @@ type WeekCardProps = {
   description: string;
   minutes: number;
   status: WeekStatus;
-  completed: boolean;
   href?: string;
   takeawaysHref?: string;
   statusLabel?: string;
@@ -20,6 +19,7 @@ type WeekCardProps = {
 const statusCopy: Record<WeekStatus, string> = {
   available: "Available",
   comingSoon: "Releasing next",
+  completed: "Completed",
 };
 
 const WeekCard = ({
@@ -28,15 +28,16 @@ const WeekCard = ({
   description,
   minutes,
   status,
-  completed,
   href,
   takeawaysHref,
   statusLabel,
   variant = "default",
 }: WeekCardProps) => {
-  const isInteractive = status !== "comingSoon" && href;
-  const takeawaysLink = completed && takeawaysHref ? takeawaysHref : undefined;
-  const statusText = completed ? "COMPLETED" : statusLabel ?? statusCopy[status];
+  const isInteractive = status !== "comingSoon" && Boolean(href);
+  const isCompleted = status === "completed";
+  const takeawaysLink = isCompleted && takeawaysHref ? takeawaysHref : undefined;
+  const statusText =
+    status === "completed" ? "Completed" : statusLabel ?? statusCopy[status];
   const cardClasses =
     "group relative flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left transition";
   const hoverClasses = "hover:-translate-y-0.5 hover:border-white/25";
@@ -45,13 +46,15 @@ const WeekCard = ({
   const variantClasses =
     variant === "orientation" ? "border-white/8 bg-white/[0.03]" : "";
   const comingSoonClasses = "opacity-60";
-  const completedClasses = completed ? "bg-white/[0.035]" : "";
-  const metaTextClass = completed ? "text-white/35" : "text-white/40";
-  const titleTextClass = completed ? "text-white/85" : "text-white";
-  const descriptionTextClass = completed ? "text-white/60" : "text-white/70";
-  const pillTextClass = completed ? "text-white/35" : "text-white/45";
-  const pillBorderClass = completed ? "border-white/10" : "border-white/15";
-  const contentWrapperClass = "relative z-10 flex h-full flex-col gap-5";
+  const completedClasses = isCompleted ? "bg-white/[0.035]" : "";
+  const metaTextClass = isCompleted ? "text-white/35" : "text-white/40";
+  const titleTextClass = isCompleted ? "text-white/85" : "text-white";
+  const descriptionTextClass = isCompleted ? "text-white/60" : "text-white/70";
+  const pillTextClass = isCompleted ? "text-white/35" : "text-white/45";
+  const pillBorderClass = isCompleted ? "border-white/10" : "border-white/15";
+  const contentWrapperClass = `relative z-10 flex h-full flex-col gap-5 ${
+    isInteractive ? "pointer-events-none" : ""
+  }`;
   const content = (
     <div className={contentWrapperClass}>
       <div className="flex items-start justify-between gap-4">
@@ -83,7 +86,7 @@ const WeekCard = ({
         <div className="mt-auto flex justify-end">
           <Link
             aria-label={`View Week ${weekNumber} takeaways`}
-            className="relative z-20 rounded-sm text-xs font-semibold text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+            className="pointer-events-auto rounded-sm text-xs font-semibold text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
             href={takeawaysLink}
           >
             View takeaways →
@@ -93,7 +96,7 @@ const WeekCard = ({
     </div>
   );
 
-  if (!isInteractive) {
+  if (status === "comingSoon" || !href) {
     return (
       <div
         aria-disabled="true"
@@ -104,30 +107,19 @@ const WeekCard = ({
     );
   }
 
-  if (takeawaysLink) {
-    return (
-      <div
-        className={`${cardClasses} ${variantClasses} ${hoverClasses} ${completedClasses}`}
-      >
-        <Link
-          aria-label={`Go to Week ${weekNumber}`}
-          className={`absolute inset-0 z-0 rounded-2xl ${focusClasses}`}
-          href={href}
-        >
-          <span className="sr-only">Go to Week {weekNumber}</span>
-        </Link>
-        {content}
-      </div>
-    );
-  }
-
   return (
-    <Link
-      href={href}
-      className={`${cardClasses} ${variantClasses} ${hoverClasses} ${focusClasses} ${completedClasses}`}
+    <div
+      className={`${cardClasses} ${variantClasses} ${hoverClasses} ${completedClasses}`}
     >
+      <Link
+        aria-label={`Go to Week ${weekNumber}`}
+        className={`absolute inset-0 rounded-2xl ${focusClasses}`}
+        href={href}
+      >
+        <span className="sr-only">Go to Week {weekNumber}</span>
+      </Link>
       {content}
-    </Link>
+    </div>
   );
 };
 
@@ -140,7 +132,6 @@ export default function Home() {
         "How this course is designed, who it’s for, and how to use AI in a way that supports—rather than replaces—professional judgment.",
       minutes: 5,
       status: "available",
-      completed: false,
       statusLabel: "Start here",
       href: "/week-0",
       variant: "orientation",
@@ -151,8 +142,7 @@ export default function Home() {
       description:
         "Understand what AI is (and isn’t), how it can support you, and the guardrails that keep it classroom-safe.",
       minutes: 25,
-      status: "available",
-      completed: true,
+      status: "completed",
       href: "/week-1",
       takeawaysHref: "/week-1/takeaways",
     },
@@ -163,8 +153,7 @@ export default function Home() {
         "Plan lessons with AI-supported outlines, differentiation options, and resource shortlists you review and refine.",
       minutes: 30,
       status: "comingSoon",
-      completed: false,
-      takeawaysHref: "/week-2/takeaways",
+      href: "/week-2",
     },
     {
       weekNumber: 3,
@@ -173,8 +162,7 @@ export default function Home() {
         "Write clear prompts, check outputs for accuracy and bias, and decide what fits your students.",
       minutes: 30,
       status: "comingSoon",
-      completed: false,
-      takeawaysHref: "/week-3/takeaways",
+      href: "/week-3",
     },
     {
       weekNumber: 4,
@@ -183,8 +171,7 @@ export default function Home() {
         "Design repeatable routines for feedback notes, family communication drafts, and classroom management supports you finalize.",
       minutes: 35,
       status: "comingSoon",
-      completed: false,
-      takeawaysHref: "/week-4/takeaways",
+      href: "/week-4",
     },
     {
       weekNumber: 5,
@@ -193,8 +180,7 @@ export default function Home() {
         "Draft rubric-aligned feedback and exemplars, then edit to match your expectations and voice.",
       minutes: 35,
       status: "comingSoon",
-      completed: false,
-      takeawaysHref: "/week-5/takeaways",
+      href: "/week-5",
     },
     {
       weekNumber: 6,
@@ -203,8 +189,7 @@ export default function Home() {
         "Establish guardrails, privacy expectations, and classroom norms with your professional judgment at the center.",
       minutes: 25,
       status: "comingSoon",
-      completed: false,
-      takeawaysHref: "/week-6/takeaways",
+      href: "/week-6",
     },
   ];
 
