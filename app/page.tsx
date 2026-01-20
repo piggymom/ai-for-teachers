@@ -1,7 +1,7 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
+
+import { auth } from "@/lib/auth";
+import { getUserProgress } from "@/lib/progress";
 
 type WeekStatus = "available" | "comingSoon";
 
@@ -197,21 +197,16 @@ const WeekCard = ({
   );
 };
 
-export default function Home() {
-  const [completedWeeks, setCompletedWeeks] = useState<Record<number, boolean>>({});
+export default async function Home() {
+  const session = await auth();
+  const completedWeeks: Record<number, boolean> = {};
 
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    const storedCompletion: Record<number, boolean> = {};
-    weeks.forEach((week) => {
-      const storageKey = `week-${week.weekNumber}-completed`;
-      storedCompletion[week.weekNumber] =
-        window.localStorage.getItem(storageKey) === "true";
+  if (session?.user?.id) {
+    const progress = await getUserProgress(session.user.id);
+    progress.forEach((entry) => {
+      completedWeeks[entry.weekNumber] = entry.status === "completed";
     });
-    setCompletedWeeks(storedCompletion);
-  }, [weeks]);
+  }
 
   return (
     <main className="min-h-screen bg-neutral-900 text-white">

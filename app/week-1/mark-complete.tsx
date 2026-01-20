@@ -1,35 +1,55 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 type MarkCompleteButtonProps = {
-  storageKey?: string;
+  weekNumber?: number;
 };
 
 export default function MarkCompleteButton({
-  storageKey = "week-1-completed",
+  weekNumber = 1,
 }: MarkCompleteButtonProps) {
-  const isComplete = useSyncExternalStore(
-    (listener) => {
-      if (typeof window === "undefined") {
-        return () => undefined;
-      }
-      window.addEventListener("storage", listener);
-      window.addEventListener("ai4t-storage", listener);
-      return () => {
-        window.removeEventListener("storage", listener);
-        window.removeEventListener("ai4t-storage", listener);
-      };
-    },
-    () =>
-      typeof window !== "undefined" &&
-      window.localStorage.getItem(storageKey) === "true",
-    () => false
-  );
+  const { status } = useSession();
+  const router = useRouter();
+  const [isComplete, setIsComplete] = useState(false);
 
-  const handleClick = () => {
-    window.localStorage.setItem(storageKey, "true");
-    window.dispatchEvent(new Event("ai4t-storage"));
+  useEffect(() => {
+    if (status !== "authenticated") {
+      setIsComplete(false);
+      return;
+    }
+
+    const checkStatus = async () => {
+      const response = await fetch(`/api/progress?weekNumber=${weekNumber}`);
+      if (!response.ok) {
+        return;
+      }
+      const data = (await response.json()) as { status?: string };
+      setIsComplete(data.status === "completed");
+    };
+
+    void checkStatus();
+  }, [status, weekNumber]);
+
+  const handleClick = async () => {
+    if (status !== "authenticated") {
+      router.push("/onboarding");
+      return;
+    }
+
+    const response = await fetch("/api/progress", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ weekNumber }),
+    });
+
+    if (response.ok) {
+      setIsComplete(true);
+    }
   };
 
   return (

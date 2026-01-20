@@ -20,6 +20,22 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Auth & onboarding (local dev)
+
+1. Copy the sample env file and fill in the Google OAuth credentials:
+   ```bash
+   cp .env.example .env
+   ```
+2. Set `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET` in `.env`.
+3. Run the Prisma migration and generate the client:
+   ```bash
+   npx prisma migrate dev --name init
+   ```
+4. Start the dev server:
+   ```bash
+   npm run dev
+   ```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
