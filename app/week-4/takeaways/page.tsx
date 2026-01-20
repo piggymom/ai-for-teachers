@@ -5,22 +5,19 @@ export default function Week4TakeawaysPage() {
     <TakeawaysPage
       weekNumber={4}
       coreIdeas={[
-        "Workflow templates make AI use repeatable and reliable.",
-        "Drafting feedback or family comms is faster with clear context.",
-        "Routines keep AI use consistent across a week.",
-        "Human-in-the-loop checks protect tone and accuracy.",
-        "Small pilots reveal what scales in your classroom.",
+        "Repeatable routines make AI support predictable and easier to review.",
+        "Drafts for feedback and communication still need a teacher’s final voice.",
+        "Small pilots help you decide what is worth keeping.",
       ]}
       teacherMoves={[
-        "Create a weekly checklist of AI-assisted tasks.",
-        "Draft feedback in batches, then personalize the final lines.",
-        "Use AI to draft family messages and verify details.",
-        "Set a routine for reviewing AI outputs before sharing.",
+        "Pick 1–2 tasks to standardize (feedback drafts, family updates).",
+        "Batch drafts, then personalize the last line for each student or class.",
+        "Set a quick review step before anything is shared.",
       ]}
       prompts={[
-        "Draft a feedback comment for a student lab report. Focus on evidence, clarity, and one next step. Keep it to 4 sentences.",
-        "Write a warm, concise family update about our upcoming unit on weather. Include dates and a simple at-home conversation starter.",
-        "Design a weekly AI workflow for grading short responses: steps, time estimates, and checkpoints.",
+        "Draft a 4-sentence feedback comment on a student lab report, focusing on evidence, clarity, and one next step.",
+        "Write a warm, concise family update about our upcoming unit on weather. Include dates and one at-home conversation starter.",
+        "Outline a weekly AI routine for drafting feedback on short responses, including checkpoints for teacher review.",
       ]}
     />
   );

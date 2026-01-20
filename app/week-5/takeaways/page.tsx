@@ -5,21 +5,18 @@ export default function Week5TakeawaysPage() {
     <TakeawaysPage
       weekNumber={5}
       coreIdeas={[
-        "Feedback is strongest when tied to a rubric or success criteria.",
-        "Exemplars help students see quality and reduce guesswork.",
-        "AI can polish clarity but should not replace student voice.",
-        "Integrity checks protect authentic learning.",
-        "Human review ensures fairness and accuracy.",
+        "Feedback is most useful when it aligns to the rubric or success criteria.",
+        "Exemplars clarify expectations and keep standards steady.",
+        "Edits should preserve student voice and authentic learning.",
       ]}
       teacherMoves={[
-        "Paste rubric language to anchor feedback suggestions.",
-        "Ask for two versions of feedback: strengths and next steps.",
-        "Use exemplars to calibrate tone and expectations.",
-        "Run a quick integrity check: look for style mismatches.",
+        "Anchor AI drafts to your rubric language and required evidence.",
+        "Separate strengths from next steps to keep feedback actionable.",
+        "Check for mismatches in voice or performance level.",
       ]}
       prompts={[
-        "Using this rubric, draft feedback for a 9th-grade persuasive essay: [paste rubric]. Keep it to 5 sentences.",
-        "Create two anonymized exemplar responses to this prompt at different performance levels: [paste prompt].",
+        "Using this rubric, draft feedback for a 9th-grade persuasive essay. Keep it to 5 sentences: [paste rubric].",
+        "Create two anonymized exemplar responses at different performance levels for this prompt: [paste prompt].",
         "Edit this student paragraph for clarity while preserving the student’s voice and ideas: [paste paragraph].",
       ]}
     />

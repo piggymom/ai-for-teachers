@@ -5,22 +5,19 @@ export default function Week2TakeawaysPage() {
     <TakeawaysPage
       weekNumber={2}
       coreIdeas={[
-        "Strong prep starts with clear outcomes and constraints.",
-        "Outlines give AI the structure it needs to stay on target.",
-        "Differentiation works best when you specify supports and stretch goals.",
-        "A short resource list helps the model stay grounded.",
-        "Teacher review remains the final filter for quality and tone.",
+        "Plan with the end in mind: goals, standards, and time limits first.",
+        "Differentiation improves when you name supports and stretch targets up front.",
+        "AI drafts are raw material; teacher review decides what stays.",
       ]}
       teacherMoves={[
-        "Define the lesson goal, standard, and time window before prompting.",
-        "Ask for tiered options (support/on-level/extension).",
-        "Provide 2–3 trusted sources or examples to anchor outputs.",
-        "Scan for alignment and adjust pacing or vocabulary as needed.",
+        "Provide the lesson goal, constraints, and class context before prompting.",
+        "Ask for tiered options and then edit for your students’ readiness.",
+        "Request a short, annotated resource list and verify it yourself.",
       ]}
       prompts={[
-        "Create a lesson outline for a 45-minute grade 5 math lesson on fractions. Include warm-up, guided practice, and exit ticket.",
-        "Give me three differentiation options for a middle school reading discussion: support, on-level, and extension.",
-        "Draft a short resource shortlist (3–5 items) to support a high school civics lesson on voting rights with brief annotations.",
+        "Draft a 45-minute Grade 5 math lesson on fractions with warm-up, guided practice, and exit ticket. Note needed materials.",
+        "Create support, on-level, and extension options for a middle school reading discussion on theme.",
+        "Suggest 3–4 reputable resources for a high school civics lesson on voting rights, each with a one-sentence note.",
       ]}
     />
   );

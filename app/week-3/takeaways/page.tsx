@@ -5,22 +5,19 @@ export default function Week3TakeawaysPage() {
     <TakeawaysPage
       weekNumber={3}
       coreIdeas={[
-        "Clear prompts reduce drift and save editing time.",
-        "Constraints (grade level, length, tone) keep outputs usable.",
-        "Ask the model to surface assumptions or uncertainties.",
-        "Bias can appear in examples, names, and framing.",
-        "Iteration beats one-shot prompts.",
+        "Good prompts specify the task, audience, and format to reduce drift.",
+        "Constraints surface limits and make revision faster.",
+        "Bias and gaps can show up in examples, so outputs need review.",
       ]}
       teacherMoves={[
-        "Start with role, audience, task, and format in every prompt.",
-        "Add a checklist of must-haves before generating.",
-        "Request two versions and combine the best pieces.",
-        "Scan for bias and adjust names, contexts, or examples.",
+        "Use a simple prompt frame: role, task, constraints, and tone.",
+        "Ask for two options, then combine the strongest parts.",
+        "Check for assumptions, missing context, or biased framing.",
       ]}
       prompts={[
-        "Act as a 6th-grade ELA coach. Draft a 4-sentence feedback comment on a narrative draft focusing on vivid details and clarity.",
-        "Generate three exit ticket questions for a 10th-grade history lesson on the causes of World War I. Keep each under 20 words.",
-        "Revise this prompt to be clearer and more constrained: [paste prompt].",
+        "You are a 6th-grade ELA coach. Draft a 4-sentence feedback comment on a narrative focusing on vivid details and clarity.",
+        "Write three exit ticket questions for a 10th-grade history lesson on causes of World War I. Keep each under 20 words.",
+        "Improve this prompt by adding audience, constraints, and format: [paste prompt].",
       ]}
     />
   );
