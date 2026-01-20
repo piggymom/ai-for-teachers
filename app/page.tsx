@@ -110,8 +110,8 @@ const WeekCard = ({
   variant = "default",
 }: WeekCardProps) => {
   const isInteractive = status !== "comingSoon" && Boolean(href);
-  const hasTakeawaysLink = completed && Boolean(takeawaysHref);
-  const statusText = completed ? "Completed" : statusLabel ?? statusCopy[status];
+  const takeawaysLink = completed ? takeawaysHref : undefined;
+  const statusText = completed ? "COMPLETED" : statusLabel ?? statusCopy[status];
   const cardClasses =
     "group relative flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left transition";
   const hoverClasses = "hover:-translate-y-0.5 hover:border-white/25";
@@ -156,12 +156,12 @@ const WeekCard = ({
       <p className={`text-sm leading-relaxed ${descriptionTextClass} sm:text-base`}>
         {description}
       </p>
-      {hasTakeawaysLink ? (
+      {takeawaysLink ? (
         <div className="mt-auto flex justify-end">
           <Link
             aria-label={`View Week ${weekNumber} takeaways`}
             className="pointer-events-auto rounded-sm text-xs font-semibold text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-            href={takeawaysHref!}
+            href={takeawaysLink}
           >
             View takeaways →
           </Link>
