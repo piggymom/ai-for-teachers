@@ -1,41 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
-
-const STORAGE_KEYS = {
-  1: "ai4t_week1_complete",
-  2: "ai4t_week2_complete",
-  3: "ai4t_week3_complete",
-  4: "ai4t_week4_complete",
-  5: "ai4t_week5_complete",
-  6: "ai4t_week6_complete",
-} as const;
-
-function useCompletionState(): Record<number, boolean> {
-  return useSyncExternalStore(
-    (listener) => {
-      if (typeof window === "undefined") {
-        return () => undefined;
-      }
-      window.addEventListener("storage", listener);
-      window.addEventListener("ai4t-storage", listener);
-      return () => {
-        window.removeEventListener("storage", listener);
-        window.removeEventListener("ai4t-storage", listener);
-      };
-    },
-    () => {
-      if (typeof window === "undefined") return {};
-      const result: Record<number, boolean> = {};
-      for (const [week, key] of Object.entries(STORAGE_KEYS)) {
-        result[Number(week)] = window.localStorage.getItem(key) === "true";
-      }
-      return result;
-    },
-    () => ({})
-  );
-}
+import { useCompletionState } from "@/lib/useCompletionState";
 
 type WeekStatus = "available" | "comingSoon" | "completed";
 
