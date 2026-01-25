@@ -1,35 +1,17 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useCompletionState } from "@/lib/useCompletionState";
 
 type MarkCompleteButtonProps = {
-  storageKey?: string;
+  weekNumber: number;
 };
 
-export default function MarkCompleteButton({
-  storageKey = "ai4t_week1_complete",
-}: MarkCompleteButtonProps) {
-  const isComplete = useSyncExternalStore(
-    (listener) => {
-      if (typeof window === "undefined") {
-        return () => undefined;
-      }
-      window.addEventListener("storage", listener);
-      window.addEventListener("ai4t-storage", listener);
-      return () => {
-        window.removeEventListener("storage", listener);
-        window.removeEventListener("ai4t-storage", listener);
-      };
-    },
-    () =>
-      typeof window !== "undefined" &&
-      window.localStorage.getItem(storageKey) === "true",
-    () => false
-  );
+export default function MarkCompleteButton({ weekNumber }: MarkCompleteButtonProps) {
+  const { completionState, markComplete } = useCompletionState();
+  const isComplete = completionState[weekNumber] ?? false;
 
   const handleClick = () => {
-    window.localStorage.setItem(storageKey, "true");
-    window.dispatchEvent(new Event("ai4t-storage"));
+    markComplete(weekNumber);
   };
 
   return (

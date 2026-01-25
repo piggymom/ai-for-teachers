@@ -1,8 +1,9 @@
 "use client";
 
-import { useSyncExternalStore, useEffect } from "react";
+import { useSyncExternalStore, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
 
-// Storage keys for each week's completion state
+// Storage keys for localStorage fallback (unauthenticated users)
 const STORAGE_KEYS: Record<number, string> = {
   1: "ai4t_week1_complete",
   2: "ai4t_week2_complete",
@@ -12,20 +13,14 @@ const STORAGE_KEYS: Record<number, string> = {
   6: "ai4t_week6_complete",
 };
 
-// Module-level state - stable reference, mutated in place
+// Module-level state - stable reference
 let state: Record<number, boolean> = {};
-
-// Listeners for state changes
 const listeners = new Set<() => void>();
-
-// Cached empty object for server snapshot - MUST be same reference every call
 const SERVER_SNAPSHOT: Record<number, boolean> = {};
 
 function subscribe(listener: () => void): () => void {
   listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
+  return () => listeners.delete(listener);
 }
 
 function getSnapshot(): Record<number, boolean> {
@@ -49,26 +44,70 @@ function readFromLocalStorage(): Record<number, boolean> {
   return result;
 }
 
-export function useCompletionState(): Record<number, boolean> {
+export function useCompletionState() {
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated" && !!session?.user?.id;
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  // Hydrate from localStorage on mount (client-only)
+  // Fetch progress from API when authenticated
   useEffect(() => {
-    setState(readFromLocalStorage());
+    if (status === "loading") return;
 
-    // Listen for storage changes (cross-tab and same-tab custom event)
-    const handleStorageChange = () => {
+    if (isAuthenticated) {
+      // Fetch from API
+      fetch("/api/progress")
+        .then((res) => res.json())
+        .then((data) => {
+          const result: Record<number, boolean> = {};
+          for (const [week, progressStatus] of Object.entries(data.progress || {})) {
+            result[Number(week)] = progressStatus === "completed";
+          }
+          setState(result);
+        })
+        .catch(() => {
+          // Fallback to localStorage on error
+          setState(readFromLocalStorage());
+        });
+    } else {
+      // Use localStorage for unauthenticated users
       setState(readFromLocalStorage());
-    };
 
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("ai4t-storage", handleStorageChange);
+      const handleStorageChange = () => setState(readFromLocalStorage());
+      window.addEventListener("storage", handleStorageChange);
+      window.addEventListener("ai4t-storage", handleStorageChange);
 
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("ai4t-storage", handleStorageChange);
-    };
-  }, []);
+      return () => {
+        window.removeEventListener("storage", handleStorageChange);
+        window.removeEventListener("ai4t-storage", handleStorageChange);
+      };
+    }
+  }, [isAuthenticated, status]);
 
-  return snapshot;
+  // Function to mark a week as complete
+  const markComplete = useCallback(
+    async (weekNumber: number) => {
+      if (isAuthenticated) {
+        // Save to API
+        const res = await fetch("/api/progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ weekNumber, status: "completed" }),
+        });
+
+        if (res.ok) {
+          setState({ ...state, [weekNumber]: true });
+        }
+      } else {
+        // Save to localStorage
+        const key = STORAGE_KEYS[weekNumber];
+        if (key) {
+          window.localStorage.setItem(key, "true");
+          window.dispatchEvent(new Event("ai4t-storage"));
+        }
+      }
+    },
+    [isAuthenticated]
+  );
+
+  return { completionState: snapshot, markComplete, isAuthenticated };
 }

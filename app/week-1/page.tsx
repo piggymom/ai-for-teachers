@@ -40,7 +40,7 @@ export default function Week1Page() {
       </HighlightCard>
 
       <div className="flex justify-start">
-        <MarkCompleteButton />
+        <MarkCompleteButton weekNumber={1} />
       </div>
     </WeekLayout>
   );

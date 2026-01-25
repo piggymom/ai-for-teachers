@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCompletionState } from "@/lib/useCompletionState";
+import { AuthButton } from "./components/auth-button";
 
 type WeekStatus = "available" | "comingSoon" | "completed";
 
@@ -125,7 +126,7 @@ const WeekCard = ({
 };
 
 export default function Home() {
-  const completionState = useCompletionState();
+  const { completionState } = useCompletionState();
 
   const weeks: WeekCardProps[] = [
     {
@@ -205,9 +206,12 @@ export default function Home() {
     <main className="min-h-screen bg-neutral-900 text-white">
       <div className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-14 sm:gap-12 sm:py-16 lg:px-12">
         <header className="space-y-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/50">
-            Course Index
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/50">
+              Course Index
+            </p>
+            <AuthButton />
+          </div>
           <div className="space-y-3">
             <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
               AI for Teachers

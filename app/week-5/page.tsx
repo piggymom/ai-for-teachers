@@ -38,7 +38,7 @@ export default function Week5Page() {
       </HighlightCard>
 
       <div className="flex justify-start">
-        <MarkCompleteButton storageKey="ai4t_week5_complete" />
+        <MarkCompleteButton weekNumber={5} />
       </div>
     </WeekLayout>
   );
