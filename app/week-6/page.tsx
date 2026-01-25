@@ -1,5 +1,4 @@
 import { HighlightCard, SectionCard, WeekLayout } from "../components/week-layout";
-import MarkCompleteButton from "../components/mark-complete";
 
 export default function Week6Page() {
   return (
@@ -8,7 +7,7 @@ export default function Week6Page() {
       title="Safety, Policy & Norms"
       dek="Establish guardrails, privacy expectations, and classroom norms with your professional judgment at the center."
       metadata={["25 min estimated", "Safety & norms"]}
-      takeawaysHref="/week-6/takeaways"
+      weekNumber={6}
     >
       <SectionCard title="1) What you'll do">
         <ul className="list-disc space-y-1.5 pl-4 text-white/75 marker:text-white/30">
@@ -35,10 +34,6 @@ export default function Week6Page() {
           </p>
         </aside>
       </HighlightCard>
-
-      <div className="flex justify-start">
-        <MarkCompleteButton weekNumber={6} />
-      </div>
     </WeekLayout>
   );
 }

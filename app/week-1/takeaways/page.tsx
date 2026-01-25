@@ -1,9 +1,11 @@
-import Link from "next/link";
 import { SectionCard, navLinkClasses } from "../../components/week-layout";
+import { completeWeekAndReturn } from "../../actions/progress";
 
 const sectionCardClasses = "rounded-2xl border-white/10 bg-white/[0.04]";
 
 export default function Week1TakeawaysPage() {
+  const completeAndReturn = completeWeekAndReturn.bind(null, 1);
+
   return (
     <main className="min-h-screen bg-neutral-900 text-white">
       <div className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-14 sm:gap-12 sm:py-16 lg:px-12">
@@ -23,7 +25,7 @@ export default function Week1TakeawaysPage() {
         </header>
 
         <div className="flex flex-col gap-6 sm:gap-7">
-          <SectionCard title="What AI is (and isn’t)" className={sectionCardClasses}>
+          <SectionCard title="What AI is (and isn't)" className={sectionCardClasses}>
             <ul className="list-disc space-y-1.5 pl-4 text-white/75 marker:text-white/30">
               <li>Generates drafts and ideas from patterns, not facts or truth.</li>
               <li>Can be fast and useful, but also wrong or overconfident.</li>
@@ -56,13 +58,12 @@ export default function Week1TakeawaysPage() {
           </SectionCard>
         </div>
 
-        <nav className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className={navLinkClasses}>
-            ← Back to course
-          </Link>
-          <Link href="/week-1" className={navLinkClasses}>
-            Review Week 1 →
-          </Link>
+        <nav className="flex flex-wrap items-center gap-3">
+          <form action={completeAndReturn}>
+            <button type="submit" className={navLinkClasses}>
+              ← Back to Course Index
+            </button>
+          </form>
         </nav>
       </div>
     </main>

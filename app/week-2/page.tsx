@@ -1,5 +1,4 @@
 import { HighlightCard, SectionCard, WeekLayout } from "../components/week-layout";
-import MarkCompleteButton from "../components/mark-complete";
 
 export default function Week2Page() {
   return (
@@ -8,8 +7,7 @@ export default function Week2Page() {
       title="Planning & Prep"
       dek="Plan lessons with AI-supported outlines, differentiation options, and resource shortlists you review and refine."
       metadata={["30 min estimated", "Planning"]}
-      nextWeek={{ href: "/week-3", label: "Week 3" }}
-      takeawaysHref="/week-2/takeaways"
+      weekNumber={2}
     >
       <SectionCard title="1) What you'll do">
         <ul className="list-disc space-y-1.5 pl-4 text-white/75 marker:text-white/30">
@@ -37,10 +35,6 @@ export default function Week2Page() {
           </p>
         </aside>
       </HighlightCard>
-
-      <div className="flex justify-start">
-        <MarkCompleteButton weekNumber={2} />
-      </div>
     </WeekLayout>
   );
 }

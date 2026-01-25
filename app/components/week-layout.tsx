@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { completeWeekAndReturn } from "../actions/progress";
 
 export type SectionCardProps = {
   title: string;
@@ -13,12 +13,7 @@ type WeekLayoutProps = {
   dek: string;
   metadata: string[];
   children: ReactNode;
-  nextWeek?: {
-    href: string;
-    label: string;
-    prefix?: string;
-  };
-  takeawaysHref?: string;
+  weekNumber: number;
 };
 
 export const SectionCard = ({ title, children, className }: SectionCardProps) => (
@@ -59,48 +54,42 @@ export const WeekLayout = ({
   dek,
   metadata,
   children,
-  nextWeek,
-  takeawaysHref,
-}: WeekLayoutProps) => (
-  <main className="min-h-screen bg-neutral-900 text-white">
-    <div className="mx-auto flex max-w-3xl flex-col gap-12 px-6 py-14 sm:gap-14 sm:py-16 lg:px-12">
-      <header className="space-y-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white/50">
-          {eyebrow}
-        </p>
-        <div className="space-y-4">
-          <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-            {title}
-          </h1>
-          <p className="max-w-2xl text-lg leading-relaxed text-white/75 sm:text-xl">
-            {dek}
+  weekNumber,
+}: WeekLayoutProps) => {
+  const completeAndReturn = completeWeekAndReturn.bind(null, weekNumber);
+
+  return (
+    <main className="min-h-screen bg-neutral-900 text-white">
+      <div className="mx-auto flex max-w-3xl flex-col gap-12 px-6 py-14 sm:gap-14 sm:py-16 lg:px-12">
+        <header className="space-y-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white/50">
+            {eyebrow}
           </p>
-          <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.24em] text-white/45">
-            {metadata.map((item) => (
-              <span key={item}>{item}</span>
-            ))}
+          <div className="space-y-4">
+            <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              {title}
+            </h1>
+            <p className="max-w-2xl text-lg leading-relaxed text-white/75 sm:text-xl">
+              {dek}
+            </p>
+            <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.24em] text-white/45">
+              {metadata.map((item) => (
+                <span key={item}>{item}</span>
+              ))}
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div className="flex flex-col gap-6 sm:gap-7">{children}</div>
+        <div className="flex flex-col gap-6 sm:gap-7">{children}</div>
 
-      <nav className="flex flex-wrap items-center gap-3">
-        <Link href="/" className={navLinkClasses}>
-          ← Back to course
-        </Link>
-        {takeawaysHref ? (
-          <Link href={takeawaysHref} className={navLinkClasses}>
-            View takeaways →
-          </Link>
-        ) : null}
-        {nextWeek ? (
-          <Link href={nextWeek.href} className={navLinkClasses}>
-            {nextWeek.prefix ?? "Next week: "}
-            {nextWeek.label} →
-          </Link>
-        ) : null}
-      </nav>
-    </div>
-  </main>
-);
+        <nav className="flex flex-wrap items-center gap-3">
+          <form action={completeAndReturn}>
+            <button type="submit" className={navLinkClasses}>
+              ← Back to Course Index
+            </button>
+          </form>
+        </nav>
+      </div>
+    </main>
+  );
+};

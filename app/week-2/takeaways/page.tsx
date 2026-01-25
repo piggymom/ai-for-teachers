@@ -1,9 +1,11 @@
-import Link from "next/link";
 import { SectionCard, navLinkClasses } from "../../components/week-layout";
+import { completeWeekAndReturn } from "../../actions/progress";
 
 const sectionCardClasses = "rounded-2xl border-white/10 bg-white/[0.04]";
 
 export default function Week2TakeawaysPage() {
+  const completeAndReturn = completeWeekAndReturn.bind(null, 2);
+
   return (
     <main className="min-h-screen bg-neutral-900 text-white">
       <div className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-14 sm:gap-12 sm:py-16 lg:px-12">
@@ -57,13 +59,12 @@ export default function Week2TakeawaysPage() {
           </SectionCard>
         </div>
 
-        <nav className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className={navLinkClasses}>
-            ← Back to course
-          </Link>
-          <Link href="/week-2" className={navLinkClasses}>
-            Review Week 2 →
-          </Link>
+        <nav className="flex flex-wrap items-center gap-3">
+          <form action={completeAndReturn}>
+            <button type="submit" className={navLinkClasses}>
+              ← Back to Course Index
+            </button>
+          </form>
         </nav>
       </div>
     </main>
