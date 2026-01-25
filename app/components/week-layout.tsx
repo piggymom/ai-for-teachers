@@ -18,6 +18,7 @@ type WeekLayoutProps = {
     label: string;
     prefix?: string;
   };
+  takeawaysHref?: string;
 };
 
 export const SectionCard = ({ title, children, className }: SectionCardProps) => (
@@ -59,6 +60,7 @@ export const WeekLayout = ({
   metadata,
   children,
   nextWeek,
+  takeawaysHref,
 }: WeekLayoutProps) => (
   <main className="min-h-screen bg-neutral-900 text-white">
     <div className="mx-auto flex max-w-3xl flex-col gap-12 px-6 py-14 sm:gap-14 sm:py-16 lg:px-12">
@@ -87,6 +89,11 @@ export const WeekLayout = ({
         <Link href="/" className={navLinkClasses}>
           ← Back to course
         </Link>
+        {takeawaysHref ? (
+          <Link href={takeawaysHref} className={navLinkClasses}>
+            View takeaways →
+          </Link>
+        ) : null}
         {nextWeek ? (
           <Link href={nextWeek.href} className={navLinkClasses}>
             {nextWeek.prefix ?? "Next week: "}

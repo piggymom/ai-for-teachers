@@ -1,15 +1,17 @@
 import { HighlightCard, SectionCard, WeekLayout } from "../components/week-layout";
+import MarkCompleteButton from "../components/mark-complete";
 
 export default function Week5Page() {
   return (
     <WeekLayout
-      eyebrow="Week 5 Module"
+      eyebrow="Week 5"
       title="Assessment & Feedback"
       dek="Draft rubric-aligned feedback and exemplars, then edit to match your expectations and voice."
       metadata={["35 min estimated", "Assessment"]}
       nextWeek={{ href: "/week-6", label: "Week 6" }}
+      takeawaysHref="/week-5/takeaways"
     >
-      <SectionCard title="1) What you’ll do">
+      <SectionCard title="1) What you'll do">
         <ul className="list-disc space-y-1.5 pl-4 text-white/75 marker:text-white/30">
           <li>Turn a rubric into short, reusable feedback stems.</li>
           <li>Draft exemplar responses you can edit and annotate.</li>
@@ -34,6 +36,10 @@ export default function Week5Page() {
           </p>
         </aside>
       </HighlightCard>
+
+      <div className="flex justify-start">
+        <MarkCompleteButton storageKey="ai4t_week5_complete" />
+      </div>
     </WeekLayout>
   );
 }

@@ -1,15 +1,16 @@
 import { HighlightCard, SectionCard, WeekLayout } from "../components/week-layout";
+import MarkCompleteButton from "../components/mark-complete";
 
 export default function Week6Page() {
   return (
     <WeekLayout
-      eyebrow="Week 6 Module"
+      eyebrow="Week 6"
       title="Safety, Policy & Norms"
       dek="Establish guardrails, privacy expectations, and classroom norms with your professional judgment at the center."
       metadata={["25 min estimated", "Safety & norms"]}
-      nextWeek={{ href: "/", label: "Back to course", prefix: "" }}
+      takeawaysHref="/week-6/takeaways"
     >
-      <SectionCard title="1) What you’ll do">
+      <SectionCard title="1) What you'll do">
         <ul className="list-disc space-y-1.5 pl-4 text-white/75 marker:text-white/30">
           <li>Clarify when AI use is appropriate and when it is not.</li>
           <li>Draft a short policy statement in plain language.</li>
@@ -30,10 +31,14 @@ export default function Week6Page() {
         <aside className="rounded-lg border border-white/5 bg-white/[0.02] p-4 sm:p-5">
           <p className="text-base leading-relaxed text-white/75 sm:text-[1.05rem]">
             Take your existing tech policy and add a short AI section with three
-            do’s and three don’ts. Share it with a colleague for a quick review.
+            do's and three don'ts. Share it with a colleague for a quick review.
           </p>
         </aside>
       </HighlightCard>
+
+      <div className="flex justify-start">
+        <MarkCompleteButton storageKey="ai4t_week6_complete" />
+      </div>
     </WeekLayout>
   );
 }

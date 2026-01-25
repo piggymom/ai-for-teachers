@@ -1,6 +1,41 @@
 "use client";
 
 import Link from "next/link";
+import { useSyncExternalStore } from "react";
+
+const STORAGE_KEYS = {
+  1: "ai4t_week1_complete",
+  2: "ai4t_week2_complete",
+  3: "ai4t_week3_complete",
+  4: "ai4t_week4_complete",
+  5: "ai4t_week5_complete",
+  6: "ai4t_week6_complete",
+} as const;
+
+function useCompletionState(): Record<number, boolean> {
+  return useSyncExternalStore(
+    (listener) => {
+      if (typeof window === "undefined") {
+        return () => undefined;
+      }
+      window.addEventListener("storage", listener);
+      window.addEventListener("ai4t-storage", listener);
+      return () => {
+        window.removeEventListener("storage", listener);
+        window.removeEventListener("ai4t-storage", listener);
+      };
+    },
+    () => {
+      if (typeof window === "undefined") return {};
+      const result: Record<number, boolean> = {};
+      for (const [week, key] of Object.entries(STORAGE_KEYS)) {
+        result[Number(week)] = window.localStorage.getItem(key) === "true";
+      }
+      return result;
+    },
+    () => ({})
+  );
+}
 
 type WeekStatus = "available" | "comingSoon" | "completed";
 
@@ -124,12 +159,14 @@ const WeekCard = ({
 };
 
 export default function Home() {
+  const completionState = useCompletionState();
+
   const weeks: WeekCardProps[] = [
     {
       weekNumber: 0,
       title: "About This Course",
       description:
-        "How this course is designed, who it’s for, and how to use AI in a way that supports—rather than replaces—professional judgment.",
+        "How this course is designed, who it's for, and how to use AI in a way that supports—rather than replaces—professional judgment.",
       minutes: 5,
       status: "available",
       statusLabel: "Start here",
@@ -140,9 +177,9 @@ export default function Home() {
       weekNumber: 1,
       title: "Understanding AI in Teaching",
       description:
-        "Understand what AI is (and isn’t), how it can support you, and the guardrails that keep it classroom-safe.",
+        "Understand what AI is (and isn't), how it can support you, and the guardrails that keep it classroom-safe.",
       minutes: 25,
-      status: "completed",
+      status: completionState[1] ? "completed" : "available",
       href: "/week-1",
       takeawaysHref: "/week-1/takeaways",
     },
@@ -152,8 +189,9 @@ export default function Home() {
       description:
         "Plan lessons with AI-supported outlines, differentiation options, and resource shortlists you review and refine.",
       minutes: 30,
-      status: "available",
+      status: completionState[2] ? "completed" : "available",
       href: "/week-2",
+      takeawaysHref: "/week-2/takeaways",
     },
     {
       weekNumber: 3,
@@ -161,8 +199,9 @@ export default function Home() {
       description:
         "Write clear prompts, check outputs for accuracy and bias, and decide what fits your students.",
       minutes: 30,
-      status: "available",
+      status: completionState[3] ? "completed" : "available",
       href: "/week-3",
+      takeawaysHref: "/week-3/takeaways",
     },
     {
       weekNumber: 4,
@@ -170,8 +209,9 @@ export default function Home() {
       description:
         "Design repeatable routines for feedback notes, family communication drafts, and classroom management supports you finalize.",
       minutes: 35,
-      status: "available",
+      status: completionState[4] ? "completed" : "available",
       href: "/week-4",
+      takeawaysHref: "/week-4/takeaways",
     },
     {
       weekNumber: 5,
@@ -179,8 +219,9 @@ export default function Home() {
       description:
         "Draft rubric-aligned feedback and exemplars, then edit to match your expectations and voice.",
       minutes: 35,
-      status: "available",
+      status: completionState[5] ? "completed" : "available",
       href: "/week-5",
+      takeawaysHref: "/week-5/takeaways",
     },
     {
       weekNumber: 6,
@@ -188,8 +229,9 @@ export default function Home() {
       description:
         "Establish guardrails, privacy expectations, and classroom norms with your professional judgment at the center.",
       minutes: 25,
-      status: "available",
+      status: completionState[6] ? "completed" : "available",
       href: "/week-6",
+      takeawaysHref: "/week-6/takeaways",
     },
   ];
 

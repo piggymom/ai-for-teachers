@@ -1,15 +1,17 @@
 import { HighlightCard, SectionCard, WeekLayout } from "../components/week-layout";
+import MarkCompleteButton from "../components/mark-complete";
 
 export default function Week2Page() {
   return (
     <WeekLayout
-      eyebrow="Week 2 Module"
+      eyebrow="Week 2"
       title="Planning & Prep"
       dek="Plan lessons with AI-supported outlines, differentiation options, and resource shortlists you review and refine."
       metadata={["30 min estimated", "Planning"]}
       nextWeek={{ href: "/week-3", label: "Week 3" }}
+      takeawaysHref="/week-2/takeaways"
     >
-      <SectionCard title="1) What you’ll do">
+      <SectionCard title="1) What you'll do">
         <ul className="list-disc space-y-1.5 pl-4 text-white/75 marker:text-white/30">
           <li>Draft a lesson outline from your existing goals and standards.</li>
           <li>Generate differentiation ideas you can adapt for your students.</li>
@@ -35,6 +37,10 @@ export default function Week2Page() {
           </p>
         </aside>
       </HighlightCard>
+
+      <div className="flex justify-start">
+        <MarkCompleteButton storageKey="ai4t_week2_complete" />
+      </div>
     </WeekLayout>
   );
 }

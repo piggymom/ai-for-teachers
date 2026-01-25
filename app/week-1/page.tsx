@@ -1,5 +1,5 @@
 import { HighlightCard, SectionCard, WeekLayout } from "../components/week-layout";
-import MarkCompleteButton from "./mark-complete";
+import MarkCompleteButton from "../components/mark-complete";
 
 export default function Week1Page() {
   return (
@@ -9,6 +9,7 @@ export default function Week1Page() {
       dek="Practical guidance for using AI to support your teaching practice—without hype, and with clear guardrails."
       metadata={["25 min estimated", "Classroom-safe"]}
       nextWeek={{ href: "/week-2", label: "Week 2" }}
+      takeawaysHref="/week-1/takeaways"
     >
       <SectionCard title="1) What AI is (and isn’t)">
         <p>
