@@ -17,7 +17,7 @@ export default function SignInPage() {
         </div>
 
         <button
-          onClick={() => signIn("google", { callbackUrl: "/" })}
+          onClick={() => signIn("google", { callbackUrl: "/home" })}
           className="inline-flex items-center justify-center gap-3 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/10"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">

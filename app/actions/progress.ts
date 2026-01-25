@@ -12,5 +12,5 @@ export async function completeWeekAndReturn(weekNumber: number) {
     await markWeekCompleted(session.user.id, weekNumber);
   }
 
-  redirect("/");
+  redirect("/home");
 }
