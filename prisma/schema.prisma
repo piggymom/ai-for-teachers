@@ -12,16 +12,18 @@ datasource db {
 
 // NextAuth.js required models
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  progress      Progress[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              String          @id @default(cuid())
+  name            String?
+  email           String?         @unique
+  emailVerified   DateTime?
+  image           String?
+  accounts        Account[]
+  sessions        Session[]
+  progress        Progress[]
+  profile         UserProfile?
+  skippyMessages  SkippyMessage[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
 }
 
 model Account {
@@ -70,5 +72,51 @@ model Progress {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, weekNumber])
+  @@index([userId])
+}
+
+// Skippy chat messages
+model SkippyMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  week      Int
+  role      String   // "user" | "assistant"
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, week])
+  @@index([createdAt])
+}
+
+// User onboarding profile
+model UserProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Step 1: Role
+  role               String
+  roleOther          String?
+  gradeLevels        String[] // ["PreK", "K", "1-2", etc.]
+  subjects           String[] // User-entered tags
+
+  // Step 2: Context
+  schoolContext      String?
+  aiExperienceLevel  String   // "new" | "some" | "advanced"
+  constraints        String?
+
+  // Step 3: Goals
+  biggestTimeDrains  String[] // ["Lesson planning", "Differentiation", etc.]
+  goals              String
+  successLooksLike   String?
+
+  // Step 4: Preferences
+  tonePreference     String?  // "direct" | "supportive" | "collaborative" | "no-fluff"
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }

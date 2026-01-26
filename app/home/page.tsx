@@ -131,11 +131,11 @@ export default function Home() {
   const weeks: WeekCardProps[] = [
     {
       weekNumber: 0,
-      title: "About This Course",
+      title: "Getting Started",
       description:
         "How this course is designed, who it's for, and how to use AI in a way that supports—rather than replaces—professional judgment.",
       minutes: 5,
-      status: "available",
+      status: completionState[0] ? "completed" : "available",
       statusLabel: "Start here",
       href: "/week-0",
       variant: "orientation",
@@ -152,9 +152,9 @@ export default function Home() {
     },
     {
       weekNumber: 2,
-      title: "Planning & Prep",
+      title: "Prompting Fundamentals",
       description:
-        "Plan lessons with AI-supported outlines, differentiation options, and resource shortlists you review and refine.",
+        "Learn the building blocks of effective prompts using the 4C framework: Context, Constraints, Command, and Criteria.",
       minutes: 30,
       status: completionState[2] ? "completed" : "available",
       href: "/week-2",
@@ -162,9 +162,9 @@ export default function Home() {
     },
     {
       weekNumber: 3,
-      title: "Prompting Basics",
+      title: "Lesson Planning with AI",
       description:
-        "Write clear prompts, check outputs for accuracy and bias, and decide what fits your students.",
+        "Use AI as a brainstorming partner for lesson design while maintaining pedagogical ownership.",
       minutes: 30,
       status: completionState[3] ? "completed" : "available",
       href: "/week-3",
@@ -172,9 +172,9 @@ export default function Home() {
     },
     {
       weekNumber: 4,
-      title: "Classroom Workflows",
+      title: "Feedback & Assessment",
       description:
-        "Design repeatable routines for feedback notes, family communication drafts, and classroom management supports you finalize.",
+        "Generate feedback drafts, rubric-aligned comments, and practice questions you personalize and finalize.",
       minutes: 35,
       status: completionState[4] ? "completed" : "available",
       href: "/week-4",
@@ -182,9 +182,9 @@ export default function Home() {
     },
     {
       weekNumber: 5,
-      title: "Assessment & Feedback",
+      title: "Communication & Admin",
       description:
-        "Draft rubric-aligned feedback and exemplars, then edit to match your expectations and voice.",
+        "Handle parent communications, newsletters, and administrative tasks that eat up planning time.",
       minutes: 35,
       status: completionState[5] ? "completed" : "available",
       href: "/week-5",
@@ -192,9 +192,9 @@ export default function Home() {
     },
     {
       weekNumber: 6,
-      title: "Safety, Policy & Norms",
+      title: "Building Your Practice",
       description:
-        "Establish guardrails, privacy expectations, and classroom norms with your professional judgment at the center.",
+        "Create sustainable AI routines and build your personal prompt library for long-term success.",
       minutes: 25,
       status: completionState[6] ? "completed" : "available",
       href: "/week-6",
