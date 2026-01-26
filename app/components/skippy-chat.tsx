@@ -4,14 +4,34 @@ import { useState, useEffect, useRef, FormEvent, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSTT, formatTime } from "@/lib/useVoice";
 
-// Message with stable ID and state for update-in-place rendering
-type MessageState = "speaking" | "ready" | "done";
+// =============================================================================
+// STRICT VOICE-FIRST IMPLEMENTATION
+// Rules:
+// 1. NEVER render assistant fullText until audio.onplay fires
+// 2. revealedText starts empty and only populates during/after playback
+// 3. Error state requires user action (Retry or Show Text button)
+// =============================================================================
+
+// Explicit pipeline states for assistant messages
+type AssistantPipelineStatus =
+  | "idle"           // Initial state, not yet processed
+  | "requesting"     // Fetching Skippy response + TTS
+  | "audio_ready"    // Audio URL exists, not playing yet
+  | "playing"        // Audio has fired onplay, text revealing
+  | "done"           // Audio ended, full text visible
+  | "error";         // Error occurred, show retry UI
 
 type Message = {
   id: string;
   role: "user" | "assistant";
-  content: string;
-  state?: MessageState; // Only used for assistant messages
+  // For user messages: content is displayed directly
+  // For assistant messages: ONLY revealedText is rendered, NEVER fullText
+  fullText: string;
+  revealedText: string;
+  status: AssistantPipelineStatus;
+  audioUrl: string | null;
+  duration: number | null;
+  errorMessage: string | null;
 };
 
 type SkippyChatProps = {
@@ -28,144 +48,282 @@ function generateMessageId(): string {
   return `msg_${Date.now()}_${++messageIdCounter}`;
 }
 
+// =============================================================================
+// MAIN COMPONENT
+// =============================================================================
+
 export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showTextInstantly, setShowTextInstantly] = useState(false); // Accessibility toggle
+  const [showTextInstantly, setShowTextInstantly] = useState(false);
 
   // Recording review state
   const [isReviewingTranscript, setIsReviewingTranscript] = useState(false);
   const [editableTranscript, setEditableTranscript] = useState("");
 
+  // Debug state
+  const [debugInfo, setDebugInfo] = useState({
+    pipelineStatus: "idle" as AssistantPipelineStatus,
+    audioReady: false,
+    audioPlaying: false,
+    revealedLength: 0,
+    fullTextLength: 0,
+    lastError: null as string | null,
+  });
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const transcriptInputRef = useRef<HTMLTextAreaElement>(null);
 
-  // TTS Manager refs - prevents double playback and handles cleanup
+  // Audio management refs
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
   const currentMessageIdRef = useRef<string | null>(null);
+  const currentFullTextRef = useRef<string>("");
   const playedMessageIdsRef = useRef<Set<string>>(new Set());
   const ttsAbortControllerRef = useRef<AbortController | null>(null);
-  const textRevealTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const rafIdRef = useRef<number | null>(null);
 
-  // Update a message by ID (for in-place updates)
+  // CRITICAL: Track if playback has started for current message
+  // Once true, NEVER set error state - message is considered successful
+  const hasStartedPlaybackRef = useRef(false);
+  // Track messages that have successfully played (immune to error)
+  const successfulMessageIdsRef = useRef<Set<string>>(new Set());
+
+  // Update message by ID
   const updateMessageById = useCallback((id: string, updates: Partial<Message>) => {
     setMessages((prev) =>
       prev.map((msg) => (msg.id === id ? { ...msg, ...updates } : msg))
     );
   }, []);
 
-  // Initialize audio element on mount (no state in callbacks - use refs)
-  useEffect(() => {
-    const audio = new Audio();
-    audioRef.current = audio;
+  // Stop RAF loop
+  const stopRevealLoop = useCallback(() => {
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
+  }, []);
 
-    audio.onplay = () => {
-      setIsSpeaking(true);
-    };
+  // RAF-based text reveal synced to audio time
+  const runRevealLoop = useCallback(() => {
+    const audio = audioRef.current;
+    const msgId = currentMessageIdRef.current;
+    const fullText = currentFullTextRef.current;
 
-    audio.onended = () => {
-      setIsSpeaking(false);
-      const msgId = currentMessageIdRef.current;
-      if (msgId) {
-        updateMessageById(msgId, { state: "done" });
-      }
-    };
+    if (!audio || !msgId || !fullText) return;
 
-    audio.onpause = () => setIsSpeaking(false);
+    const duration = audio.duration;
+    if (!duration || !isFinite(duration) || duration === 0) {
+      rafIdRef.current = requestAnimationFrame(runRevealLoop);
+      return;
+    }
 
-    audio.onerror = () => {
-      setIsSpeaking(false);
-      const msgId = currentMessageIdRef.current;
-      if (msgId) {
-        // On error, reveal text immediately
-        updateMessageById(msgId, { state: "done" });
-      }
-      console.warn("Audio playback error");
-    };
+    const progress = Math.min(audio.currentTime / duration, 1);
+    const revealedCharCount = Math.floor(progress * fullText.length);
+    const revealedText = fullText.slice(0, revealedCharCount);
 
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.onplay = null;
-        audioRef.current.onended = null;
-        audioRef.current.onpause = null;
-        audioRef.current.onerror = null;
-        audioRef.current = null;
-      }
-      if (audioUrlRef.current) {
-        URL.revokeObjectURL(audioUrlRef.current);
-      }
-      if (ttsAbortControllerRef.current) {
-        ttsAbortControllerRef.current.abort();
-      }
-      if (textRevealTimeoutRef.current) {
-        clearTimeout(textRevealTimeoutRef.current);
-      }
-    };
+    updateMessageById(msgId, { revealedText });
+    setDebugInfo((prev) => ({
+      ...prev,
+      revealedLength: revealedCharCount,
+      fullTextLength: fullText.length,
+    }));
+
+    if (!audio.paused && !audio.ended) {
+      rafIdRef.current = requestAnimationFrame(runRevealLoop);
+    }
   }, [updateMessageById]);
 
-  // Stop speaking and cleanup
-  const stopSpeaking = useCallback(() => {
-    // Cancel any in-flight TTS request
-    if (ttsAbortControllerRef.current) {
-      ttsAbortControllerRef.current.abort();
-      ttsAbortControllerRef.current = null;
-    }
+  // Cleanup audio - DO NOT remove handlers (they have guards), just stop playback
+  const cleanupAudio = useCallback(() => {
+    stopRevealLoop();
 
-    // Clear text reveal timeout
-    if (textRevealTimeoutRef.current) {
-      clearTimeout(textRevealTimeoutRef.current);
-      textRevealTimeoutRef.current = null;
-    }
-
-    // Stop and cleanup audio
     if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current.src = "";
+      const audio = audioRef.current;
+      // Mark current message as done BEFORE clearing src (prevents spurious onerror)
+      const msgId = currentMessageIdRef.current;
+      if (msgId && hasStartedPlaybackRef.current) {
+        // Message already started playing, ensure it stays successful
+        successfulMessageIdsRef.current.add(msgId);
+      }
+      audio.pause();
+      // Clear src - onerror may fire but will be ignored due to guards
+      audio.src = "";
     }
 
-    // Cleanup URL
     if (audioUrlRef.current) {
       URL.revokeObjectURL(audioUrlRef.current);
       audioUrlRef.current = null;
     }
 
-    setIsSpeaking(false);
-  }, []);
+    if (ttsAbortControllerRef.current) {
+      ttsAbortControllerRef.current.abort();
+      ttsAbortControllerRef.current = null;
+    }
 
-  // Speak assistant message with idempotency and proper state management
-  const speakAssistantMessage = useCallback(
+    // Reset playback tracking for next message
+    hasStartedPlaybackRef.current = false;
+  }, [stopRevealLoop]);
+
+  // Initialize audio element with proper state guards
+  useEffect(() => {
+    const audio = new Audio();
+    audioRef.current = audio;
+
+    audio.onloadedmetadata = () => {
+      const msgId = currentMessageIdRef.current;
+      console.log(`[AUDIO] onloadedmetadata msgId=${msgId} duration=${audio.duration}`);
+      if (msgId && audio.duration) {
+        updateMessageById(msgId, { duration: audio.duration });
+      }
+      setDebugInfo((prev) => ({ ...prev, audioReady: true }));
+    };
+
+    audio.onplay = () => {
+      const msgId = currentMessageIdRef.current;
+      const fullText = currentFullTextRef.current;
+      console.log(`[AUDIO] onplay msgId=${msgId} hasStarted=${hasStartedPlaybackRef.current}`);
+
+      if (msgId && fullText) {
+        // CRITICAL: Mark playback as started - this message is now immune to error
+        hasStartedPlaybackRef.current = true;
+        successfulMessageIdsRef.current.add(msgId);
+
+        // VOICE-FIRST: Only NOW populate fullText in state and start reveal
+        updateMessageById(msgId, {
+          fullText,
+          status: "playing",
+          revealedText: "", // Start empty, RAF will populate
+        });
+        setDebugInfo((prev) => ({
+          ...prev,
+          pipelineStatus: "playing",
+          audioPlaying: true,
+          fullTextLength: fullText.length,
+        }));
+        rafIdRef.current = requestAnimationFrame(runRevealLoop);
+      }
+    };
+
+    audio.onended = () => {
+      const msgId = currentMessageIdRef.current;
+      const fullText = currentFullTextRef.current;
+      console.log(`[AUDIO] onended msgId=${msgId}`);
+
+      stopRevealLoop();
+
+      if (msgId) {
+        // Always transition to done, never error (playback completed)
+        updateMessageById(msgId, {
+          status: "done",
+          revealedText: fullText,
+        });
+        setDebugInfo((prev) => ({
+          ...prev,
+          pipelineStatus: "done",
+          audioPlaying: false,
+          revealedLength: fullText.length,
+        }));
+      }
+    };
+
+    audio.onpause = () => {
+      console.log(`[AUDIO] onpause`);
+      stopRevealLoop();
+      setDebugInfo((prev) => ({ ...prev, audioPlaying: false }));
+    };
+
+    audio.onerror = (e) => {
+      const msgId = currentMessageIdRef.current;
+      const hasStarted = hasStartedPlaybackRef.current;
+      const isSuccessful = msgId ? successfulMessageIdsRef.current.has(msgId) : false;
+      console.log(`[AUDIO] onerror msgId=${msgId} hasStarted=${hasStarted} isSuccessful=${isSuccessful} error=`, e);
+
+      stopRevealLoop();
+
+      // DO NOT set error state from onerror - it fires spuriously
+      // Error handling is done in play().catch() which is more reliable
+      // Just log for debugging
+      console.log(`[AUDIO] onerror ignored - relying on play().catch() for error handling`);
+    };
+
+    return () => {
+      // Cleanup on unmount - handlers already removed in cleanupAudio
+      cleanupAudio();
+      audioRef.current = null;
+    };
+  }, [updateMessageById, runRevealLoop, stopRevealLoop, cleanupAudio]);
+
+  // Stop speaking and reveal full text
+  const stopSpeaking = useCallback(() => {
+    cleanupAudio();
+
+    const msgId = currentMessageIdRef.current;
+    const fullText = currentFullTextRef.current;
+
+    if (msgId && fullText) {
+      updateMessageById(msgId, {
+        status: "done",
+        fullText,
+        revealedText: fullText,
+      });
+    }
+
+    setDebugInfo((prev) => ({
+      ...prev,
+      pipelineStatus: "done",
+      audioPlaying: false,
+      audioReady: false,
+    }));
+  }, [cleanupAudio, updateMessageById]);
+
+  // Process assistant message through voice-first pipeline
+  const processAssistantMessage = useCallback(
     async (text: string, messageId: string) => {
-      // Idempotency check - don't play if already played
+      // Idempotency check
       if (playedMessageIdsRef.current.has(messageId)) {
         return;
       }
-
-      // Stop any existing audio/request
-      stopSpeaking();
-
-      // Mark this message as current
-      currentMessageIdRef.current = messageId;
-
-      // Mark as played immediately to prevent double-invocation
       playedMessageIdsRef.current.add(messageId);
 
-      // If accessibility mode, reveal text immediately and skip TTS
+      // Cleanup any existing audio
+      cleanupAudio();
+
+      // Store text in refs ONLY (not in message state)
+      currentMessageIdRef.current = messageId;
+      currentFullTextRef.current = text;
+
+      // Update debug
+      setDebugInfo((prev) => ({
+        ...prev,
+        pipelineStatus: "requesting",
+        audioReady: false,
+        audioPlaying: false,
+        revealedLength: 0,
+        fullTextLength: text.length,
+        lastError: null,
+      }));
+
+      // If instant mode, skip voice pipeline entirely
       if (showTextInstantly) {
-        updateMessageById(messageId, { state: "done" });
+        updateMessageById(messageId, {
+          fullText: text,
+          revealedText: text,
+          status: "done",
+        });
+        setDebugInfo((prev) => ({ ...prev, pipelineStatus: "done" }));
         return;
       }
 
+      // Update message to requesting state (still no text visible)
+      updateMessageById(messageId, { status: "requesting" });
+
       try {
-        // Create abort controller for this request
         const abortController = new AbortController();
         ttsAbortControllerRef.current = abortController;
 
@@ -177,80 +335,160 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
         });
 
         if (!res.ok) {
-          throw new Error("TTS request failed");
+          throw new Error(`TTS request failed: ${res.status}`);
         }
 
-        // Check if we were aborted during fetch
-        if (abortController.signal.aborted) {
-          return;
-        }
+        if (abortController.signal.aborted) return;
 
         const audioBlob = await res.blob();
         const audioUrl = URL.createObjectURL(audioBlob);
 
-        // Cleanup previous URL
         if (audioUrlRef.current) {
           URL.revokeObjectURL(audioUrlRef.current);
         }
         audioUrlRef.current = audioUrl;
 
-        // Check if this is still the current message (might have changed)
+        // Verify still current message
         if (currentMessageIdRef.current !== messageId) {
           URL.revokeObjectURL(audioUrl);
           return;
         }
 
+        // Update to audio_ready state (still no text visible!)
+        updateMessageById(messageId, {
+          status: "audio_ready",
+          audioUrl,
+        });
+        setDebugInfo((prev) => ({ ...prev, pipelineStatus: "audio_ready" }));
+
         if (!audioRef.current) return;
 
+        // Set source and play - onplay will trigger text reveal
         audioRef.current.src = audioUrl;
-        await audioRef.current.play();
 
-        // Reveal text 400ms after audio starts playing
-        textRevealTimeoutRef.current = setTimeout(() => {
-          if (currentMessageIdRef.current === messageId) {
-            updateMessageById(messageId, { state: "ready" });
+        try {
+          await audioRef.current.play();
+        } catch (playErr) {
+          const errMsg = playErr instanceof Error ? playErr.message : String(playErr);
+          console.log(`[AUDIO] play() threw: "${errMsg}" hasStarted=${hasStartedPlaybackRef.current}`);
+
+          // Ignore "interrupted" errors - these happen when play() is called again quickly
+          // or when src changes during loading. Not actual failures.
+          const isInterrupted = errMsg.toLowerCase().includes("interrupted") ||
+                               errMsg.toLowerCase().includes("aborted");
+
+          // CRITICAL: Only set error if:
+          // 1. Playback hasn't started (onplay never fired)
+          // 2. Not already marked successful
+          // 3. Not an "interrupted" error (which is benign)
+          if (!hasStartedPlaybackRef.current &&
+              !successfulMessageIdsRef.current.has(messageId) &&
+              !isInterrupted) {
+            console.log(`[AUDIO] Setting error from play().catch() for msgId=${messageId}`);
+            updateMessageById(messageId, {
+              status: "error",
+              errorMessage: errMsg,
+              fullText: text,
+            });
+            setDebugInfo((prev) => ({
+              ...prev,
+              pipelineStatus: "error",
+              lastError: errMsg,
+            }));
+          } else {
+            console.log(`[AUDIO] Ignoring play() error - hasStarted=${hasStartedPlaybackRef.current} isInterrupted=${isInterrupted}`);
           }
-        }, 400);
+        }
 
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") {
           return;
         }
-        console.warn("TTS error:", err);
-        setIsSpeaking(false);
-        // On error, reveal text immediately
-        updateMessageById(messageId, { state: "done" });
+
+        // This catch handles TTS fetch errors, not audio playback errors
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
+        console.warn("TTS fetch error:", err);
+
+        updateMessageById(messageId, {
+          status: "error",
+          errorMessage,
+          fullText: text, // Store for "Show Text" fallback
+        });
+        setDebugInfo((prev) => ({
+          ...prev,
+          pipelineStatus: "error",
+          lastError: errorMessage,
+        }));
       }
     },
-    [stopSpeaking, showTextInstantly, updateMessageById]
+    [cleanupAudio, showTextInstantly, updateMessageById]
   );
 
-  // Create assistant message and speak it (single entry point)
+  // Create assistant message placeholder (voice-first: no text content)
   const addAssistantMessage = useCallback(
     (text: string, shouldSpeak: boolean = true) => {
       const messageId = generateMessageId();
-      const initialState: MessageState = shouldSpeak && !showTextInstantly ? "speaking" : "done";
 
+      // VOICE-FIRST: Message starts with EMPTY fullText and revealedText
+      // Text only appears after audio.onplay fires
       const newMessage: Message = {
         id: messageId,
         role: "assistant",
-        content: text,
-        state: initialState,
+        fullText: "", // EMPTY - will be set on audio.onplay
+        revealedText: "", // EMPTY - will be populated by RAF loop
+        status: shouldSpeak && !showTextInstantly ? "requesting" : "done",
+        audioUrl: null,
+        duration: null,
+        errorMessage: null,
       };
+
+      // For instant mode, populate immediately
+      if (!shouldSpeak || showTextInstantly) {
+        newMessage.fullText = text;
+        newMessage.revealedText = text;
+        newMessage.status = "done";
+      }
 
       setMessages((prev) => [...prev, newMessage]);
 
       if (shouldSpeak) {
-        // Use setTimeout to ensure message is in state before TTS starts
-        setTimeout(() => speakAssistantMessage(text, messageId), 0);
+        // Process through voice pipeline (will store text in refs, not state)
+        setTimeout(() => processAssistantMessage(text, messageId), 0);
       }
 
       return messageId;
     },
-    [showTextInstantly, speakAssistantMessage]
+    [showTextInstantly, processAssistantMessage]
   );
 
-  // STT hook - manual start/stop, no auto-cutoff
+  // Retry failed audio
+  const retryAudio = useCallback((messageId: string) => {
+    const msg = messages.find((m) => m.id === messageId);
+    if (msg && msg.fullText) {
+      // Reset state and retry
+      playedMessageIdsRef.current.delete(messageId);
+      updateMessageById(messageId, {
+        status: "requesting",
+        revealedText: "",
+        errorMessage: null,
+      });
+      processAssistantMessage(msg.fullText, messageId);
+    }
+  }, [messages, updateMessageById, processAssistantMessage]);
+
+  // Show text fallback for error state
+  const showTextFallback = useCallback((messageId: string) => {
+    const msg = messages.find((m) => m.id === messageId);
+    if (msg && msg.fullText) {
+      updateMessageById(messageId, {
+        status: "done",
+        revealedText: msg.fullText,
+      });
+      setDebugInfo((prev) => ({ ...prev, pipelineStatus: "done" }));
+    }
+  }, [messages, updateMessageById]);
+
+  // STT hook
   const stt = useSTT({
     onRecordingComplete: (transcript) => {
       if (transcript) {
@@ -261,19 +499,16 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     onError: (err) => setError(err),
   });
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Start the week conversation on mount (guarded against StrictMode double-invoke)
+  // Start week conversation (guarded against StrictMode)
   const startWeekCalledRef = useRef(false);
 
   useEffect(() => {
-    // Guard against StrictMode double-invocation
-    if (startWeekCalledRef.current) {
-      return;
-    }
+    if (startWeekCalledRef.current) return;
     startWeekCalledRef.current = true;
 
     async function startWeek() {
@@ -284,34 +519,46 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
           body: JSON.stringify({ event: "start_week", week }),
         });
 
-        if (!res.ok) {
-          throw new Error("Failed to start conversation");
-        }
+        if (!res.ok) throw new Error("Failed to start conversation");
 
         const data = await res.json();
 
-        // Load history with proper IDs
         if (data.history && data.history.length > 0) {
-          const historyWithIds: Message[] = data.history.map(
+          // Load history - previous messages shown as done, last assistant spoken
+          const historyMsgs = data.history.slice(0, -1).map(
             (msg: { role: "user" | "assistant"; content: string }, idx: number) => ({
               id: `history_${idx}`,
               role: msg.role,
-              content: msg.content,
-              state: "done" as MessageState,
+              fullText: msg.content,
+              revealedText: msg.content, // History is fully revealed
+              status: "done" as AssistantPipelineStatus,
+              audioUrl: null,
+              duration: null,
+              errorMessage: null,
             })
           );
 
-          // Show all but last message immediately
-          const lastMsg = historyWithIds[historyWithIds.length - 1];
-          const previousMsgs = historyWithIds.slice(0, -1);
+          const lastMsg = data.history[data.history.length - 1];
+          setMessages(historyMsgs);
 
+          // Speak the last assistant message through voice-first pipeline
           if (lastMsg.role === "assistant") {
-            // Set previous messages first
-            setMessages(previousMsgs);
-            // Then add and speak the last assistant message
             setTimeout(() => addAssistantMessage(lastMsg.content, true), 300);
           } else {
-            setMessages(historyWithIds);
+            // Last message is user, just add it
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: `history_${data.history.length - 1}`,
+                role: lastMsg.role,
+                fullText: lastMsg.content,
+                revealedText: lastMsg.content,
+                status: "done" as AssistantPipelineStatus,
+                audioUrl: null,
+                duration: null,
+                errorMessage: null,
+              },
+            ]);
           }
         }
       } catch (err) {
@@ -325,14 +572,13 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     startWeek();
   }, [week, addAssistantMessage]);
 
-  // Focus input after loading
+  // Focus management
   useEffect(() => {
     if (!isLoading && !isReviewingTranscript && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isLoading, isReviewingTranscript]);
 
-  // Focus transcript input when reviewing
   useEffect(() => {
     if (isReviewingTranscript && transcriptInputRef.current) {
       transcriptInputRef.current.focus();
@@ -340,19 +586,18 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     }
   }, [isReviewingTranscript]);
 
-  // Cancel TTS when user starts typing
+  // Handle input change (barge-in)
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const value = e.target.value;
-      setInput(value);
-      if (value && isSpeaking) {
+      setInput(e.target.value);
+      if (e.target.value && debugInfo.audioPlaying) {
         stopSpeaking();
       }
     },
-    [isSpeaking, stopSpeaking]
+    [debugInfo.audioPlaying, stopSpeaking]
   );
 
-  // Submit message function
+  // Submit message
   const submitMessage = useCallback(
     async (messageText: string) => {
       const trimmedInput = messageText.trim();
@@ -362,12 +607,16 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
       setIsSending(true);
       setError(null);
 
-      // Add user message with ID
       const userMessageId = generateMessageId();
       const userMessage: Message = {
         id: userMessageId,
         role: "user",
-        content: trimmedInput,
+        fullText: trimmedInput,
+        revealedText: trimmedInput,
+        status: "done",
+        audioUrl: null,
+        duration: null,
+        errorMessage: null,
       };
       setMessages((prev) => [...prev, userMessage]);
 
@@ -382,16 +631,12 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
           }),
         });
 
-        if (!res.ok) {
-          throw new Error("Failed to send message");
-        }
+        if (!res.ok) throw new Error("Failed to send message");
 
         const data = await res.json();
-        // Add and speak assistant response (single message creation point)
         addAssistantMessage(data.response, true);
       } catch (err) {
         setError("Failed to send message. Please try again.");
-        // Remove the user message on error
         setMessages((prev) => prev.filter((m) => m.id !== userMessageId));
         console.error("Send message error:", err);
       } finally {
@@ -402,9 +647,9 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     [week, isSending, addAssistantMessage]
   );
 
-  async function handleSubmit(e: FormEvent) {
+  function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    await submitMessage(input);
+    submitMessage(input);
   }
 
   async function handleEndWeek() {
@@ -416,15 +661,10 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ event: "end_week", week }),
       });
-
-      if (!res.ok) {
-        throw new Error("Failed to complete week");
-      }
-
+      if (!res.ok) throw new Error("Failed to complete week");
       router.push("/home");
     } catch (err) {
       setError("Failed to mark week complete. Please try again.");
-      console.error("End week error:", err);
       setIsLoading(false);
     }
   }
@@ -436,18 +676,15 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     }
   }
 
-  // Start recording (barge-in: stop audio first)
   function startRecording() {
-    stopSpeaking(); // Barge-in: stop audio when user starts recording
+    stopSpeaking();
     stt.startListening();
   }
 
-  // Stop recording (goes to review step)
   function stopRecording() {
     stt.stopListening();
   }
 
-  // Send reviewed transcript
   function sendTranscript() {
     const text = editableTranscript.trim();
     if (text && countWords(text) >= MIN_TRANSCRIPT_WORDS) {
@@ -458,7 +695,6 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     }
   }
 
-  // Record again
   function recordAgain() {
     setIsReviewingTranscript(false);
     setEditableTranscript("");
@@ -466,14 +702,12 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     startRecording();
   }
 
-  // Cancel review
   function cancelReview() {
     setIsReviewingTranscript(false);
     setEditableTranscript("");
     stt.resetTranscript();
   }
 
-  // Clear errors
   function clearError() {
     setError(null);
     stt.clearError();
@@ -484,6 +718,15 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
 
   return (
     <main className="flex min-h-screen flex-col bg-neutral-900 text-white">
+      {/* Debug Badge */}
+      <div className="fixed top-2 right-2 z-50 rounded bg-black/80 px-2 py-1 text-[10px] font-mono text-white/70">
+        <div>Week: {week}</div>
+        <div>Status: {debugInfo.pipelineStatus}</div>
+        <div>Audio: {debugInfo.audioReady ? "ready" : "no"} | {debugInfo.audioPlaying ? "playing" : "stopped"}</div>
+        <div>Text: {debugInfo.revealedLength}/{debugInfo.fullTextLength}</div>
+        {debugInfo.lastError && <div className="text-red-400">Err: {debugInfo.lastError}</div>}
+      </div>
+
       {/* Header */}
       <header className="border-b border-white/10 px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
@@ -494,7 +737,6 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
             <h1 className="text-lg font-semibold text-white">{weekTitle}</h1>
           </div>
           <div className="flex items-center gap-3">
-            {/* Accessibility toggle */}
             <label className="flex items-center gap-2 text-xs text-white/50 cursor-pointer">
               <input
                 type="checkbox"
@@ -507,7 +749,7 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
             <button
               onClick={handleEndWeek}
               disabled={isLoading}
-              className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/60 transition hover:border-white/30 hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
+              className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/60 transition hover:border-white/30 hover:text-white/80 disabled:opacity-50"
             >
               Complete & Return
             </button>
@@ -528,7 +770,12 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
           ) : (
             <>
               {messages.map((message) => (
-                <MessageBubble key={message.id} message={message} />
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  onRetry={() => retryAudio(message.id)}
+                  onShowText={() => showTextFallback(message.id)}
+                />
               ))}
               {isSending && (
                 <div className="flex justify-start">
@@ -543,16 +790,12 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
         </div>
       </div>
 
-      {/* Error message */}
+      {/* Error bar */}
       {(error || stt.error) && (
         <div className="border-t border-red-500/20 bg-red-500/10 px-6 py-3">
           <div className="mx-auto flex max-w-3xl items-center justify-between">
             <p className="text-sm text-red-400">{error || stt.error}</p>
-            <button
-              onClick={clearError}
-              className="text-xs text-red-400/70 hover:text-red-400"
-              aria-label="Dismiss error"
-            >
+            <button onClick={clearError} className="text-xs text-red-400/70 hover:text-red-400">
               Dismiss
             </button>
           </div>
@@ -579,15 +822,13 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
               </button>
             </div>
             {stt.currentTranscript && (
-              <p className="mt-3 text-sm text-white/60 italic">
-                "{stt.currentTranscript}"
-              </p>
+              <p className="mt-3 text-sm text-white/60 italic">"{stt.currentTranscript}"</p>
             )}
           </div>
         </div>
       )}
 
-      {/* Transcript review step */}
+      {/* Transcript review */}
       {isReviewingTranscript && (
         <div className="border-t border-blue-500/20 bg-blue-500/10 px-6 py-4">
           <div className="mx-auto max-w-3xl space-y-3">
@@ -604,22 +845,14 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
               <div className="text-xs text-white/50">
                 {wordCount} word{wordCount !== 1 ? "s" : ""}
                 {!canSendTranscript && (
-                  <span className="ml-2 text-yellow-400">
-                    (minimum {MIN_TRANSCRIPT_WORDS} words)
-                  </span>
+                  <span className="ml-2 text-yellow-400">(minimum {MIN_TRANSCRIPT_WORDS} words)</span>
                 )}
               </div>
               <div className="flex gap-2">
-                <button
-                  onClick={cancelReview}
-                  className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/20 transition"
-                >
+                <button onClick={cancelReview} className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/20 transition">
                   Cancel
                 </button>
-                <button
-                  onClick={recordAgain}
-                  className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition"
-                >
+                <button onClick={recordAgain} className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition">
                   Record Again
                 </button>
                 <button
@@ -635,7 +868,7 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
         </div>
       )}
 
-      {/* Input (hidden during recording/review) */}
+      {/* Input */}
       {!stt.isListening && !isReviewingTranscript && (
         <div className="border-t border-white/10 px-6 py-4">
           <form onSubmit={handleSubmit} className="mx-auto max-w-3xl">
@@ -649,13 +882,11 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
                 disabled={isLoading || isSending}
                 rows={1}
                 className="flex-1 resize-none rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-white placeholder-white/40 focus:border-white/30 focus:outline-none disabled:opacity-50"
-                aria-label="Message input"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || isLoading || isSending}
-                className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
-                aria-label="Send message"
+                className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 disabled:opacity-50"
               >
                 <SendIcon />
               </button>
@@ -664,8 +895,7 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
                   type="button"
                   onClick={startRecording}
                   disabled={isLoading || isSending}
-                  className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
-                  aria-label="Start recording"
+                  className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 disabled:opacity-50"
                 >
                   <MicIcon />
                 </button>
@@ -673,17 +903,14 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
               <button
                 type="button"
                 onClick={stopSpeaking}
-                disabled={!isSpeaking}
-                className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
-                aria-label="Stop Skippy speaking"
+                disabled={!debugInfo.audioPlaying}
+                className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 disabled:opacity-50"
               >
                 <StopIcon />
               </button>
             </div>
             <p className="mt-2 text-xs text-white/30">
-              {stt.isSupported
-                ? "Type, press Cmd+Enter, or tap Record to speak"
-                : "Press Cmd+Enter to send"}
+              {stt.isSupported ? "Type, press Cmd+Enter, or tap Record to speak" : "Press Cmd+Enter to send"}
             </p>
           </form>
         </div>
@@ -692,33 +919,93 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
   );
 }
 
-function MessageBubble({ message }: { message: Message }) {
+// =============================================================================
+// MESSAGE BUBBLE - STRICT VOICE-FIRST RENDERING
+// =============================================================================
+
+type MessageBubbleProps = {
+  message: Message;
+  onRetry: () => void;
+  onShowText: () => void;
+};
+
+function MessageBubble({ message, onRetry, onShowText }: MessageBubbleProps) {
   const isUser = message.role === "user";
-  const isSpeaking = message.state === "speaking";
+  const { status, revealedText, fullText } = message;
+
+  // STRICT RULES:
+  // - User messages: always show fullText
+  // - Assistant requesting/audio_ready: show ONLY placeholder, NO text
+  // - Assistant playing: show ONLY revealedText (may be empty at start)
+  // - Assistant done: show revealedText (which equals fullText)
+  // - Assistant error: show error UI with Retry + Show Text buttons
+
+  if (isUser) {
+    return (
+      <div className="flex justify-end">
+        <div className="max-w-[85%] rounded-2xl rounded-br-md bg-blue-600 px-4 py-3 text-white">
+          <div className="whitespace-pre-wrap text-[0.95rem] leading-relaxed">{fullText}</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Assistant message - voice-first rendering
+  const showPlaceholder = status === "requesting" || status === "audio_ready";
+  const isRevealing = status === "playing";
+  const isError = status === "error";
+  const isDone = status === "done";
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-          isUser
-            ? "rounded-br-md bg-blue-600 text-white"
-            : "rounded-bl-md bg-white/[0.06] text-white/90"
-        }`}
-      >
-        {isSpeaking ? (
+    <div className="flex justify-start">
+      <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-white/[0.06] px-4 py-3 text-white/90">
+        {showPlaceholder && (
           <div className="flex items-center gap-2 text-white/70">
             <SpeakingIndicator />
-            <span>Skippy is speaking...</span>
+            <span>Skippy is preparing...</span>
           </div>
-        ) : (
+        )}
+
+        {isRevealing && (
           <div className="whitespace-pre-wrap text-[0.95rem] leading-relaxed">
-            {message.content}
+            {revealedText || <span className="text-white/50">...</span>}
+            <span className="animate-pulse">▌</span>
+          </div>
+        )}
+
+        {isDone && (
+          <div className="whitespace-pre-wrap text-[0.95rem] leading-relaxed">
+            {revealedText}
+          </div>
+        )}
+
+        {isError && (
+          <div className="space-y-2">
+            <p className="text-red-400 text-sm">{message.errorMessage || "Audio failed to load"}</p>
+            <div className="flex gap-2">
+              <button
+                onClick={onRetry}
+                className="rounded bg-white/10 px-3 py-1 text-xs font-medium text-white hover:bg-white/20 transition"
+              >
+                Try Again
+              </button>
+              <button
+                onClick={onShowText}
+                className="rounded bg-white/10 px-3 py-1 text-xs font-medium text-white/70 hover:bg-white/20 transition"
+              >
+                Show Text
+              </button>
+            </div>
           </div>
         )}
       </div>
     </div>
   );
 }
+
+// =============================================================================
+// HELPER COMPONENTS
+// =============================================================================
 
 function LoadingDots() {
   return (
@@ -731,11 +1018,7 @@ function LoadingDots() {
 }
 
 function RecordingIndicator() {
-  return (
-    <div className="flex items-center gap-1">
-      <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse" />
-    </div>
-  );
+  return <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse" />;
 }
 
 function SpeakingIndicator() {
@@ -754,53 +1037,25 @@ function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
-// Icons
 function SendIcon() {
   return (
-    <svg
-      className="h-5 w-5"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-      />
+    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
     </svg>
   );
 }
 
 function MicIcon() {
   return (
-    <svg
-      className="h-5 w-5"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-      />
+    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
     </svg>
   );
 }
 
 function StopIcon() {
   return (
-    <svg
-      className="h-5 w-5"
-      fill="currentColor"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
+    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
       <rect x="6" y="6" width="12" height="12" rx="2" />
     </svg>
   );
