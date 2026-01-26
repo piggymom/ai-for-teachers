@@ -2,11 +2,16 @@
 
 import { useState, useEffect, useRef, FormEvent, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useTTS, useSTT } from "@/lib/useVoice";
+import { useSTT, formatTime } from "@/lib/useVoice";
+
+// Message with stable ID and state for update-in-place rendering
+type MessageState = "speaking" | "ready" | "done";
 
 type Message = {
+  id: string;
   role: "user" | "assistant";
   content: string;
+  state?: MessageState; // Only used for assistant messages
 };
 
 type SkippyChatProps = {
@@ -14,45 +19,243 @@ type SkippyChatProps = {
   weekTitle: string;
 };
 
+// Minimum words required for a valid transcript
+const MIN_TRANSCRIPT_WORDS = 3;
+
+// Generate unique message ID
+let messageIdCounter = 0;
+function generateMessageId(): string {
+  return `msg_${Date.now()}_${++messageIdCounter}`;
+}
+
 export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showTextInstantly, setShowTextInstantly] = useState(false); // Accessibility toggle
+
+  // Recording review state
+  const [isReviewingTranscript, setIsReviewingTranscript] = useState(false);
+  const [editableTranscript, setEditableTranscript] = useState("");
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const pendingMessageRef = useRef<string | null>(null);
+  const transcriptInputRef = useRef<HTMLTextAreaElement>(null);
 
-  // TTS hook
-  const tts = useTTS({
-    onError: (err) => console.warn("TTS error:", err),
-  });
+  // TTS Manager refs - prevents double playback and handles cleanup
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
+  const currentMessageIdRef = useRef<string | null>(null);
+  const playedMessageIdsRef = useRef<Set<string>>(new Set());
+  const ttsAbortControllerRef = useRef<AbortController | null>(null);
+  const textRevealTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // STT hook with auto-submit on final transcript
-  const stt = useSTT({
-    onResult: (transcript, isFinal) => {
-      if (isFinal) {
-        // Store the final transcript for submission
-        pendingMessageRef.current = transcript;
-      } else {
-        // Show interim transcript in input field
-        setInput(transcript);
+  // Update a message by ID (for in-place updates)
+  const updateMessageById = useCallback((id: string, updates: Partial<Message>) => {
+    setMessages((prev) =>
+      prev.map((msg) => (msg.id === id ? { ...msg, ...updates } : msg))
+    );
+  }, []);
+
+  // Initialize audio element on mount (no state in callbacks - use refs)
+  useEffect(() => {
+    const audio = new Audio();
+    audioRef.current = audio;
+
+    audio.onplay = () => {
+      setIsSpeaking(true);
+    };
+
+    audio.onended = () => {
+      setIsSpeaking(false);
+      const msgId = currentMessageIdRef.current;
+      if (msgId) {
+        updateMessageById(msgId, { state: "done" });
+      }
+    };
+
+    audio.onpause = () => setIsSpeaking(false);
+
+    audio.onerror = () => {
+      setIsSpeaking(false);
+      const msgId = currentMessageIdRef.current;
+      if (msgId) {
+        // On error, reveal text immediately
+        updateMessageById(msgId, { state: "done" });
+      }
+      console.warn("Audio playback error");
+    };
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.onplay = null;
+        audioRef.current.onended = null;
+        audioRef.current.onpause = null;
+        audioRef.current.onerror = null;
+        audioRef.current = null;
+      }
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+      }
+      if (ttsAbortControllerRef.current) {
+        ttsAbortControllerRef.current.abort();
+      }
+      if (textRevealTimeoutRef.current) {
+        clearTimeout(textRevealTimeoutRef.current);
+      }
+    };
+  }, [updateMessageById]);
+
+  // Stop speaking and cleanup
+  const stopSpeaking = useCallback(() => {
+    // Cancel any in-flight TTS request
+    if (ttsAbortControllerRef.current) {
+      ttsAbortControllerRef.current.abort();
+      ttsAbortControllerRef.current = null;
+    }
+
+    // Clear text reveal timeout
+    if (textRevealTimeoutRef.current) {
+      clearTimeout(textRevealTimeoutRef.current);
+      textRevealTimeoutRef.current = null;
+    }
+
+    // Stop and cleanup audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current.src = "";
+    }
+
+    // Cleanup URL
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
+
+    setIsSpeaking(false);
+  }, []);
+
+  // Speak assistant message with idempotency and proper state management
+  const speakAssistantMessage = useCallback(
+    async (text: string, messageId: string) => {
+      // Idempotency check - don't play if already played
+      if (playedMessageIdsRef.current.has(messageId)) {
+        return;
+      }
+
+      // Stop any existing audio/request
+      stopSpeaking();
+
+      // Mark this message as current
+      currentMessageIdRef.current = messageId;
+
+      // Mark as played immediately to prevent double-invocation
+      playedMessageIdsRef.current.add(messageId);
+
+      // If accessibility mode, reveal text immediately and skip TTS
+      if (showTextInstantly) {
+        updateMessageById(messageId, { state: "done" });
+        return;
+      }
+
+      try {
+        // Create abort controller for this request
+        const abortController = new AbortController();
+        ttsAbortControllerRef.current = abortController;
+
+        const res = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+          signal: abortController.signal,
+        });
+
+        if (!res.ok) {
+          throw new Error("TTS request failed");
+        }
+
+        // Check if we were aborted during fetch
+        if (abortController.signal.aborted) {
+          return;
+        }
+
+        const audioBlob = await res.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        // Cleanup previous URL
+        if (audioUrlRef.current) {
+          URL.revokeObjectURL(audioUrlRef.current);
+        }
+        audioUrlRef.current = audioUrl;
+
+        // Check if this is still the current message (might have changed)
+        if (currentMessageIdRef.current !== messageId) {
+          URL.revokeObjectURL(audioUrl);
+          return;
+        }
+
+        if (!audioRef.current) return;
+
+        audioRef.current.src = audioUrl;
+        await audioRef.current.play();
+
+        // Reveal text 400ms after audio starts playing
+        textRevealTimeoutRef.current = setTimeout(() => {
+          if (currentMessageIdRef.current === messageId) {
+            updateMessageById(messageId, { state: "ready" });
+          }
+        }, 400);
+
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+        console.warn("TTS error:", err);
+        setIsSpeaking(false);
+        // On error, reveal text immediately
+        updateMessageById(messageId, { state: "done" });
       }
     },
-    onStart: () => {
-      // Cancel any ongoing TTS when user starts talking
-      tts.cancel();
+    [stopSpeaking, showTextInstantly, updateMessageById]
+  );
+
+  // Create assistant message and speak it (single entry point)
+  const addAssistantMessage = useCallback(
+    (text: string, shouldSpeak: boolean = true) => {
+      const messageId = generateMessageId();
+      const initialState: MessageState = shouldSpeak && !showTextInstantly ? "speaking" : "done";
+
+      const newMessage: Message = {
+        id: messageId,
+        role: "assistant",
+        content: text,
+        state: initialState,
+      };
+
+      setMessages((prev) => [...prev, newMessage]);
+
+      if (shouldSpeak) {
+        // Use setTimeout to ensure message is in state before TTS starts
+        setTimeout(() => speakAssistantMessage(text, messageId), 0);
+      }
+
+      return messageId;
     },
-    onEnd: () => {
-      // Submit the pending message if we have one
-      if (pendingMessageRef.current) {
-        const message = pendingMessageRef.current;
-        pendingMessageRef.current = null;
-        setInput(message);
-        // Use setTimeout to ensure state is updated before submission
-        setTimeout(() => submitMessage(message), 0);
+    [showTextInstantly, speakAssistantMessage]
+  );
+
+  // STT hook - manual start/stop, no auto-cutoff
+  const stt = useSTT({
+    onRecordingComplete: (transcript) => {
+      if (transcript) {
+        setEditableTranscript(transcript);
+        setIsReviewingTranscript(true);
       }
     },
     onError: (err) => setError(err),
@@ -63,20 +266,16 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Speak new assistant messages
-  const lastMessageCountRef = useRef(0);
-  useEffect(() => {
-    if (messages.length > lastMessageCountRef.current) {
-      const newMessage = messages[messages.length - 1];
-      if (newMessage.role === "assistant") {
-        tts.speak(newMessage.content);
-      }
-    }
-    lastMessageCountRef.current = messages.length;
-  }, [messages, tts]);
+  // Start the week conversation on mount (guarded against StrictMode double-invoke)
+  const startWeekCalledRef = useRef(false);
 
-  // Start the week conversation on mount
   useEffect(() => {
+    // Guard against StrictMode double-invocation
+    if (startWeekCalledRef.current) {
+      return;
+    }
+    startWeekCalledRef.current = true;
+
     async function startWeek() {
       try {
         const res = await fetch("/api/skippy", {
@@ -90,7 +289,31 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
         }
 
         const data = await res.json();
-        setMessages(data.history);
+
+        // Load history with proper IDs
+        if (data.history && data.history.length > 0) {
+          const historyWithIds: Message[] = data.history.map(
+            (msg: { role: "user" | "assistant"; content: string }, idx: number) => ({
+              id: `history_${idx}`,
+              role: msg.role,
+              content: msg.content,
+              state: "done" as MessageState,
+            })
+          );
+
+          // Show all but last message immediately
+          const lastMsg = historyWithIds[historyWithIds.length - 1];
+          const previousMsgs = historyWithIds.slice(0, -1);
+
+          if (lastMsg.role === "assistant") {
+            // Set previous messages first
+            setMessages(previousMsgs);
+            // Then add and speak the last assistant message
+            setTimeout(() => addAssistantMessage(lastMsg.content, true), 300);
+          } else {
+            setMessages(historyWithIds);
+          }
+        }
       } catch (err) {
         setError("Failed to load conversation. Please refresh the page.");
         console.error("Start week error:", err);
@@ -100,29 +323,36 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     }
 
     startWeek();
-  }, [week]);
+  }, [week, addAssistantMessage]);
 
   // Focus input after loading
   useEffect(() => {
-    if (!isLoading && inputRef.current) {
+    if (!isLoading && !isReviewingTranscript && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [isLoading]);
+  }, [isLoading, isReviewingTranscript]);
+
+  // Focus transcript input when reviewing
+  useEffect(() => {
+    if (isReviewingTranscript && transcriptInputRef.current) {
+      transcriptInputRef.current.focus();
+      transcriptInputRef.current.select();
+    }
+  }, [isReviewingTranscript]);
 
   // Cancel TTS when user starts typing
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
       setInput(value);
-      // Cancel speech if user starts typing manually
-      if (value && tts.isSpeaking) {
-        tts.cancel();
+      if (value && isSpeaking) {
+        stopSpeaking();
       }
     },
-    [tts]
+    [isSpeaking, stopSpeaking]
   );
 
-  // Submit message function (shared between form submit and voice input)
+  // Submit message function
   const submitMessage = useCallback(
     async (messageText: string) => {
       const trimmedInput = messageText.trim();
@@ -132,8 +362,13 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
       setIsSending(true);
       setError(null);
 
-      // Optimistically add user message
-      const userMessage: Message = { role: "user", content: trimmedInput };
+      // Add user message with ID
+      const userMessageId = generateMessageId();
+      const userMessage: Message = {
+        id: userMessageId,
+        role: "user",
+        content: trimmedInput,
+      };
       setMessages((prev) => [...prev, userMessage]);
 
       try {
@@ -152,22 +387,19 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
         }
 
         const data = await res.json();
-        const assistantMessage: Message = {
-          role: "assistant",
-          content: data.response,
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
+        // Add and speak assistant response (single message creation point)
+        addAssistantMessage(data.response, true);
       } catch (err) {
         setError("Failed to send message. Please try again.");
-        // Remove optimistic message on error
-        setMessages((prev) => prev.slice(0, -1));
+        // Remove the user message on error
+        setMessages((prev) => prev.filter((m) => m.id !== userMessageId));
         console.error("Send message error:", err);
       } finally {
         setIsSending(false);
         inputRef.current?.focus();
       }
     },
-    [week, isSending]
+    [week, isSending, addAssistantMessage]
   );
 
   async function handleSubmit(e: FormEvent) {
@@ -176,7 +408,7 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
   }
 
   async function handleEndWeek() {
-    tts.cancel(); // Stop any speech before navigating
+    stopSpeaking();
     setIsLoading(true);
     try {
       const res = await fetch("/api/skippy", {
@@ -197,7 +429,6 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     }
   }
 
-  // Handle Cmd/Ctrl + Enter to submit
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
       e.preventDefault();
@@ -205,26 +436,51 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     }
   }
 
-  // Toggle voice recording
-  function toggleListening() {
-    if (stt.isListening) {
-      stt.stopListening();
-    } else {
-      tts.cancel(); // Cancel speech before starting to listen
-      stt.startListening();
+  // Start recording (barge-in: stop audio first)
+  function startRecording() {
+    stopSpeaking(); // Barge-in: stop audio when user starts recording
+    stt.startListening();
+  }
+
+  // Stop recording (goes to review step)
+  function stopRecording() {
+    stt.stopListening();
+  }
+
+  // Send reviewed transcript
+  function sendTranscript() {
+    const text = editableTranscript.trim();
+    if (text && countWords(text) >= MIN_TRANSCRIPT_WORDS) {
+      setIsReviewingTranscript(false);
+      setEditableTranscript("");
+      stt.resetTranscript();
+      submitMessage(text);
     }
   }
 
-  // Stop TTS
-  function handleStop() {
-    tts.cancel();
+  // Record again
+  function recordAgain() {
+    setIsReviewingTranscript(false);
+    setEditableTranscript("");
+    stt.resetTranscript();
+    startRecording();
   }
 
-  // Clear STT error
+  // Cancel review
+  function cancelReview() {
+    setIsReviewingTranscript(false);
+    setEditableTranscript("");
+    stt.resetTranscript();
+  }
+
+  // Clear errors
   function clearError() {
     setError(null);
     stt.clearError();
   }
+
+  const wordCount = countWords(editableTranscript);
+  const canSendTranscript = wordCount >= MIN_TRANSCRIPT_WORDS;
 
   return (
     <main className="flex min-h-screen flex-col bg-neutral-900 text-white">
@@ -237,13 +493,25 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
             </p>
             <h1 className="text-lg font-semibold text-white">{weekTitle}</h1>
           </div>
-          <button
-            onClick={handleEndWeek}
-            disabled={isLoading}
-            className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/60 transition hover:border-white/30 hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
-          >
-            Complete & Return
-          </button>
+          <div className="flex items-center gap-3">
+            {/* Accessibility toggle */}
+            <label className="flex items-center gap-2 text-xs text-white/50 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showTextInstantly}
+                onChange={(e) => setShowTextInstantly(e.target.checked)}
+                className="w-4 h-4 rounded bg-white/10 border-white/20"
+              />
+              Show text instantly
+            </label>
+            <button
+              onClick={handleEndWeek}
+              disabled={isLoading}
+              className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-white/60 transition hover:border-white/30 hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
+            >
+              Complete & Return
+            </button>
+          </div>
         </div>
       </header>
 
@@ -259,16 +527,8 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
             </div>
           ) : (
             <>
-              {messages.map((message, index) => (
-                <MessageBubble
-                  key={index}
-                  message={message}
-                  isSpeaking={
-                    tts.isSpeaking &&
-                    index === messages.length - 1 &&
-                    message.role === "assistant"
-                  }
-                />
+              {messages.map((message) => (
+                <MessageBubble key={message.id} message={message} />
               ))}
               {isSending && (
                 <div className="flex justify-start">
@@ -299,92 +559,142 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
         </div>
       )}
 
-      {/* Listening indicator */}
+      {/* Recording indicator */}
       {stt.isListening && (
-        <div className="border-t border-blue-500/20 bg-blue-500/10 px-6 py-3">
-          <div className="mx-auto flex max-w-3xl items-center gap-3">
-            <ListeningIndicator />
-            <span className="text-sm text-blue-400">
-              Listening...{" "}
-              {stt.interimTranscript && (
-                <span className="text-white/60">"{stt.interimTranscript}"</span>
-              )}
-            </span>
+        <div className="border-t border-red-500/20 bg-red-500/10 px-6 py-4">
+          <div className="mx-auto max-w-3xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <RecordingIndicator />
+                <div>
+                  <span className="text-sm font-medium text-red-400">Recording</span>
+                  <span className="ml-2 text-sm text-white/60">{formatTime(stt.elapsedTime)}</span>
+                </div>
+              </div>
+              <button
+                onClick={stopRecording}
+                className="rounded-lg bg-red-500/20 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/30 transition"
+              >
+                Stop Recording
+              </button>
+            </div>
+            {stt.currentTranscript && (
+              <p className="mt-3 text-sm text-white/60 italic">
+                "{stt.currentTranscript}"
+              </p>
+            )}
           </div>
         </div>
       )}
 
-      {/* Input */}
-      <div className="border-t border-white/10 px-6 py-4">
-        <form onSubmit={handleSubmit} className="mx-auto max-w-3xl">
-          <div className="flex gap-2">
+      {/* Transcript review step */}
+      {isReviewingTranscript && (
+        <div className="border-t border-blue-500/20 bg-blue-500/10 px-6 py-4">
+          <div className="mx-auto max-w-3xl space-y-3">
+            <p className="text-sm font-medium text-blue-400">Review your message</p>
             <textarea
-              ref={inputRef}
-              value={input}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              placeholder={
-                stt.isListening ? "Listening..." : "Type or tap Talk..."
-              }
-              disabled={isLoading || isSending || stt.isListening}
-              rows={1}
-              className="flex-1 resize-none rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-white placeholder-white/40 focus:border-white/30 focus:outline-none disabled:opacity-50"
-              aria-label="Message input"
+              ref={transcriptInputRef}
+              value={editableTranscript}
+              onChange={(e) => setEditableTranscript(e.target.value)}
+              rows={3}
+              className="w-full resize-none rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-white placeholder-white/40 focus:border-white/30 focus:outline-none"
+              placeholder="Your message..."
             />
-            <button
-              type="submit"
-              disabled={!input.trim() || isLoading || isSending}
-              className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
-              aria-label="Send message"
-            >
-              <SendIcon />
-            </button>
-            {stt.isSupported && (
-              <button
-                type="button"
-                onClick={toggleListening}
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-white/50">
+                {wordCount} word{wordCount !== 1 ? "s" : ""}
+                {!canSendTranscript && (
+                  <span className="ml-2 text-yellow-400">
+                    (minimum {MIN_TRANSCRIPT_WORDS} words)
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={cancelReview}
+                  className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/20 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={recordAgain}
+                  className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition"
+                >
+                  Record Again
+                </button>
+                <button
+                  onClick={sendTranscript}
+                  disabled={!canSendTranscript}
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Send
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Input (hidden during recording/review) */}
+      {!stt.isListening && !isReviewingTranscript && (
+        <div className="border-t border-white/10 px-6 py-4">
+          <form onSubmit={handleSubmit} className="mx-auto max-w-3xl">
+            <div className="flex gap-2">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Type or tap Record..."
                 disabled={isLoading || isSending}
-                className={`rounded-xl px-4 py-3 font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50 ${
-                  stt.isListening
-                    ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
-                    : "bg-white/10 text-white hover:bg-white/20"
-                }`}
-                aria-label={stt.isListening ? "Stop listening" : "Start voice input"}
+                rows={1}
+                className="flex-1 resize-none rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-white placeholder-white/40 focus:border-white/30 focus:outline-none disabled:opacity-50"
+                aria-label="Message input"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || isLoading || isSending}
+                className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
+                aria-label="Send message"
               >
-                <MicIcon isActive={stt.isListening} />
+                <SendIcon />
               </button>
-            )}
-            {tts.isSupported && (
+              {stt.isSupported && (
+                <button
+                  type="button"
+                  onClick={startRecording}
+                  disabled={isLoading || isSending}
+                  className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
+                  aria-label="Start recording"
+                >
+                  <MicIcon />
+                </button>
+              )}
               <button
                 type="button"
-                onClick={handleStop}
-                disabled={!tts.isSpeaking}
+                onClick={stopSpeaking}
+                disabled={!isSpeaking}
                 className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 disabled:opacity-50"
                 aria-label="Stop Skippy speaking"
               >
                 <StopIcon />
               </button>
-            )}
-          </div>
-          <p className="mt-2 text-xs text-white/30">
-            {stt.isSupported
-              ? "Type, press Cmd+Enter, or tap the mic to talk"
-              : "Press Cmd+Enter to send"}
-          </p>
-        </form>
-      </div>
+            </div>
+            <p className="mt-2 text-xs text-white/30">
+              {stt.isSupported
+                ? "Type, press Cmd+Enter, or tap Record to speak"
+                : "Press Cmd+Enter to send"}
+            </p>
+          </form>
+        </div>
+      )}
     </main>
   );
 }
 
-function MessageBubble({
-  message,
-  isSpeaking,
-}: {
-  message: Message;
-  isSpeaking?: boolean;
-}) {
+function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
+  const isSpeaking = message.state === "speaking";
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
@@ -395,13 +705,14 @@ function MessageBubble({
             : "rounded-bl-md bg-white/[0.06] text-white/90"
         }`}
       >
-        <div className="whitespace-pre-wrap text-[0.95rem] leading-relaxed">
-          {message.content}
-        </div>
-        {isSpeaking && (
-          <div className="mt-2 flex items-center gap-2 text-xs text-white/50">
+        {isSpeaking ? (
+          <div className="flex items-center gap-2 text-white/70">
             <SpeakingIndicator />
-            <span>Speaking...</span>
+            <span>Skippy is speaking...</span>
+          </div>
+        ) : (
+          <div className="whitespace-pre-wrap text-[0.95rem] leading-relaxed">
+            {message.content}
           </div>
         )}
       </div>
@@ -419,14 +730,10 @@ function LoadingDots() {
   );
 }
 
-function ListeningIndicator() {
+function RecordingIndicator() {
   return (
-    <div className="flex items-center gap-0.5">
-      <div className="h-3 w-1 animate-pulse rounded-full bg-blue-400 [animation-delay:-0.3s]" />
-      <div className="h-4 w-1 animate-pulse rounded-full bg-blue-400 [animation-delay:-0.15s]" />
-      <div className="h-3 w-1 animate-pulse rounded-full bg-blue-400" />
-      <div className="h-4 w-1 animate-pulse rounded-full bg-blue-400 [animation-delay:-0.15s]" />
-      <div className="h-3 w-1 animate-pulse rounded-full bg-blue-400 [animation-delay:-0.3s]" />
+    <div className="flex items-center gap-1">
+      <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse" />
     </div>
   );
 }
@@ -434,11 +741,17 @@ function ListeningIndicator() {
 function SpeakingIndicator() {
   return (
     <div className="flex items-center gap-0.5">
-      <div className="h-2 w-0.5 animate-pulse rounded-full bg-white/50 [animation-delay:-0.3s]" />
-      <div className="h-3 w-0.5 animate-pulse rounded-full bg-white/50 [animation-delay:-0.15s]" />
-      <div className="h-2 w-0.5 animate-pulse rounded-full bg-white/50" />
+      <div className="h-3 w-1 animate-pulse rounded-full bg-white/50 [animation-delay:-0.3s]" />
+      <div className="h-4 w-1 animate-pulse rounded-full bg-white/50 [animation-delay:-0.15s]" />
+      <div className="h-3 w-1 animate-pulse rounded-full bg-white/50" />
+      <div className="h-4 w-1 animate-pulse rounded-full bg-white/50 [animation-delay:-0.15s]" />
+      <div className="h-3 w-1 animate-pulse rounded-full bg-white/50 [animation-delay:-0.3s]" />
     </div>
   );
+}
+
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
 // Icons
@@ -461,11 +774,11 @@ function SendIcon() {
   );
 }
 
-function MicIcon({ isActive }: { isActive: boolean }) {
+function MicIcon() {
   return (
     <svg
       className="h-5 w-5"
-      fill={isActive ? "currentColor" : "none"}
+      fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
       aria-hidden="true"

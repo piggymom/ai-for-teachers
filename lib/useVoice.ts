@@ -33,121 +33,46 @@ declare global {
   }
 }
 
-// ==================== TTS Hook ====================
+// ==================== STT Hook (Chrome webkitSpeechRecognition) ====================
+// Manual tap-to-start, tap-to-stop with NO auto-stop on silence
+// Max duration: 90 seconds safety limit
 
-type UseTTSOptions = {
-  onStart?: () => void;
-  onEnd?: () => void;
-  onError?: (error: string) => void;
-};
-
-export function useTTS(options: UseTTSOptions = {}) {
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const [preferredVoice, setPreferredVoice] = useState<SpeechSynthesisVoice | null>(null);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-
-  // Load voices and select preferred Australian voice
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-
-    function loadVoices() {
-      const availableVoices = window.speechSynthesis.getVoices();
-      setVoices(availableVoices);
-
-      // Prefer Australian English, fallback to any English
-      const auVoice = availableVoices.find((v) => v.lang.startsWith("en-AU"));
-      const enVoice = availableVoices.find((v) => v.lang.startsWith("en-"));
-      setPreferredVoice(auVoice || enVoice || availableVoices[0] || null);
-    }
-
-    // Load immediately if voices are available
-    loadVoices();
-
-    // Chrome loads voices asynchronously
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-
-    return () => {
-      window.speechSynthesis.onvoiceschanged = null;
-    };
-  }, []);
-
-  const cancel = useCallback(() => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    setIsSpeaking(false);
-  }, []);
-
-  const speak = useCallback(
-    (text: string) => {
-      if (typeof window === "undefined" || !window.speechSynthesis) return;
-
-      // Always cancel any ongoing speech first
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utteranceRef.current = utterance;
-
-      // Set voice and warm delivery settings
-      if (preferredVoice) {
-        utterance.voice = preferredVoice;
-      }
-      utterance.rate = 0.95;
-      utterance.pitch = 0.95;
-      utterance.volume = 1;
-
-      utterance.onstart = () => {
-        setIsSpeaking(true);
-        options.onStart?.();
-      };
-
-      utterance.onend = () => {
-        setIsSpeaking(false);
-        options.onEnd?.();
-      };
-
-      utterance.onerror = (event) => {
-        setIsSpeaking(false);
-        // Don't report "interrupted" as an error - it's expected when we cancel
-        if (event.error !== "interrupted") {
-          options.onError?.(event.error);
-        }
-      };
-
-      window.speechSynthesis.speak(utterance);
-    },
-    [preferredVoice, options]
-  );
-
-  return {
-    speak,
-    cancel,
-    isSpeaking,
-    voices,
-    preferredVoice,
-    isSupported: typeof window !== "undefined" && !!window.speechSynthesis,
-  };
-}
-
-// ==================== STT Hook ====================
+const MAX_RECORDING_DURATION = 90000; // 90 seconds
 
 type UseSTTOptions = {
-  onResult?: (transcript: string, isFinal: boolean) => void;
+  onRecordingComplete?: (transcript: string) => void;
   onError?: (error: string) => void;
-  onStart?: () => void;
-  onEnd?: () => void;
 };
 
 export function useSTT(options: UseSTTOptions = {}) {
   const [isListening, setIsListening] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
+  const [finalTranscript, setFinalTranscript] = useState("");
+  const [elapsedTime, setElapsedTime] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const maxDurationRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number>(0);
+  const accumulatedTranscriptRef = useRef<string>("");
 
   // Check if speech recognition is supported
   const isSupported =
     typeof window !== "undefined" &&
     !!(window.webkitSpeechRecognition || window.SpeechRecognition);
+
+  // Clear all timers
+  const clearTimers = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (maxDurationRef.current) {
+      clearTimeout(maxDurationRef.current);
+      maxDurationRef.current = null;
+    }
+  }, []);
 
   // Initialize recognition
   useEffect(() => {
@@ -157,38 +82,47 @@ export function useSTT(options: UseSTTOptions = {}) {
       window.webkitSpeechRecognition || window.SpeechRecognition;
     const recognition = new SpeechRecognitionAPI();
 
-    recognition.continuous = false;
+    // CONTINUOUS mode - no auto-stop on silence
+    recognition.continuous = true;
     recognition.interimResults = true;
-    recognition.lang = "en-AU"; // Prefer Australian English for input too
+    recognition.lang = "en-AU";
 
     recognition.onstart = () => {
       setIsListening(true);
       setError(null);
       setInterimTranscript("");
-      options.onStart?.();
+      setFinalTranscript("");
+      setElapsedTime(0);
+      accumulatedTranscriptRef.current = "";
+      startTimeRef.current = Date.now();
+
+      // Start elapsed time counter
+      timerRef.current = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - startTimeRef.current) / 1000));
+      }, 1000);
+
+      // Set max duration safety limit
+      maxDurationRef.current = setTimeout(() => {
+        console.log("Max recording duration reached");
+        recognition.stop();
+      }, MAX_RECORDING_DURATION);
     };
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       let interim = "";
-      let final = "";
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          final += transcript;
+          // Accumulate final results
+          accumulatedTranscriptRef.current += transcript + " ";
+          setFinalTranscript(accumulatedTranscriptRef.current.trim());
         } else {
           interim += transcript;
         }
       }
 
       setInterimTranscript(interim);
-
-      if (final) {
-        options.onResult?.(final, true);
-        setInterimTranscript("");
-      } else if (interim) {
-        options.onResult?.(interim, false);
-      }
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -198,48 +132,77 @@ export function useSTT(options: UseSTTOptions = {}) {
         setError(errorMessage);
         options.onError?.(errorMessage);
       }
-      setIsListening(false);
     };
 
     recognition.onend = () => {
+      clearTimers();
       setIsListening(false);
-      options.onEnd?.();
+
+      // Combine final + any remaining interim transcript
+      const fullTranscript = (
+        accumulatedTranscriptRef.current + " " + interimTranscript
+      ).trim();
+
+      if (fullTranscript) {
+        setFinalTranscript(fullTranscript);
+        options.onRecordingComplete?.(fullTranscript);
+      } else {
+        options.onRecordingComplete?.("");
+      }
     };
 
     recognitionRef.current = recognition;
 
     return () => {
+      clearTimers();
       recognition.abort();
     };
-  }, [isSupported]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isSupported, clearTimers]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const startListening = useCallback(() => {
     if (!recognitionRef.current || isListening) return;
     setError(null);
+    setFinalTranscript("");
+    setInterimTranscript("");
+    accumulatedTranscriptRef.current = "";
+
     try {
       recognitionRef.current.start();
     } catch (err) {
-      // Recognition might already be started
       console.error("Failed to start recognition:", err);
     }
   }, [isListening]);
 
   const stopListening = useCallback(() => {
     if (!recognitionRef.current || !isListening) return;
+    clearTimers();
     recognitionRef.current.stop();
-  }, [isListening]);
+  }, [isListening, clearTimers]);
 
   const clearError = useCallback(() => {
     setError(null);
   }, []);
 
+  const resetTranscript = useCallback(() => {
+    setFinalTranscript("");
+    setInterimTranscript("");
+    accumulatedTranscriptRef.current = "";
+  }, []);
+
+  // Get full current transcript (final + interim)
+  const currentTranscript = finalTranscript + (interimTranscript ? " " + interimTranscript : "");
+
   return {
     isListening,
     interimTranscript,
+    finalTranscript,
+    currentTranscript: currentTranscript.trim(),
+    elapsedTime,
     error,
     startListening,
     stopListening,
     clearError,
+    resetTranscript,
     isSupported,
   };
 }
@@ -257,4 +220,11 @@ function getErrorMessage(error: string): string {
     default:
       return `Speech recognition error: ${error}`;
   }
+}
+
+// Format seconds to MM:SS
+export function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
