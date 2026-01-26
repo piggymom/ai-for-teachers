@@ -12,6 +12,44 @@ import { useSTT, formatTime } from "@/lib/useVoice";
 // 3. Error state requires user action (Retry or Show Text button)
 // =============================================================================
 
+// =============================================================================
+// LATENCY INSTRUMENTATION
+// =============================================================================
+type ClientTiming = {
+  submitTime: number;
+  apiResponseTime: number;
+  ttsStartTime: number;
+  ttsResponseTime: number;
+  audioCanPlayTime: number;
+  audioPlayTime: number;
+  serverTiming?: {
+    auth: number;
+    context: number;
+    llm: number;
+    total: number;
+  };
+};
+
+function logClientTiming(timing: Partial<ClientTiming>) {
+  const t0 = timing.submitTime || 0;
+  const durations: Record<string, string> = {};
+
+  if (timing.apiResponseTime) durations.api = `${timing.apiResponseTime - t0}ms`;
+  if (timing.ttsResponseTime && timing.ttsStartTime) durations.tts = `${timing.ttsResponseTime - timing.ttsStartTime}ms`;
+  if (timing.audioCanPlayTime) durations.audioLoad = `${timing.audioCanPlayTime - (timing.ttsResponseTime || t0)}ms`;
+  if (timing.audioPlayTime) durations.total = `${timing.audioPlayTime - t0}ms`;
+
+  if (timing.serverTiming) {
+    durations.serverAuth = `${timing.serverTiming.auth}ms`;
+    durations.serverContext = `${timing.serverTiming.context}ms`;
+    durations.serverLLM = `${timing.serverTiming.llm}ms`;
+    durations.serverTotal = `${timing.serverTiming.total}ms`;
+  }
+
+  console.log(`[SKIPPY CLIENT TIMING]`, durations);
+  return durations;
+}
+
 // Explicit pipeline states for assistant messages
 type AssistantPipelineStatus =
   | "idle"           // Initial state, not yet processed
@@ -74,6 +112,10 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     fullTextLength: 0,
     lastError: null as string | null,
   });
+
+  // Latency tracking
+  const [latencyInfo, setLatencyInfo] = useState<Record<string, string> | null>(null);
+  const currentTimingRef = useRef<Partial<ClientTiming>>({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -178,6 +220,10 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     audio.onloadedmetadata = () => {
       const msgId = currentMessageIdRef.current;
       console.log(`[AUDIO] onloadedmetadata msgId=${msgId} duration=${audio.duration}`);
+
+      // Track audio can play timing
+      currentTimingRef.current.audioCanPlayTime = Date.now();
+
       if (msgId && audio.duration) {
         updateMessageById(msgId, { duration: audio.duration });
       }
@@ -188,6 +234,11 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
       const msgId = currentMessageIdRef.current;
       const fullText = currentFullTextRef.current;
       console.log(`[AUDIO] onplay msgId=${msgId} hasStarted=${hasStartedPlaybackRef.current}`);
+
+      // Track final audio play timing and log complete timing
+      currentTimingRef.current.audioPlayTime = Date.now();
+      const timingResult = logClientTiming(currentTimingRef.current);
+      setLatencyInfo(timingResult);
 
       if (msgId && fullText) {
         // CRITICAL: Mark playback as started - this message is now immune to error
@@ -327,6 +378,9 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
         const abortController = new AbortController();
         ttsAbortControllerRef.current = abortController;
 
+        // Track TTS timing
+        currentTimingRef.current.ttsStartTime = Date.now();
+
         const res = await fetch("/api/tts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -341,6 +395,8 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
         if (abortController.signal.aborted) return;
 
         const audioBlob = await res.blob();
+        currentTimingRef.current.ttsResponseTime = Date.now();
+
         const audioUrl = URL.createObjectURL(audioBlob);
 
         if (audioUrlRef.current) {
@@ -597,11 +653,15 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     [debugInfo.audioPlaying, stopSpeaking]
   );
 
-  // Submit message
+  // Submit message with timing instrumentation
   const submitMessage = useCallback(
     async (messageText: string) => {
       const trimmedInput = messageText.trim();
       if (!trimmedInput || isSending) return;
+
+      // Start timing
+      currentTimingRef.current = { submitTime: Date.now() };
+      setLatencyInfo(null);
 
       setInput("");
       setIsSending(true);
@@ -631,12 +691,44 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
           }),
         });
 
-        if (!res.ok) throw new Error("Failed to send message");
+        currentTimingRef.current.apiResponseTime = Date.now();
+
+        if (!res.ok) {
+          // Safe error extraction - check content-type before parsing
+          const contentType = res.headers.get("content-type") || "";
+          let errorMessage = `Request failed (${res.status})`;
+
+          try {
+            if (contentType.includes("application/json")) {
+              const errorData = await res.json();
+              if (errorData.error?.message) {
+                errorMessage = errorData.error.message;
+              } else if (typeof errorData.error === "string") {
+                errorMessage = errorData.error;
+              }
+            } else {
+              const textBody = await res.text();
+              if (textBody) errorMessage = textBody.slice(0, 100);
+            }
+          } catch {
+            // Ignore parse errors, use default message
+          }
+
+          console.error(`[SKIPPY] API error: ${res.status} ${res.statusText}`, errorMessage);
+          throw new Error(errorMessage);
+        }
 
         const data = await res.json();
+
+        // Capture server timing if provided
+        if (data.serverTiming) {
+          currentTimingRef.current.serverTiming = data.serverTiming;
+        }
+
         addAssistantMessage(data.response, true);
       } catch (err) {
-        setError("Failed to send message. Please try again.");
+        const errorMsg = err instanceof Error ? err.message : "Unknown error";
+        setError(`Failed to send message: ${errorMsg}`);
         setMessages((prev) => prev.filter((m) => m.id !== userMessageId));
         console.error("Send message error:", err);
       } finally {
@@ -718,14 +810,25 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
 
   return (
     <main className="flex min-h-screen flex-col bg-neutral-900 text-white">
-      {/* Debug Badge */}
-      <div className="fixed top-2 right-2 z-50 rounded bg-black/80 px-2 py-1 text-[10px] font-mono text-white/70">
-        <div>Week: {week}</div>
-        <div>Status: {debugInfo.pipelineStatus}</div>
-        <div>Audio: {debugInfo.audioReady ? "ready" : "no"} | {debugInfo.audioPlaying ? "playing" : "stopped"}</div>
-        <div>Text: {debugInfo.revealedLength}/{debugInfo.fullTextLength}</div>
-        {debugInfo.lastError && <div className="text-red-400">Err: {debugInfo.lastError}</div>}
-      </div>
+      {/* Debug Badge - only show in development */}
+      {process.env.NODE_ENV === "development" && (
+        <div className="fixed top-2 right-2 z-50 rounded bg-black/80 px-2 py-1 text-[10px] font-mono text-white/70 max-w-[200px]">
+          <div>Week: {week}</div>
+          <div>Status: {debugInfo.pipelineStatus}</div>
+          <div>Audio: {debugInfo.audioReady ? "ready" : "no"} | {debugInfo.audioPlaying ? "playing" : "stopped"}</div>
+          <div>Text: {debugInfo.revealedLength}/{debugInfo.fullTextLength}</div>
+          {debugInfo.lastError && <div className="text-red-400">Err: {debugInfo.lastError}</div>}
+          {latencyInfo && (
+            <div className="mt-1 pt-1 border-t border-white/20">
+              <div className="text-green-400 font-bold">Latency:</div>
+              {latencyInfo.total && <div>Total: {latencyInfo.total}</div>}
+              {latencyInfo.serverLLM && <div>LLM: {latencyInfo.serverLLM}</div>}
+              {latencyInfo.tts && <div>TTS: {latencyInfo.tts}</div>}
+              {latencyInfo.api && <div>API: {latencyInfo.api}</div>}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Header */}
       <header className="border-b border-white/10 px-6 py-4">
