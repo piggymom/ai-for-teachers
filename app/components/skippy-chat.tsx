@@ -2,73 +2,30 @@
 
 import { useState, useEffect, useRef, FormEvent, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useSTT, formatTime } from "@/lib/useVoice";
+import { useRealtimeConnection, ConnectionState } from "@/lib/useRealtimeConnection";
 
 // =============================================================================
-// STRICT VOICE-FIRST IMPLEMENTATION
+// OPENAI REALTIME API VOICE-FIRST IMPLEMENTATION
 // Rules:
-// 1. NEVER render assistant fullText until audio.onplay fires
-// 2. revealedText starts empty and only populates during/after playback
-// 3. Error state requires user action (Retry or Show Text button)
+// 1. NO text shown until audio starts streaming
+// 2. Transcript appears progressively as audio plays
+// 3. User can barge-in by speaking or typing
+// 4. Voice is primary, text is optional support
 // =============================================================================
 
-// =============================================================================
-// LATENCY INSTRUMENTATION
-// =============================================================================
-type ClientTiming = {
-  submitTime: number;
-  apiResponseTime: number;
-  ttsStartTime: number;
-  ttsResponseTime: number;
-  audioCanPlayTime: number;
-  audioPlayTime: number;
-  serverTiming?: {
-    auth: number;
-    context: number;
-    llm: number;
-    total: number;
-  };
-};
-
-function logClientTiming(timing: Partial<ClientTiming>) {
-  const t0 = timing.submitTime || 0;
-  const durations: Record<string, string> = {};
-
-  if (timing.apiResponseTime) durations.api = `${timing.apiResponseTime - t0}ms`;
-  if (timing.ttsResponseTime && timing.ttsStartTime) durations.tts = `${timing.ttsResponseTime - timing.ttsStartTime}ms`;
-  if (timing.audioCanPlayTime) durations.audioLoad = `${timing.audioCanPlayTime - (timing.ttsResponseTime || t0)}ms`;
-  if (timing.audioPlayTime) durations.total = `${timing.audioPlayTime - t0}ms`;
-
-  if (timing.serverTiming) {
-    durations.serverAuth = `${timing.serverTiming.auth}ms`;
-    durations.serverContext = `${timing.serverTiming.context}ms`;
-    durations.serverLLM = `${timing.serverTiming.llm}ms`;
-    durations.serverTotal = `${timing.serverTiming.total}ms`;
-  }
-
-  console.log(`[SKIPPY CLIENT TIMING]`, durations);
-  return durations;
-}
-
-// Explicit pipeline states for assistant messages
+// Simplified pipeline states for streaming
 type AssistantPipelineStatus =
-  | "idle"           // Initial state, not yet processed
-  | "requesting"     // Fetching Skippy response + TTS
-  | "audio_ready"    // Audio URL exists, not playing yet
-  | "playing"        // Audio has fired onplay, text revealing
-  | "done"           // Audio ended, full text visible
-  | "error";         // Error occurred, show retry UI
+  | "idle"        // Not yet processed
+  | "streaming"   // Audio + transcript streaming
+  | "done"        // Complete
+  | "error";      // Failed
 
 type Message = {
   id: string;
   role: "user" | "assistant";
-  // For user messages: content is displayed directly
-  // For assistant messages: ONLY revealedText is rendered, NEVER fullText
   fullText: string;
   revealedText: string;
   status: AssistantPipelineStatus;
-  audioUrl: string | null;
-  duration: number | null;
   errorMessage: string | null;
 };
 
@@ -76,9 +33,6 @@ type SkippyChatProps = {
   week: number;
   weekTitle: string;
 };
-
-// Minimum words required for a valid transcript
-const MIN_TRANSCRIPT_WORDS = 3;
 
 // Generate unique message ID
 let messageIdCounter = 0;
@@ -98,43 +52,23 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showTextInstantly, setShowTextInstantly] = useState(false);
-
-  // Recording review state
-  const [isReviewingTranscript, setIsReviewingTranscript] = useState(false);
-  const [editableTranscript, setEditableTranscript] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
 
   // Debug state
   const [debugInfo, setDebugInfo] = useState({
-    pipelineStatus: "idle" as AssistantPipelineStatus,
-    audioReady: false,
-    audioPlaying: false,
-    revealedLength: 0,
-    fullTextLength: 0,
-    lastError: null as string | null,
+    connectionState: "disconnected" as ConnectionState,
+    lastEvent: null as string | null,
+    streamingMessageId: null as string | null,
   });
-
-  // Latency tracking
-  const [latencyInfo, setLatencyInfo] = useState<Record<string, string> | null>(null);
-  const currentTimingRef = useRef<Partial<ClientTiming>>({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const transcriptInputRef = useRef<HTMLTextAreaElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
-  // Audio management refs
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioUrlRef = useRef<string | null>(null);
-  const currentMessageIdRef = useRef<string | null>(null);
-  const currentFullTextRef = useRef<string>("");
-  const playedMessageIdsRef = useRef<Set<string>>(new Set());
-  const ttsAbortControllerRef = useRef<AbortController | null>(null);
-  const rafIdRef = useRef<number | null>(null);
-
-  // CRITICAL: Track if playback has started for current message
-  // Once true, NEVER set error state - message is considered successful
-  const hasStartedPlaybackRef = useRef(false);
-  // Track messages that have successfully played (immune to error)
-  const successfulMessageIdsRef = useRef<Set<string>>(new Set());
+  // Current streaming message tracking
+  const streamingMessageIdRef = useRef<string | null>(null);
+  const systemPromptRef = useRef<string>("");
+  const initCalledRef = useRef(false);
 
   // Update message by ID
   const updateMessageById = useCallback((id: string, updates: Partial<Message>) => {
@@ -143,530 +77,217 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     );
   }, []);
 
-  // Stop RAF loop
-  const stopRevealLoop = useCallback(() => {
-    if (rafIdRef.current !== null) {
-      cancelAnimationFrame(rafIdRef.current);
-      rafIdRef.current = null;
-    }
+  // Append to revealed text
+  const appendToRevealedText = useCallback((id: string, delta: string) => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === id
+          ? { ...msg, revealedText: msg.revealedText + delta }
+          : msg
+      )
+    );
   }, []);
 
-  // RAF-based text reveal synced to audio time
-  const runRevealLoop = useCallback(() => {
-    const audio = audioRef.current;
-    const msgId = currentMessageIdRef.current;
-    const fullText = currentFullTextRef.current;
-
-    if (!audio || !msgId || !fullText) return;
-
-    const duration = audio.duration;
-    if (!duration || !isFinite(duration) || duration === 0) {
-      rafIdRef.current = requestAnimationFrame(runRevealLoop);
-      return;
-    }
-
-    const progress = Math.min(audio.currentTime / duration, 1);
-    const revealedCharCount = Math.floor(progress * fullText.length);
-    const revealedText = fullText.slice(0, revealedCharCount);
-
-    updateMessageById(msgId, { revealedText });
-    setDebugInfo((prev) => ({
-      ...prev,
-      revealedLength: revealedCharCount,
-      fullTextLength: fullText.length,
-    }));
-
-    if (!audio.paused && !audio.ended) {
-      rafIdRef.current = requestAnimationFrame(runRevealLoop);
-    }
-  }, [updateMessageById]);
-
-  // Cleanup audio - DO NOT remove handlers (they have guards), just stop playback
-  const cleanupAudio = useCallback(() => {
-    stopRevealLoop();
-
-    if (audioRef.current) {
-      const audio = audioRef.current;
-      // Mark current message as done BEFORE clearing src (prevents spurious onerror)
-      const msgId = currentMessageIdRef.current;
-      if (msgId && hasStartedPlaybackRef.current) {
-        // Message already started playing, ensure it stays successful
-        successfulMessageIdsRef.current.add(msgId);
-      }
-      audio.pause();
-      // Clear src - onerror may fire but will be ignored due to guards
-      audio.src = "";
-    }
-
-    if (audioUrlRef.current) {
-      URL.revokeObjectURL(audioUrlRef.current);
-      audioUrlRef.current = null;
-    }
-
-    if (ttsAbortControllerRef.current) {
-      ttsAbortControllerRef.current.abort();
-      ttsAbortControllerRef.current = null;
-    }
-
-    // Reset playback tracking for next message
-    hasStartedPlaybackRef.current = false;
-  }, [stopRevealLoop]);
-
-  // Initialize audio element with proper state guards
-  useEffect(() => {
-    const audio = new Audio();
-    audioRef.current = audio;
-
-    audio.onloadedmetadata = () => {
-      const msgId = currentMessageIdRef.current;
-      console.log(`[AUDIO] onloadedmetadata msgId=${msgId} duration=${audio.duration}`);
-
-      // Track audio can play timing
-      currentTimingRef.current.audioCanPlayTime = Date.now();
-
-      if (msgId && audio.duration) {
-        updateMessageById(msgId, { duration: audio.duration });
-      }
-      setDebugInfo((prev) => ({ ...prev, audioReady: true }));
-    };
-
-    audio.onplay = () => {
-      const msgId = currentMessageIdRef.current;
-      const fullText = currentFullTextRef.current;
-      console.log(`[AUDIO] onplay msgId=${msgId} hasStarted=${hasStartedPlaybackRef.current}`);
-
-      // Track final audio play timing and log complete timing
-      currentTimingRef.current.audioPlayTime = Date.now();
-      const timingResult = logClientTiming(currentTimingRef.current);
-      setLatencyInfo(timingResult);
-
-      if (msgId && fullText) {
-        // CRITICAL: Mark playback as started - this message is now immune to error
-        hasStartedPlaybackRef.current = true;
-        successfulMessageIdsRef.current.add(msgId);
-
-        // VOICE-FIRST: Only NOW populate fullText in state and start reveal
-        updateMessageById(msgId, {
-          fullText,
-          status: "playing",
-          revealedText: "", // Start empty, RAF will populate
-        });
-        setDebugInfo((prev) => ({
-          ...prev,
-          pipelineStatus: "playing",
-          audioPlaying: true,
-          fullTextLength: fullText.length,
-        }));
-        rafIdRef.current = requestAnimationFrame(runRevealLoop);
-      }
-    };
-
-    audio.onended = () => {
-      const msgId = currentMessageIdRef.current;
-      const fullText = currentFullTextRef.current;
-      console.log(`[AUDIO] onended msgId=${msgId}`);
-
-      stopRevealLoop();
-
-      if (msgId) {
-        // Always transition to done, never error (playback completed)
-        updateMessageById(msgId, {
-          status: "done",
-          revealedText: fullText,
-        });
-        setDebugInfo((prev) => ({
-          ...prev,
-          pipelineStatus: "done",
-          audioPlaying: false,
-          revealedLength: fullText.length,
-        }));
-      }
-    };
-
-    audio.onpause = () => {
-      console.log(`[AUDIO] onpause`);
-      stopRevealLoop();
-      setDebugInfo((prev) => ({ ...prev, audioPlaying: false }));
-    };
-
-    audio.onerror = (e) => {
-      const msgId = currentMessageIdRef.current;
-      const hasStarted = hasStartedPlaybackRef.current;
-      const isSuccessful = msgId ? successfulMessageIdsRef.current.has(msgId) : false;
-      console.log(`[AUDIO] onerror msgId=${msgId} hasStarted=${hasStarted} isSuccessful=${isSuccessful} error=`, e);
-
-      stopRevealLoop();
-
-      // DO NOT set error state from onerror - it fires spuriously
-      // Error handling is done in play().catch() which is more reliable
-      // Just log for debugging
-      console.log(`[AUDIO] onerror ignored - relying on play().catch() for error handling`);
-    };
-
-    return () => {
-      // Cleanup on unmount - handlers already removed in cleanupAudio
-      cleanupAudio();
-      audioRef.current = null;
-    };
-  }, [updateMessageById, runRevealLoop, stopRevealLoop, cleanupAudio]);
-
-  // Stop speaking and reveal full text
-  const stopSpeaking = useCallback(() => {
-    cleanupAudio();
-
-    const msgId = currentMessageIdRef.current;
-    const fullText = currentFullTextRef.current;
-
-    if (msgId && fullText) {
-      updateMessageById(msgId, {
-        status: "done",
-        fullText,
-        revealedText: fullText,
+  // Save message to server (for persistence)
+  const saveMessageToServer = useCallback(async (role: "user" | "assistant", content: string) => {
+    try {
+      await fetch("/api/skippy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event: "save_message",
+          week,
+          role,
+          content,
+        }),
       });
+    } catch (err) {
+      console.error("Failed to save message:", err);
+      // Non-blocking - conversation continues
     }
+  }, [week]);
 
-    setDebugInfo((prev) => ({
-      ...prev,
-      pipelineStatus: "done",
-      audioPlaying: false,
-      audioReady: false,
-    }));
-  }, [cleanupAudio, updateMessageById]);
-
-  // Process assistant message through voice-first pipeline
-  const processAssistantMessage = useCallback(
-    async (text: string, messageId: string) => {
-      // Idempotency check
-      if (playedMessageIdsRef.current.has(messageId)) {
-        return;
-      }
-      playedMessageIdsRef.current.add(messageId);
-
-      // Cleanup any existing audio
-      cleanupAudio();
-
-      // Store text in refs ONLY (not in message state)
-      currentMessageIdRef.current = messageId;
-      currentFullTextRef.current = text;
-
-      // Update debug
-      setDebugInfo((prev) => ({
-        ...prev,
-        pipelineStatus: "requesting",
-        audioReady: false,
-        audioPlaying: false,
-        revealedLength: 0,
-        fullTextLength: text.length,
-        lastError: null,
-      }));
-
-      // If instant mode, skip voice pipeline entirely
-      if (showTextInstantly) {
-        updateMessageById(messageId, {
-          fullText: text,
-          revealedText: text,
-          status: "done",
-        });
-        setDebugInfo((prev) => ({ ...prev, pipelineStatus: "done" }));
-        return;
-      }
-
-      // Update message to requesting state (still no text visible)
-      updateMessageById(messageId, { status: "requesting" });
-
-      try {
-        const abortController = new AbortController();
-        ttsAbortControllerRef.current = abortController;
-
-        // Track TTS timing
-        currentTimingRef.current.ttsStartTime = Date.now();
-
-        const res = await fetch("/api/tts", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
-          signal: abortController.signal,
-        });
-
-        if (!res.ok) {
-          throw new Error(`TTS request failed: ${res.status}`);
-        }
-
-        if (abortController.signal.aborted) return;
-
-        const audioBlob = await res.blob();
-        currentTimingRef.current.ttsResponseTime = Date.now();
-
-        const audioUrl = URL.createObjectURL(audioBlob);
-
-        if (audioUrlRef.current) {
-          URL.revokeObjectURL(audioUrlRef.current);
-        }
-        audioUrlRef.current = audioUrl;
-
-        // Verify still current message
-        if (currentMessageIdRef.current !== messageId) {
-          URL.revokeObjectURL(audioUrl);
-          return;
-        }
-
-        // Update to audio_ready state (still no text visible!)
-        updateMessageById(messageId, {
-          status: "audio_ready",
-          audioUrl,
-        });
-        setDebugInfo((prev) => ({ ...prev, pipelineStatus: "audio_ready" }));
-
-        if (!audioRef.current) return;
-
-        // Set source and play - onplay will trigger text reveal
-        audioRef.current.src = audioUrl;
-
-        try {
-          await audioRef.current.play();
-        } catch (playErr) {
-          const errMsg = playErr instanceof Error ? playErr.message : String(playErr);
-          console.log(`[AUDIO] play() threw: "${errMsg}" hasStarted=${hasStartedPlaybackRef.current}`);
-
-          // Ignore "interrupted" errors - these happen when play() is called again quickly
-          // or when src changes during loading. Not actual failures.
-          const isInterrupted = errMsg.toLowerCase().includes("interrupted") ||
-                               errMsg.toLowerCase().includes("aborted");
-
-          // CRITICAL: Only set error if:
-          // 1. Playback hasn't started (onplay never fired)
-          // 2. Not already marked successful
-          // 3. Not an "interrupted" error (which is benign)
-          if (!hasStartedPlaybackRef.current &&
-              !successfulMessageIdsRef.current.has(messageId) &&
-              !isInterrupted) {
-            console.log(`[AUDIO] Setting error from play().catch() for msgId=${messageId}`);
-            updateMessageById(messageId, {
-              status: "error",
-              errorMessage: errMsg,
-              fullText: text,
-            });
-            setDebugInfo((prev) => ({
-              ...prev,
-              pipelineStatus: "error",
-              lastError: errMsg,
-            }));
-          } else {
-            console.log(`[AUDIO] Ignoring play() error - hasStarted=${hasStartedPlaybackRef.current} isInterrupted=${isInterrupted}`);
-          }
-        }
-
-      } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") {
-          return;
-        }
-
-        // This catch handles TTS fetch errors, not audio playback errors
-        const errorMessage = err instanceof Error ? err.message : "Unknown error";
-        console.warn("TTS fetch error:", err);
-
-        updateMessageById(messageId, {
-          status: "error",
-          errorMessage,
-          fullText: text, // Store for "Show Text" fallback
-        });
-        setDebugInfo((prev) => ({
-          ...prev,
-          pipelineStatus: "error",
-          lastError: errorMessage,
-        }));
+  // Realtime connection hook
+  const realtime = useRealtimeConnection({
+    onConnectionStateChange: (state) => {
+      setDebugInfo((prev) => ({ ...prev, connectionState: state }));
+      if (state === "error") {
+        setError("Connection lost. Please refresh the page.");
       }
     },
-    [cleanupAudio, showTextInstantly, updateMessageById]
-  );
 
-  // Create assistant message placeholder (voice-first: no text content)
-  const addAssistantMessage = useCallback(
-    (text: string, shouldSpeak: boolean = true) => {
-      const messageId = generateMessageId();
+    onResponseStart: (_responseId) => {
+      // Create streaming assistant message
+      const msgId = generateMessageId();
+      streamingMessageIdRef.current = msgId;
+      setDebugInfo((prev) => ({ ...prev, streamingMessageId: msgId }));
 
-      // VOICE-FIRST: Message starts with EMPTY fullText and revealedText
-      // Text only appears after audio.onplay fires
       const newMessage: Message = {
-        id: messageId,
+        id: msgId,
         role: "assistant",
-        fullText: "", // EMPTY - will be set on audio.onplay
-        revealedText: "", // EMPTY - will be populated by RAF loop
-        status: shouldSpeak && !showTextInstantly ? "requesting" : "done",
-        audioUrl: null,
-        duration: null,
+        fullText: "",
+        revealedText: "",
+        status: "streaming",
         errorMessage: null,
       };
-
-      // For instant mode, populate immediately
-      if (!shouldSpeak || showTextInstantly) {
-        newMessage.fullText = text;
-        newMessage.revealedText = text;
-        newMessage.status = "done";
-      }
-
       setMessages((prev) => [...prev, newMessage]);
-
-      if (shouldSpeak) {
-        // Process through voice pipeline (will store text in refs, not state)
-        setTimeout(() => processAssistantMessage(text, messageId), 0);
-      }
-
-      return messageId;
     },
-    [showTextInstantly, processAssistantMessage]
-  );
 
-  // Retry failed audio
-  const retryAudio = useCallback((messageId: string) => {
-    const msg = messages.find((m) => m.id === messageId);
-    if (msg && msg.fullText) {
-      // Reset state and retry
-      playedMessageIdsRef.current.delete(messageId);
-      updateMessageById(messageId, {
-        status: "requesting",
-        revealedText: "",
-        errorMessage: null,
-      });
-      processAssistantMessage(msg.fullText, messageId);
-    }
-  }, [messages, updateMessageById, processAssistantMessage]);
-
-  // Show text fallback for error state
-  const showTextFallback = useCallback((messageId: string) => {
-    const msg = messages.find((m) => m.id === messageId);
-    if (msg && msg.fullText) {
-      updateMessageById(messageId, {
-        status: "done",
-        revealedText: msg.fullText,
-      });
-      setDebugInfo((prev) => ({ ...prev, pipelineStatus: "done" }));
-    }
-  }, [messages, updateMessageById]);
-
-  // STT hook
-  const stt = useSTT({
-    onRecordingComplete: (transcript) => {
-      if (transcript) {
-        setEditableTranscript(transcript);
-        setIsReviewingTranscript(true);
+    onTranscriptDelta: (delta, _itemId) => {
+      const msgId = streamingMessageIdRef.current;
+      if (msgId) {
+        appendToRevealedText(msgId, delta);
       }
     },
-    onError: (err) => setError(err),
+
+    onResponseDone: (transcript, _responseId) => {
+      const msgId = streamingMessageIdRef.current;
+      if (msgId && transcript) {
+        updateMessageById(msgId, {
+          fullText: transcript,
+          revealedText: transcript,
+          status: "done",
+        });
+        // Save to database
+        saveMessageToServer("assistant", transcript);
+      }
+      streamingMessageIdRef.current = null;
+      setDebugInfo((prev) => ({ ...prev, streamingMessageId: null }));
+      setIsSending(false);
+    },
+
+    onUserSpeechStarted: () => {
+      // Barge-in: cancel current response
+      const msgId = streamingMessageIdRef.current;
+      if (msgId) {
+        // Remove incomplete message
+        setMessages((prev) => prev.filter((m) => m.id !== msgId));
+        streamingMessageIdRef.current = null;
+        setDebugInfo((prev) => ({ ...prev, streamingMessageId: null }));
+      }
+      realtime.cancelResponse();
+      realtime.stopAudio();
+    },
+
+    onUserSpeechStopped: () => {
+      // VAD detected end of speech - response will start automatically
+      setIsRecording(false);
+    },
+
+    onError: (err) => {
+      console.error("Realtime error:", err);
+      setError(err.message);
+      const msgId = streamingMessageIdRef.current;
+      if (msgId) {
+        updateMessageById(msgId, {
+          status: "error",
+          errorMessage: err.message,
+        });
+        streamingMessageIdRef.current = null;
+      }
+      setIsSending(false);
+    },
   });
 
-  // Scroll to bottom
+  // Update debug info with last event
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (realtime.lastEvent) {
+      setDebugInfo((prev) => ({ ...prev, lastEvent: realtime.lastEvent }));
+    }
+  }, [realtime.lastEvent]);
 
-  // Start week conversation (guarded against StrictMode)
-  const startWeekCalledRef = useRef(false);
-
+  // Initialize connection on mount
   useEffect(() => {
-    if (startWeekCalledRef.current) return;
-    startWeekCalledRef.current = true;
+    if (initCalledRef.current) return;
+    initCalledRef.current = true;
 
-    async function startWeek() {
+    async function initConnection() {
       try {
+        // Fetch context and history
         const res = await fetch("/api/skippy", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ event: "start_week", week }),
         });
 
-        if (!res.ok) throw new Error("Failed to start conversation");
+        if (!res.ok) throw new Error("Failed to load conversation");
 
         const data = await res.json();
 
+        // Store system prompt for session config
+        systemPromptRef.current = data.systemPrompt;
+
+        // Load history
         if (data.history && data.history.length > 0) {
-          // Load history - previous messages shown as done, last assistant spoken
-          const historyMsgs = data.history.slice(0, -1).map(
+          const historyMsgs = data.history.map(
             (msg: { role: "user" | "assistant"; content: string }, idx: number) => ({
               id: `history_${idx}`,
               role: msg.role,
               fullText: msg.content,
-              revealedText: msg.content, // History is fully revealed
+              revealedText: msg.content,
               status: "done" as AssistantPipelineStatus,
-              audioUrl: null,
-              duration: null,
               errorMessage: null,
             })
           );
-
-          const lastMsg = data.history[data.history.length - 1];
           setMessages(historyMsgs);
-
-          // Speak the last assistant message through voice-first pipeline
-          if (lastMsg.role === "assistant") {
-            setTimeout(() => addAssistantMessage(lastMsg.content, true), 300);
-          } else {
-            // Last message is user, just add it
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: `history_${data.history.length - 1}`,
-                role: lastMsg.role,
-                fullText: lastMsg.content,
-                revealedText: lastMsg.content,
-                status: "done" as AssistantPipelineStatus,
-                audioUrl: null,
-                duration: null,
-                errorMessage: null,
-              },
-            ]);
-          }
         }
+
+        setIsLoading(false);
+
+        // Connect to Realtime API
+        if (audioRef.current && data.systemPrompt) {
+          await realtime.connect(data.systemPrompt, audioRef.current);
+        }
+
       } catch (err) {
-        setError("Failed to load conversation. Please refresh the page.");
-        console.error("Start week error:", err);
-      } finally {
+        console.error("Init error:", err);
+        setError("Failed to start conversation. Please refresh the page.");
         setIsLoading(false);
       }
     }
 
-    startWeek();
-  }, [week, addAssistantMessage]);
+    initConnection();
+  }, [week, realtime]);
 
-  // Focus management
+  // Scroll to bottom
   useEffect(() => {
-    if (!isLoading && !isReviewingTranscript && inputRef.current) {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Focus input when ready
+  useEffect(() => {
+    if (!isLoading && !isRecording && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [isLoading, isReviewingTranscript]);
+  }, [isLoading, isRecording]);
 
-  useEffect(() => {
-    if (isReviewingTranscript && transcriptInputRef.current) {
-      transcriptInputRef.current.focus();
-      transcriptInputRef.current.select();
-    }
-  }, [isReviewingTranscript]);
-
-  // Handle input change (barge-in)
+  // Handle input change with barge-in
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setInput(e.target.value);
-      if (e.target.value && debugInfo.audioPlaying) {
-        stopSpeaking();
+      // Barge-in on typing
+      if (e.target.value && streamingMessageIdRef.current) {
+        const msgId = streamingMessageIdRef.current;
+        setMessages((prev) => prev.filter((m) => m.id !== msgId));
+        streamingMessageIdRef.current = null;
+        realtime.cancelResponse();
+        realtime.stopAudio();
       }
     },
-    [debugInfo.audioPlaying, stopSpeaking]
+    [realtime]
   );
 
-  // Submit message with timing instrumentation
+  // Submit text message
   const submitMessage = useCallback(
     async (messageText: string) => {
       const trimmedInput = messageText.trim();
-      if (!trimmedInput || isSending) return;
-
-      // Start timing
-      currentTimingRef.current = { submitTime: Date.now() };
-      setLatencyInfo(null);
+      if (!trimmedInput || isSending || !realtime.isConnected) return;
 
       setInput("");
       setIsSending(true);
       setError(null);
 
+      // Add user message to UI
       const userMessageId = generateMessageId();
       const userMessage: Message = {
         id: userMessageId,
@@ -674,69 +295,17 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
         fullText: trimmedInput,
         revealedText: trimmedInput,
         status: "done",
-        audioUrl: null,
-        duration: null,
         errorMessage: null,
       };
       setMessages((prev) => [...prev, userMessage]);
 
-      try {
-        const res = await fetch("/api/skippy", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            event: "user_message",
-            week,
-            message: trimmedInput,
-          }),
-        });
+      // Save user message to server
+      saveMessageToServer("user", trimmedInput);
 
-        currentTimingRef.current.apiResponseTime = Date.now();
-
-        if (!res.ok) {
-          // Safe error extraction - check content-type before parsing
-          const contentType = res.headers.get("content-type") || "";
-          let errorMessage = `Request failed (${res.status})`;
-
-          try {
-            if (contentType.includes("application/json")) {
-              const errorData = await res.json();
-              if (errorData.error?.message) {
-                errorMessage = errorData.error.message;
-              } else if (typeof errorData.error === "string") {
-                errorMessage = errorData.error;
-              }
-            } else {
-              const textBody = await res.text();
-              if (textBody) errorMessage = textBody.slice(0, 100);
-            }
-          } catch {
-            // Ignore parse errors, use default message
-          }
-
-          console.error(`[SKIPPY] API error: ${res.status} ${res.statusText}`, errorMessage);
-          throw new Error(errorMessage);
-        }
-
-        const data = await res.json();
-
-        // Capture server timing if provided
-        if (data.serverTiming) {
-          currentTimingRef.current.serverTiming = data.serverTiming;
-        }
-
-        addAssistantMessage(data.response, true);
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : "Unknown error";
-        setError(`Failed to send message: ${errorMsg}`);
-        setMessages((prev) => prev.filter((m) => m.id !== userMessageId));
-        console.error("Send message error:", err);
-      } finally {
-        setIsSending(false);
-        inputRef.current?.focus();
-      }
+      // Send to Realtime API
+      realtime.sendTextMessage(trimmedInput);
     },
-    [week, isSending, addAssistantMessage]
+    [isSending, realtime, saveMessageToServer]
   );
 
   function handleSubmit(e: FormEvent) {
@@ -745,7 +314,7 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
   }
 
   async function handleEndWeek() {
-    stopSpeaking();
+    realtime.disconnect();
     setIsLoading(true);
     try {
       const res = await fetch("/api/skippy", {
@@ -755,7 +324,7 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
       });
       if (!res.ok) throw new Error("Failed to complete week");
       router.push("/home");
-    } catch (err) {
+    } catch {
       setError("Failed to mark week complete. Please try again.");
       setIsLoading(false);
     }
@@ -768,65 +337,54 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
     }
   }
 
-  function startRecording() {
-    stopSpeaking();
-    stt.startListening();
+  async function startRecording() {
+    if (!realtime.isConnected) {
+      setError("Not connected. Please wait for connection.");
+      return;
+    }
+
+    // Barge-in if Skippy is speaking
+    if (streamingMessageIdRef.current) {
+      const msgId = streamingMessageIdRef.current;
+      setMessages((prev) => prev.filter((m) => m.id !== msgId));
+      streamingMessageIdRef.current = null;
+      realtime.cancelResponse();
+      realtime.stopAudio();
+    }
+
+    setIsRecording(true);
+    await realtime.startMicrophone();
   }
 
   function stopRecording() {
-    stt.stopListening();
-  }
-
-  function sendTranscript() {
-    const text = editableTranscript.trim();
-    if (text && countWords(text) >= MIN_TRANSCRIPT_WORDS) {
-      setIsReviewingTranscript(false);
-      setEditableTranscript("");
-      stt.resetTranscript();
-      submitMessage(text);
-    }
-  }
-
-  function recordAgain() {
-    setIsReviewingTranscript(false);
-    setEditableTranscript("");
-    stt.resetTranscript();
-    startRecording();
-  }
-
-  function cancelReview() {
-    setIsReviewingTranscript(false);
-    setEditableTranscript("");
-    stt.resetTranscript();
+    realtime.stopMicrophone();
+    setIsRecording(false);
   }
 
   function clearError() {
     setError(null);
-    stt.clearError();
   }
 
-  const wordCount = countWords(editableTranscript);
-  const canSendTranscript = wordCount >= MIN_TRANSCRIPT_WORDS;
+  function retryConnection() {
+    if (audioRef.current && systemPromptRef.current) {
+      setError(null);
+      realtime.connect(systemPromptRef.current, audioRef.current);
+    }
+  }
 
   return (
     <main className="flex min-h-screen flex-col bg-neutral-900 text-white">
+      {/* Hidden audio element for WebRTC */}
+      <audio ref={audioRef} autoPlay />
+
       {/* Debug Badge - only show in development */}
       {process.env.NODE_ENV === "development" && (
         <div className="fixed top-2 right-2 z-50 rounded bg-black/80 px-2 py-1 text-[10px] font-mono text-white/70 max-w-[200px]">
           <div>Week: {week}</div>
-          <div>Status: {debugInfo.pipelineStatus}</div>
-          <div>Audio: {debugInfo.audioReady ? "ready" : "no"} | {debugInfo.audioPlaying ? "playing" : "stopped"}</div>
-          <div>Text: {debugInfo.revealedLength}/{debugInfo.fullTextLength}</div>
-          {debugInfo.lastError && <div className="text-red-400">Err: {debugInfo.lastError}</div>}
-          {latencyInfo && (
-            <div className="mt-1 pt-1 border-t border-white/20">
-              <div className="text-green-400 font-bold">Latency:</div>
-              {latencyInfo.total && <div>Total: {latencyInfo.total}</div>}
-              {latencyInfo.serverLLM && <div>LLM: {latencyInfo.serverLLM}</div>}
-              {latencyInfo.tts && <div>TTS: {latencyInfo.tts}</div>}
-              {latencyInfo.api && <div>API: {latencyInfo.api}</div>}
-            </div>
-          )}
+          <div>Connection: {debugInfo.connectionState}</div>
+          <div>Recording: {isRecording ? "yes" : "no"}</div>
+          {debugInfo.streamingMessageId && <div>Streaming: {debugInfo.streamingMessageId.slice(-6)}</div>}
+          {debugInfo.lastEvent && <div>Event: {debugInfo.lastEvent}</div>}
         </div>
       )}
 
@@ -876,11 +434,10 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
                 <MessageBubble
                   key={message.id}
                   message={message}
-                  onRetry={() => retryAudio(message.id)}
-                  onShowText={() => showTextFallback(message.id)}
+                  showTextInstantly={showTextInstantly}
                 />
               ))}
-              {isSending && (
+              {isSending && !streamingMessageIdRef.current && (
                 <div className="flex justify-start">
                   <div className="rounded-2xl rounded-bl-md bg-white/[0.06] px-4 py-3">
                     <LoadingDots />
@@ -894,85 +451,46 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
       </div>
 
       {/* Error bar */}
-      {(error || stt.error) && (
+      {error && (
         <div className="border-t border-red-500/20 bg-red-500/10 px-6 py-3">
           <div className="mx-auto flex max-w-3xl items-center justify-between">
-            <p className="text-sm text-red-400">{error || stt.error}</p>
-            <button onClick={clearError} className="text-xs text-red-400/70 hover:text-red-400">
-              Dismiss
-            </button>
+            <p className="text-sm text-red-400">{error}</p>
+            <div className="flex gap-2">
+              {debugInfo.connectionState === "error" && (
+                <button onClick={retryConnection} className="text-xs text-red-400/70 hover:text-red-400">
+                  Retry
+                </button>
+              )}
+              <button onClick={clearError} className="text-xs text-red-400/70 hover:text-red-400">
+                Dismiss
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Recording indicator */}
-      {stt.isListening && (
+      {isRecording && (
         <div className="border-t border-red-500/20 bg-red-500/10 px-6 py-4">
           <div className="mx-auto max-w-3xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <RecordingIndicator />
-                <div>
-                  <span className="text-sm font-medium text-red-400">Recording</span>
-                  <span className="ml-2 text-sm text-white/60">{formatTime(stt.elapsedTime)}</span>
-                </div>
+                <span className="text-sm font-medium text-red-400">Listening...</span>
               </div>
               <button
                 onClick={stopRecording}
                 className="rounded-lg bg-red-500/20 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/30 transition"
               >
-                Stop Recording
+                Stop
               </button>
-            </div>
-            {stt.currentTranscript && (
-              <p className="mt-3 text-sm text-white/60 italic">"{stt.currentTranscript}"</p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Transcript review */}
-      {isReviewingTranscript && (
-        <div className="border-t border-blue-500/20 bg-blue-500/10 px-6 py-4">
-          <div className="mx-auto max-w-3xl space-y-3">
-            <p className="text-sm font-medium text-blue-400">Review your message</p>
-            <textarea
-              ref={transcriptInputRef}
-              value={editableTranscript}
-              onChange={(e) => setEditableTranscript(e.target.value)}
-              rows={3}
-              className="w-full resize-none rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-white placeholder-white/40 focus:border-white/30 focus:outline-none"
-              placeholder="Your message..."
-            />
-            <div className="flex items-center justify-between">
-              <div className="text-xs text-white/50">
-                {wordCount} word{wordCount !== 1 ? "s" : ""}
-                {!canSendTranscript && (
-                  <span className="ml-2 text-yellow-400">(minimum {MIN_TRANSCRIPT_WORDS} words)</span>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <button onClick={cancelReview} className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white/70 hover:bg-white/20 transition">
-                  Cancel
-                </button>
-                <button onClick={recordAgain} className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition">
-                  Record Again
-                </button>
-                <button
-                  onClick={sendTranscript}
-                  disabled={!canSendTranscript}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Send
-                </button>
-              </div>
             </div>
           </div>
         </div>
       )}
 
       {/* Input */}
-      {!stt.isListening && !isReviewingTranscript && (
+      {!isRecording && (
         <div className="border-t border-white/10 px-6 py-4">
           <form onSubmit={handleSubmit} className="mx-auto max-w-3xl">
             <div className="flex gap-2">
@@ -981,39 +499,47 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
-                placeholder="Type or tap Record..."
-                disabled={isLoading || isSending}
+                placeholder={realtime.isConnected ? "Type or tap Record..." : "Connecting..."}
+                disabled={isLoading || isSending || !realtime.isConnected}
                 rows={1}
                 className="flex-1 resize-none rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-white placeholder-white/40 focus:border-white/30 focus:outline-none disabled:opacity-50"
               />
               <button
                 type="submit"
-                disabled={!input.trim() || isLoading || isSending}
+                disabled={!input.trim() || isLoading || isSending || !realtime.isConnected}
                 className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 disabled:opacity-50"
               >
                 <SendIcon />
               </button>
-              {stt.isSupported && (
-                <button
-                  type="button"
-                  onClick={startRecording}
-                  disabled={isLoading || isSending}
-                  className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 disabled:opacity-50"
-                >
-                  <MicIcon />
-                </button>
-              )}
               <button
                 type="button"
-                onClick={stopSpeaking}
-                disabled={!debugInfo.audioPlaying}
+                onClick={startRecording}
+                disabled={isLoading || isSending || !realtime.isConnected}
+                className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 disabled:opacity-50"
+              >
+                <MicIcon />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  realtime.cancelResponse();
+                  realtime.stopAudio();
+                  if (streamingMessageIdRef.current) {
+                    const msgId = streamingMessageIdRef.current;
+                    setMessages((prev) => prev.filter((m) => m.id !== msgId));
+                    streamingMessageIdRef.current = null;
+                  }
+                }}
+                disabled={!streamingMessageIdRef.current}
                 className="rounded-xl bg-white/10 px-4 py-3 font-medium text-white transition hover:bg-white/20 disabled:opacity-50"
               >
                 <StopIcon />
               </button>
             </div>
             <p className="mt-2 text-xs text-white/30">
-              {stt.isSupported ? "Type, press Cmd+Enter, or tap Record to speak" : "Press Cmd+Enter to send"}
+              {realtime.isConnected
+                ? "Type, press Cmd+Enter, or tap Record to speak"
+                : "Connecting to voice service..."}
             </p>
           </form>
         </div>
@@ -1023,25 +549,17 @@ export function SkippyChat({ week, weekTitle }: SkippyChatProps) {
 }
 
 // =============================================================================
-// MESSAGE BUBBLE - STRICT VOICE-FIRST RENDERING
+// MESSAGE BUBBLE
 // =============================================================================
 
 type MessageBubbleProps = {
   message: Message;
-  onRetry: () => void;
-  onShowText: () => void;
+  showTextInstantly: boolean;
 };
 
-function MessageBubble({ message, onRetry, onShowText }: MessageBubbleProps) {
+function MessageBubble({ message, showTextInstantly }: MessageBubbleProps) {
   const isUser = message.role === "user";
   const { status, revealedText, fullText } = message;
-
-  // STRICT RULES:
-  // - User messages: always show fullText
-  // - Assistant requesting/audio_ready: show ONLY placeholder, NO text
-  // - Assistant playing: show ONLY revealedText (may be empty at start)
-  // - Assistant done: show revealedText (which equals fullText)
-  // - Assistant error: show error UI with Retry + Show Text buttons
 
   if (isUser) {
     return (
@@ -1053,52 +571,34 @@ function MessageBubble({ message, onRetry, onShowText }: MessageBubbleProps) {
     );
   }
 
-  // Assistant message - voice-first rendering
-  const showPlaceholder = status === "requesting" || status === "audio_ready";
-  const isRevealing = status === "playing";
-  const isError = status === "error";
+  // Assistant message
+  const isStreaming = status === "streaming";
   const isDone = status === "done";
+  const isError = status === "error";
+
+  // Text to display
+  const displayText = showTextInstantly && isDone ? fullText : revealedText;
 
   return (
     <div className="flex justify-start">
       <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-white/[0.06] px-4 py-3 text-white/90">
-        {showPlaceholder && (
+        {isStreaming && !displayText && (
           <div className="flex items-center gap-2 text-white/70">
             <SpeakingIndicator />
-            <span>Skippy is preparing...</span>
+            <span>Skippy is speaking...</span>
           </div>
         )}
 
-        {isRevealing && (
+        {(isStreaming || isDone) && displayText && (
           <div className="whitespace-pre-wrap text-[0.95rem] leading-relaxed">
-            {revealedText || <span className="text-white/50">...</span>}
-            <span className="animate-pulse">▌</span>
-          </div>
-        )}
-
-        {isDone && (
-          <div className="whitespace-pre-wrap text-[0.95rem] leading-relaxed">
-            {revealedText}
+            {displayText}
+            {isStreaming && <span className="animate-pulse">▌</span>}
           </div>
         )}
 
         {isError && (
           <div className="space-y-2">
-            <p className="text-red-400 text-sm">{message.errorMessage || "Audio failed to load"}</p>
-            <div className="flex gap-2">
-              <button
-                onClick={onRetry}
-                className="rounded bg-white/10 px-3 py-1 text-xs font-medium text-white hover:bg-white/20 transition"
-              >
-                Try Again
-              </button>
-              <button
-                onClick={onShowText}
-                className="rounded bg-white/10 px-3 py-1 text-xs font-medium text-white/70 hover:bg-white/20 transition"
-              >
-                Show Text
-              </button>
-            </div>
+            <p className="text-red-400 text-sm">{message.errorMessage || "Something went wrong"}</p>
           </div>
         )}
       </div>
@@ -1134,10 +634,6 @@ function SpeakingIndicator() {
       <div className="h-3 w-1 animate-pulse rounded-full bg-white/50 [animation-delay:-0.3s]" />
     </div>
   );
-}
-
-function countWords(text: string): number {
-  return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
 function SendIcon() {

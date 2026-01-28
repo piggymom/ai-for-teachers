@@ -46,12 +46,14 @@ const SKIPPY_MAX_TOKENS = 300; // Short responses for conversation
 const SKIPPY_TEMPERATURE = 0.7;
 const MAX_HISTORY_MESSAGES = 10; // Only send last N messages
 
-type SkippyEventType = "start_week" | "user_message" | "end_week";
+type SkippyEventType = "start_week" | "user_message" | "end_week" | "save_message";
 
 type SkippyRequest = {
   event: SkippyEventType;
   week: number;
   message?: string; // Required for user_message event
+  role?: "user" | "assistant"; // Required for save_message event
+  content?: string; // Required for save_message event
 };
 
 export async function POST(req: NextRequest) {
@@ -96,6 +98,13 @@ export async function POST(req: NextRequest) {
       case "end_week":
         return handleEndWeek(userId, week);
 
+      case "save_message":
+        // Used by Realtime API client to persist messages after conversation
+        if (!body.role || !body.content) {
+          return NextResponse.json({ error: "Role and content required" }, { status: 400 });
+        }
+        return handleSaveMessage(userId, week, body.role, body.content);
+
       default:
         return NextResponse.json({ error: "Invalid event type" }, { status: 400 });
     }
@@ -129,11 +138,12 @@ async function handleStartWeek(userId: string, week: number) {
     const alreadyStarted = await hasConversationStarted(userId, week);
 
     if (alreadyStarted) {
-      // Return existing conversation
+      // Return existing conversation with system prompt for Realtime API
       return NextResponse.json({
         event: "start_week",
         week,
         history: context.history,
+        systemPrompt: context.systemPrompt, // For Realtime API session config
         resumed: true,
       });
     }
@@ -146,10 +156,29 @@ async function handleStartWeek(userId: string, week: number) {
       event: "start_week",
       week,
       history: [{ role: "assistant", content: openingMessage }],
+      systemPrompt: context.systemPrompt, // For Realtime API session config
       resumed: false,
     });
   } catch (error) {
     console.error("Start week error:", error);
+    throw error;
+  }
+}
+
+async function handleSaveMessage(
+  userId: string,
+  week: number,
+  role: "user" | "assistant",
+  content: string
+) {
+  try {
+    await saveMessage(userId, week, role, content);
+    return NextResponse.json({
+      event: "save_message",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Save message error:", error);
     throw error;
   }
 }
