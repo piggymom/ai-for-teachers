@@ -105,59 +105,71 @@ function generateIntroWeekPrompt(
   teacherQuotes: string,
   profileContext: string | null
 ): string {
-  return `You are writing a script for a 2-3 minute podcast episode. Two hosts are welcoming a teacher who just started the "AI for Teachers" course. This is their INTRODUCTION episode—it should feel warm, personal, and set up excitement for the journey ahead.
+  return `You are writing a script for a 2-3 minute podcast episode. Two hosts are creating a PERSONALIZED WELCOME for a teacher who just joined "AI for Teachers." The tone should be warm, genuine, and conversational—like two thoughtful friends who are genuinely interested in this person's story.
 
 ## THE TWO HOSTS
 
-**Sam** (Host A): The curious one. Gets genuinely excited about learning who this teacher is. Warm and welcoming. Uses phrases like "Oh I love that...", "That's such an interesting background...", "You know what excites me about their goals?". Picks up on personal details.
+**Sam** (Host A): Warm and curious. Notices the personal details—their specific context, challenges, what they said. Asks good questions and makes observations that show they were really listening. Friendly without being performative.
 
-**Alex** (Host B): The synthesizer. Connects the teacher's goals to what they'll learn in the course. Offers previews like "and that connects perfectly to Week 3 where they'll..." Grounds things in practical value. Builds anticipation.
+**Alex** (Host B): The connector. Links this teacher's specific situation to what's ahead in the course. Sees patterns and possibilities. Offers reassurance and clarity about the journey ahead. Grounded but encouraging.
 
-## CRITICAL PODCAST QUALITIES (NotebookLM-style)
+## THE TONE WE'RE GOING FOR
 
-1. **Interruptions & reactions**: Hosts should interrupt naturally ("Oh!" "Wait—" "Yes!" "Mmm"). Not every line is a complete thought.
-2. **Building on each other**: Alex might say "And building on that..." or Sam might say "That reminds me of something else they mentioned..."
-3. **Genuine warmth**: This is a welcome episode! Be encouraging about their decision to take the course.
-4. **Specific references**: Quote or paraphrase SPECIFIC things about this teacher. Not generic welcomes.
-5. **Course preview**: Naturally mention 2-3 specific weeks that connect to their goals/interests.
-6. **Brief moments**: Many exchanges should be short (5-15 words). Not every turn is a paragraph.
+Think: Two thoughtful educators having coffee, genuinely interested in a new colleague's story. NOT morning radio DJs. NOT two analysts presenting a case study.
+
+Natural warmth, not manufactured hype:
+- "What stood out to me was when they said..."
+- "That's actually really common—and it's exactly what Week 3 addresses."
+- "I think they're going to get a lot out of this."
+- "The fact that they mentioned [specific thing]—that tells me a lot about where they're at."
+
+## PODCAST STRUCTURE
+
+1. **OPEN WITH THEIR STORY (2-3 exchanges)**: Ground it in who they are. Their role, context, what brought them here. Make it specific and real.
+
+2. **WHAT THEY SHARED (3-4 exchanges)**: Reflect back what they said—their challenges, constraints, goals. Quote them naturally. Show you were listening.
+
+3. **THE DEEPER WHY (2-3 exchanges)**: What's really driving them? Usually it's about time, stress, being better at their craft, or feeling behind. Name it without overdramatizing.
+
+4. **WHAT'S AHEAD (3-4 exchanges)**: Connect their specific situation to 2-3 course moments that will resonate for them. Be specific: "Given that they're dealing with [challenge], Week X is going to be particularly useful."
+
+5. **CLOSE WITH CONFIDENCE (2-3 exchanges)**: Reassure them they're in the right place. End with genuine encouragement—not a sales pitch.
 
 ## WHAT THIS COURSE COVERS
 ${COURSE_OVERVIEW}
 
-Reference specific weeks that connect to what this teacher cares about! "When they get to Week 4, they're going to love..."
+Pick 2-3 weeks that genuinely connect to their situation. Don't list—weave them into the conversation naturally.
 
-## ABOUT THIS TEACHER
+## THIS TEACHER'S PROFILE
 ${profileContext || "No specific profile context available."}
 
-This is the star of the episode! Reference their role, subjects, grade levels, goals, and constraints throughout.
+Use their specifics—role, subjects, grades, constraints, goals. This makes the conversation feel like it's truly for them.
 
-## WHAT THEY SHARED IN THEIR INTRO CONVERSATION
+## QUOTES FROM THEIR CONVERSATION
 ${teacherQuotes}
 
-Use these heavily! This podcast is about THEM—their background, goals, what brought them here.
+Reference these naturally: "When they said [quote], that really stood out to me."
 
-## THE FULL INTRO CONVERSATION
+## THE FULL CONVERSATION
 ${conversationText}
 
 ## OUTPUT FORMAT
 
-Write ONLY the script, formatted exactly like this:
+Write ONLY the script:
 A: [Sam's line]
 B: [Alex's line]
-A: [Sam's line]
 ...
 
-Guidelines:
-- 14-20 exchanges total
-- Start with something like "So we just met [their role]..." or "I'm so excited about this teacher..."—make it personal immediately
-- Celebrate what makes this teacher's context interesting
-- Preview 2-3 specific weeks that connect to their stated goals
-- End with genuine encouragement for the journey ahead
-- Include natural interruptions and reactions
-- Reference their specific subject area, grade level, and constraints
+REQUIREMENTS:
+- 16-22 exchanges total
+- Quote them at least 2-3 times (naturally, not forced)
+- Identify their emotional core without overdramatizing
+- Connect to 2-3 specific course moments
+- Warm and genuine, not hyped or performative
+- End with reassurance and encouragement
+- Conversation should feel natural—varied pace, some shorter responses, some longer
 
-Do NOT include any preamble, notes, or commentary. ONLY the A:/B: script.`;
+Do NOT include preamble or notes. ONLY the A:/B: script.`;
 }
 
 function generateStandardWeekPrompt(

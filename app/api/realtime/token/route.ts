@@ -16,7 +16,7 @@ import { getSkippyContext } from "@/lib/skippy";
 
 // Voice selection - using "ash" for British-sounding warm voice
 // Available voices: alloy, ash, ballad, coral, echo, sage, shimmer, verse
-const REALTIME_VOICE = "ash";
+const REALTIME_VOICE = "sage";
 
 export async function POST(req: NextRequest) {
   try {
