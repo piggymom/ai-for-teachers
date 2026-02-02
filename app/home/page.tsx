@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCompletionState } from "@/lib/useCompletionState";
 import { AuthButton } from "../components/auth-button";
+import { WelcomeVideo } from "../components/welcome-video";
 
 type WeekStatus = "available" | "comingSoon" | "completed";
 
@@ -18,12 +19,6 @@ type WeekCardProps = {
   variant?: "default" | "orientation";
 };
 
-const statusCopy: Record<WeekStatus, string> = {
-  available: "Available",
-  comingSoon: "Releasing next",
-  completed: "Completed",
-};
-
 const WeekCard = ({
   weekNumber,
   title,
@@ -33,93 +28,69 @@ const WeekCard = ({
   href,
   takeawaysHref,
   statusLabel,
-  variant = "default",
 }: WeekCardProps) => {
   const isInteractive = status !== "comingSoon" && Boolean(href);
   const isCompleted = status === "completed";
   const takeawaysLink = isCompleted && takeawaysHref ? takeawaysHref : undefined;
-  const statusText =
-    status === "completed" ? "Completed" : statusLabel ?? statusCopy[status];
-  const cardClasses =
-    "group relative flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left transition";
-  const hoverClasses = "hover:-translate-y-0.5 hover:border-white/25";
-  const focusClasses =
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30";
-  const variantClasses =
-    variant === "orientation" ? "border-white/8 bg-white/[0.03]" : "";
-  const comingSoonClasses = "opacity-60";
-  const completedClasses = isCompleted ? "bg-white/[0.035]" : "";
-  const metaTextClass = isCompleted ? "text-white/35" : "text-white/40";
-  const titleTextClass = isCompleted ? "text-white/85" : "text-white";
-  const descriptionTextClass = isCompleted ? "text-white/60" : "text-white/70";
-  const pillTextClass = isCompleted ? "text-white/35" : "text-white/45";
-  const pillBorderClass = isCompleted ? "border-white/10" : "border-white/15";
-  const contentWrapperClass = `relative z-10 flex h-full flex-col gap-5 ${
-    isInteractive ? "pointer-events-none" : ""
-  }`;
+
   const content = (
-    <div className={contentWrapperClass}>
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2">
-          <p
-            className={`text-xs font-semibold uppercase tracking-[0.32em] ${metaTextClass}`}
-          >
-            Week {weekNumber}
-          </p>
-          <h2 className={`text-xl font-semibold ${titleTextClass} sm:text-2xl`}>
+    <div className={`relative z-10 flex h-full flex-col gap-2.5 ${isInteractive ? "pointer-events-none" : ""}`}>
+      <div className="flex items-baseline justify-between gap-4">
+        <div className="flex items-baseline gap-3">
+          <span className={`text-[13px] tabular-nums ${isCompleted ? "text-white/20" : "text-white/30"}`}>
+            {weekNumber.toString().padStart(2, "0")}
+          </span>
+          <h2 className={`text-[15px] font-medium ${isCompleted ? "text-white/50" : "text-white/85"}`}>
             {title}
           </h2>
+          {isCompleted && (
+            <svg
+              className="h-3.5 w-3.5 text-emerald-500/50"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          )}
         </div>
-        <div
-          className={`flex flex-col items-end gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.28em] ${pillTextClass}`}
-        >
-          <span className={`rounded-full border ${pillBorderClass} px-3 py-1`}>
-            {minutes} min
-          </span>
-          <span className="rounded-full border border-white/10 px-3 py-1">
-            {statusText}
-          </span>
-        </div>
+        <span className={`text-[13px] ${isCompleted ? "text-white/15" : "text-white/25"}`}>
+          {minutes}m
+        </span>
       </div>
-      <p className={`text-sm leading-relaxed ${descriptionTextClass} sm:text-base`}>
+      <p className={`pl-7 text-[14px] leading-relaxed ${isCompleted ? "text-white/25" : "text-white/40"}`}>
         {description}
       </p>
-      {takeawaysLink ? (
-        <div className="mt-auto flex justify-end">
+      {takeawaysLink && (
+        <div className="pl-7 pt-1">
           <Link
             aria-label={`View Week ${weekNumber} takeaways`}
-            className="pointer-events-auto rounded-sm text-xs font-semibold text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+            className="pointer-events-auto text-[13px] text-cyan-400/60 transition hover:text-cyan-400"
             href={takeawaysLink}
           >
-            View takeaways →
+            View takeaways
           </Link>
         </div>
-      ) : null}
+      )}
     </div>
   );
 
   if (status === "comingSoon" || !href) {
     return (
-      <div
-        aria-disabled="true"
-        className={`${cardClasses} ${variantClasses} ${comingSoonClasses} ${completedClasses}`}
-      >
+      <div aria-disabled="true" className="group relative flex h-full flex-col py-5 text-left opacity-40">
         {content}
       </div>
     );
   }
 
   return (
-    <div
-      className={`${cardClasses} ${variantClasses} ${hoverClasses} ${completedClasses}`}
-    >
+    <div className="group relative flex h-full flex-col py-5 text-left transition-colors duration-150 hover:bg-white/[0.03]">
       <Link
         aria-label={`Go to Week ${weekNumber}`}
-        className={`absolute inset-0 rounded-2xl ${focusClasses}`}
+        className="absolute inset-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400/30"
         href={href}
-      >
-        <span className="sr-only">Go to Week {weekNumber}</span>
-      </Link>
+      />
       {content}
     </div>
   );
@@ -138,6 +109,7 @@ export default function Home() {
       status: completionState[0] ? "completed" : "available",
       statusLabel: "Start here",
       href: "/week-0",
+      takeawaysHref: "/week-0/takeaways",
       variant: "orientation",
     },
     {
@@ -203,26 +175,24 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen bg-neutral-900 text-white">
-      <div className="mx-auto flex max-w-4xl flex-col gap-10 px-6 py-14 sm:gap-12 sm:py-16 lg:px-12">
-        <header className="space-y-5">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/50">
-              Course Index
-            </p>
-            <AuthButton />
-          </div>
-          <div className="space-y-3">
-            <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              AI for Teachers
-            </h1>
-            <p className="max-w-2xl text-lg leading-relaxed text-white/70 sm:text-xl">
-              Practical, classroom-safe guidance for using AI with clarity and no hype.
-            </p>
-          </div>
+    <main className="min-h-screen bg-[#191919] text-white">
+      <div className="fixed right-6 top-6 z-10">
+        <AuthButton />
+      </div>
+      <div className="mx-auto flex max-w-xl flex-col gap-12 px-6 py-20">
+        {/* Welcome video tile - shows while generating, then video when ready */}
+        <WelcomeVideo />
+
+        <header className="space-y-3">
+          <h1 className="text-2xl font-normal tracking-tight text-white/90">
+            AI for Teachers
+          </h1>
+          <p className="text-[15px] font-light leading-relaxed text-white/40">
+            Practical guidance for using AI with clarity.
+          </p>
         </header>
 
-        <section className="grid gap-5 sm:gap-6">
+        <section className="flex flex-col divide-y divide-white/[0.06]">
           {weeks.map((week) => (
             <WeekCard key={week.weekNumber} {...week} />
           ))}
