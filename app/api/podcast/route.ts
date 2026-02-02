@@ -80,6 +80,10 @@ async function generatePodcastScript(
 
   // Parse the script into segments
   const scriptText = response.content[0].type === "text" ? response.content[0].text : "";
+
+  // Log the full script for debugging
+  console.log("[PODCAST] Generated script:\n" + scriptText);
+
   const lines = scriptText.trim().split("\n").filter((line) => line.trim());
 
   const segments: PodcastSegment[] = [];
@@ -164,64 +168,84 @@ function generateStandardWeekPrompt(
   weekTitle: string,
   moduleContext: string
 ): string {
-  return `You are writing a script for a 2-3 minute podcast episode. Two hosts are discussing a teacher's recent AI learning session. This should sound like a REAL podcast—natural, warm, with genuine reactions.
+  // What's coming next week (for the preview/hook)
+  const nextWeekPreview: Record<number, string> = {
+    1: "Week 2 is all about prompting fundamentals—the 4C framework: Context, Constraints, Command, Criteria. They're going to learn how to get exactly what they need from AI, every time.",
+    2: "Week 3 is where it gets really practical—lesson planning with AI. They'll use AI as a brainstorming partner while staying in the driver's seat.",
+    3: "Week 4 tackles feedback and assessment—generating feedback drafts, rubric-aligned comments. This is where AI starts saving serious time.",
+    4: "Week 5 is communication and admin—parent emails, newsletters, all that stuff that eats up planning time. This is going to be huge for them.",
+    5: "Week 6 is about building sustainable habits—creating their personal prompt library, figuring out where AI actually helps vs. where it's overhead.",
+    6: "They've completed the course! Now it's about putting it all into practice and building those sustainable routines.",
+  };
+
+  return `You are writing a script for a 2-3 minute podcast episode. Two hosts are creating a PERSONALIZED RECAP for a specific teacher who just completed Week ${weekNumber}. This is FOR them—make them feel seen, celebrated, and excited to continue.
 
 ## THE TWO HOSTS
 
-**Sam** (Host A): The curious one. Gets genuinely excited about insights. Asks "wait, say more about that" type questions. Uses phrases like "Oh that's interesting...", "I love that they...", "You know what strikes me?". Tends to pick up on the human/emotional elements.
+**Sam** (Host A): Warm, enthusiastic, picks up on personal details. Gets excited about the teacher's specific wins. Uses their context naturally ("As a high school Social Studies teacher, that's huge!"). Asks rhetorical questions that make the listener reflect.
 
-**Alex** (Host B): The synthesizer. Connects ideas to bigger concepts. Offers "the thing that's actually happening here is..." type insights. Grounds things in practical application. Sometimes gently pushes back or adds nuance.
+**Alex** (Host B): The insight-giver. Connects what the teacher did to the bigger "why." Names the skills they've built. Creates "aha" moments. Previews what's coming next to build anticipation.
 
-## CRITICAL PODCAST QUALITIES (NotebookLM-style)
+## PODCAST STRUCTURE (Follow this arc!)
 
-1. **Interruptions & reactions**: Hosts should interrupt naturally ("Oh!" "Wait—" "Yes!" "Mmm"). Not every line is a complete thought.
-2. **Building on each other**: Alex might say "And building on that..." or Sam might say "That connects to something else they said..."
-3. **Genuine surprise/delight**: When something interesting comes up, react to it. "I didn't expect them to say..."
-4. **Specific references**: Quote or paraphrase SPECIFIC things the teacher said. Not generic summaries.
-5. **Thinking out loud**: "I wonder if..." "What I'm hearing is..." "The way I'd put it..."
-6. **Brief moments**: Many exchanges should be short (5-15 words). Not every turn is a paragraph.
+1. **HOOK (2-3 exchanges)**: Open with something specific and personal. NOT generic. Use their role, subject, or a specific moment from their conversation. Make them think "oh, they're talking about ME."
 
-## THIS WEEK'S KEY THEMES (Week ${weekNumber}: ${weekTitle})
-${moduleContext}
+2. **CELEBRATE WINS (3-4 exchanges)**: What did they DO in this session? What breakthroughs did they have? Quote specific things they said or tried. Be genuinely impressed.
 
-IMPORTANT: The hosts MUST explicitly discuss 2-3 of these key themes/concepts during the episode. Weave them naturally into the conversation:
-- "This connects to one of the big ideas this week—[concept]"
-- "And that's really the heart of what Week ${weekNumber} is about: [concept]"
-- "The key insight here is [concept from the week]"
+3. **CONSOLIDATE LEARNING (4-5 exchanges)**: Name 2-3 key concepts from this week that they now understand. Make it explicit: "What you've learned here is [concept]." Connect their experience to the learning objectives.
 
-Don't just summarize what the teacher said—connect it to the learning objectives!
+4. **CONNECT TO GOALS (2-3 exchanges)**: Tie back to their stated goals (saving time, better planning, etc.). "Remember, they said they wanted to [goal]—and this is exactly how that happens."
 
-## ABOUT THIS TEACHER
+5. **PREVIEW & HOOK FOR NEXT WEEK (2-3 exchanges)**: Build genuine excitement for what's coming. Be specific about Week ${weekNumber + 1}. End with energy—they should WANT to start the next session.
+
+## CRITICAL QUALITIES
+
+- **ENERGY**: This should feel exciting, not like a dry summary. Use exclamations, genuine reactions.
+- **SPECIFIC**: Quote them. Reference their exact subject, grade level, school context, constraints.
+- **ACTIONABLE**: They should walk away knowing what they learned and what they can DO with it.
+- **FORWARD MOMENTUM**: End with them eager for Week ${weekNumber + 1}, not just satisfied with Week ${weekNumber}.
+
+## THIS TEACHER'S PROFILE
 ${profileContext || "No specific profile context available."}
 
-Reference their teaching context (grade level, subject, constraints) when relevant. Make it feel like you're talking about a REAL person.
+USE THIS! Reference their role, subjects, grade levels, constraints, and goals throughout. Make it personal.
 
-## TEACHER QUOTES TO REFERENCE
+## WHAT'S COMING NEXT
+${nextWeekPreview[weekNumber] || "More exciting learning ahead!"}
+
+Build anticipation for this! "Wait until they get to Week ${weekNumber + 1}..."
+
+## WEEK ${weekNumber} KEY CONCEPTS (${weekTitle})
+${moduleContext}
+
+These are the learning objectives. The hosts should explicitly name 2-3 of these as things the teacher NOW understands. "What they've really learned here is [concept]."
+
+## SPECIFIC QUOTES FROM THEIR CONVERSATION
 ${teacherQuotes}
 
-Use these! Paraphrase or quote directly. "They said something like..." or "I loved when they mentioned..."
+QUOTE THESE DIRECTLY. "They literally said '[quote]'—I love that!" This is what makes it feel personalized.
 
 ## THE FULL CONVERSATION
 ${conversationText}
 
 ## OUTPUT FORMAT
 
-Write ONLY the script, formatted exactly like this:
+Write ONLY the script:
 A: [Sam's line]
 B: [Alex's line]
-A: [Sam's line]
 ...
 
-Guidelines:
-- 14-20 exchanges total
-- Vary line length: some short reactions (3-8 words), some longer insights (1-2 sentences)
-- Start with a warm, personalized hook—NOT "Welcome to the podcast"
-- MUST explicitly mention 2-3 key concepts from this week's learning objectives
-- End with something encouraging and forward-looking
-- Include at least 3-4 interruption moments
-- Reference at least 2-3 specific things the teacher said
+Requirements:
+- 16-22 exchanges total
+- Mix short reactions ("Yes!" "Oh wow." "Exactly.") with fuller thoughts
+- Start with their specific context, not a generic opener
+- Must quote at least 3 specific things they said
+- Must name at least 2 key concepts from this week as "things you now know"
+- Must preview Week ${weekNumber + 1} with genuine excitement
+- Must reference their stated goals at least once
+- End on a high note—they should feel accomplished AND eager for more
 
-Do NOT include any preamble, notes, or commentary. ONLY the A:/B: script.`;
+Do NOT include any preamble or notes. ONLY the A:/B: formatted script.`;
 }
 
 /**
