@@ -123,6 +123,8 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
   // INIT
   // =============================================================================
 
+  const needsOpeningRef = useRef(false);
+
   useEffect(() => {
     if (initCalledRef.current) return;
     initCalledRef.current = true;
@@ -148,6 +150,9 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
           })));
         }
 
+        // If this is a new conversation (not resumed), we'll need to trigger the opening
+        needsOpeningRef.current = !data.resumed && data.history?.length === 0;
+
         setIsLoading(false);
 
         if (audioRef.current) {
@@ -162,6 +167,17 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
 
     init();
   }, [week, realtime]);
+
+  // Trigger opening message after realtime connects (for new conversations)
+  useEffect(() => {
+    if (realtime.isConnected && needsOpeningRef.current) {
+      needsOpeningRef.current = false;
+      // Small delay to ensure connection is fully ready
+      setTimeout(() => {
+        realtime.triggerResponse();
+      }, 500);
+    }
+  }, [realtime.isConnected, realtime]);
 
   // Scroll
   useEffect(() => {

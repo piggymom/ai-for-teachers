@@ -22,11 +22,11 @@ Key topics:
 - How to use Skippy effectively
 - Setting expectations for AI as a teaching assistant
 Keep it welcoming and orient them to the journey ahead.`,
-    openingMessage: `Welcome to AI for Teachers! I'm Skippy, and I'll be your guide through this 6-week journey.
+    openingMessage: `Hey {{name}}! I'm Skippy, and I'll be your guide through this 6-week course.
 
-This course is designed to help you build practical AI skills you can use in your classroom—without the hype, and with clear guardrails.
+We're going to build practical AI skills you can use in your classroom—no hype, just real tools. By the end, you'll have prompts, templates, and workflows you actually use.
 
-Before we dive in, I'd love to learn a bit about what brought you here. What's one thing you're hoping to accomplish with AI in your teaching?`,
+What's one thing you're hoping to get out of this course?`,
   },
 
   1: {
@@ -40,11 +40,11 @@ Key topics:
 - Limitations and guardrails: hallucinations, bias, privacy concerns
 - The "fast assistant, not source of truth" mental model
 Help them try: Creating three variations of a lesson (scaffolds, rigor, different hook).`,
-    openingMessage: `Let's start with the foundations. This week is about understanding what AI actually is—and more importantly, what it isn't.
+    openingMessage: `Hey {{name}}! This week we're building your foundation—understanding what AI actually is, and what it's good for in the classroom.
 
-Here's the key insight: AI predicts and produces text based on patterns. It's a fast assistant, not a source of truth.
+The key insight: AI predicts patterns, it doesn't understand meaning. That makes it a fast assistant, not a source of truth. By the end of today, you'll have a prompt you can use for lesson variations.
 
-Tell me about a lesson you teach regularly. I'll help you explore how AI could create useful variations—and where you'd still need your professional judgment.`,
+What's one thing you'd like AI to help you with in your teaching?`,
   },
 
   2: {
@@ -58,11 +58,11 @@ Key topics:
 - Providing examples (few-shot prompting)
 - Being specific about format and length
 Help them practice: Taking a vague request and refining it using the 4C framework.`,
-    openingMessage: `This week we're diving into the skill that makes everything else work: writing effective prompts.
+    openingMessage: `Hey {{name}}! This week is the one that makes everything else click: writing prompts that actually work.
 
-I'll teach you a simple framework called the 4Cs: Context, Constraints, Command, and Criteria.
+I'll teach you the 4Cs—Context, Constraints, Command, Criteria. By the end, you'll have a refined prompt you can reuse.
 
-Let's start with something you actually need. What's a task you've tried (or wanted to try) with AI that didn't go as well as you hoped?`,
+What's a task you've tried with AI that didn't quite give you what you wanted?`,
   },
 
   3: {
@@ -77,11 +77,11 @@ Key topics:
 - Building in student voice and choice
 - Quality control: what to accept, edit, or reject
 Help them apply: Building out a lesson with AI support while maintaining pedagogical ownership.`,
-    openingMessage: `Now we're getting practical. This week is about using AI to speed up your lesson planning—while keeping you in the driver's seat.
+    openingMessage: `Hey {{name}}! Now we're getting practical—using AI to speed up lesson planning while you stay in the driver's seat.
 
-The goal isn't to have AI write your lessons. It's to use AI as a brainstorming partner that helps you explore more options, faster.
+The goal isn't AI-written lessons. It's AI as a brainstorming partner that helps you explore more ideas, faster. By the end, you'll have differentiated materials for an actual lesson.
 
-What's a unit or lesson you're working on right now? Let's build something together.`,
+What's a unit or lesson you're working on right now?`,
   },
 
   4: {
@@ -96,11 +96,11 @@ Key topics:
 - Self and peer assessment tools
 - When AI feedback helps vs. when it harms relationships
 Help them practice: Taking real student work and drafting feedback with AI assistance.`,
-    openingMessage: `Feedback is one of the most time-consuming parts of teaching—and one of the most important. This week, we'll explore how AI can help you give better feedback, not just faster feedback.
+    openingMessage: `Hey {{name}}! Feedback takes forever—but it matters. This week, we'll make AI help you give better feedback, not just faster feedback.
 
-The key is using AI to draft, not deliver. Your voice and relationship with students still matters.
+The key: AI drafts, you finalize. Your voice and relationship with students still matters. By the end, you'll have a feedback workflow you can actually use.
 
-What type of student work do you spend the most time giving feedback on? Let's see how AI could support that process.`,
+What type of student work eats up most of your feedback time?`,
   },
 
   5: {
@@ -115,11 +115,11 @@ Key topics:
 - Handling sensitive communications (with human review)
 - Email templates and response drafting
 Help them try: Drafting a challenging parent communication with AI support.`,
-    openingMessage: `The administrative side of teaching—emails, newsletters, forms—can eat hours every week. This week, we'll make AI your communication assistant.
+    openingMessage: `Hey {{name}}! Emails, newsletters, forms—the admin side of teaching can eat hours. This week, AI becomes your communication assistant.
 
-The best part? These tasks are lower-stakes than instruction, so they're a great place to let AI do more of the heavy lifting.
+Good news: these are lower-stakes than instruction, so you can let AI do more of the heavy lifting. By the end, you'll have templates for the communications that drain your time.
 
-What's a communication task that tends to take you longer than you'd like? Parent updates? Newsletters? Something else?`,
+What communication task takes you longer than it should?`,
   },
 
   6: {
@@ -135,11 +135,11 @@ Key topics:
 - Teaching students about AI responsibly
 - Connecting with other educators using AI
 Help them plan: Identifying 2-3 sustainable ways to integrate AI into their practice.`,
-    openingMessage: `Final week! You've learned the fundamentals—now it's about building habits that stick.
+    openingMessage: `Hey {{name}}! Final week—you've learned the tools, now let's make them stick.
 
-The teachers who get the most from AI aren't the ones who use it for everything. They're the ones who've identified a few specific workflows where AI consistently saves time.
+The teachers who get the most from AI aren't using it for everything. They've found 2-3 specific workflows where it consistently saves time. By the end, you'll have your personal AI playbook.
 
-Looking back at the past weeks, what's resonated most? Let's design your personal AI workflow.`,
+Looking back at the past weeks, what's been most useful for you?`,
   },
 };
 

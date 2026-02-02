@@ -84,10 +84,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid week number" }, { status: 400 });
     }
 
+    // Get user's first name for personalization
+    const userName = session.user.name?.split(" ")[0] || "there";
+
     // Handle different event types
     switch (event) {
       case "start_week":
-        return handleStartWeek(userId, week);
+        return handleStartWeek(userId, week, userName);
 
       case "user_message":
         if (!message || typeof message !== "string") {
@@ -132,9 +135,9 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function handleStartWeek(userId: string, week: number) {
+async function handleStartWeek(userId: string, week: number, userName: string) {
   try {
-    const context = await getSkippyContext(userId, week);
+    const context = await getSkippyContext(userId, week, userName);
     const alreadyStarted = await hasConversationStarted(userId, week);
 
     if (alreadyStarted) {
@@ -148,16 +151,19 @@ async function handleStartWeek(userId: string, week: number) {
       });
     }
 
-    // Start new conversation with opening message
-    const openingMessage = context.modulePrompt.openingMessage;
-    await saveMessage(userId, week, "assistant", openingMessage);
+    // NEW conversation - don't pre-save opening message
+    // The realtime API will generate and speak the opening based on system prompt
+    // Pass the personalized opening template for the system prompt to use
+    const openingHint = context.modulePrompt.openingMessage.replace(/\{\{name\}\}/g, userName);
 
     return NextResponse.json({
       event: "start_week",
       week,
-      history: [{ role: "assistant", content: openingMessage }],
-      systemPrompt: context.systemPrompt, // For Realtime API session config
+      history: [],
+      systemPrompt: context.systemPrompt,
+      openingHint, // The UI will inject this into the first response request
       resumed: false,
+      userName, // Pass name for system prompt personalization
     });
   } catch (error) {
     console.error("Start week error:", error);

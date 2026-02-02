@@ -44,8 +44,11 @@ export async function POST(req: NextRequest) {
       const body = await req.json();
       const week = body.week ?? 1;
 
+      // Get user's first name for personalization
+      const userName = session.user.name?.split(" ")[0] || "there";
+
       // Get the full system prompt with module and profile context
-      const context = await getSkippyContext(session.user.id, week);
+      const context = await getSkippyContext(session.user.id, week, userName);
       systemPrompt = context.systemPrompt;
     } catch {
       // Fallback to basic prompt if context fetch fails

@@ -296,6 +296,20 @@ export function useRealtimeConnection(options: {
     return true;
   }, [updateTurnState]);
 
+  // Trigger an AI response without user input (for opening messages)
+  const triggerResponse = useCallback(() => {
+    const dc = dataChannelRef.current;
+    if (!dc || dc.readyState !== "open") return false;
+    if (responseActiveRef.current) return false;
+
+    turnIdRef.current++;
+    setTurnId(turnIdRef.current);
+
+    dc.send(JSON.stringify({ type: "response.create" }));
+    updateTurnState("thinking");
+    return true;
+  }, [updateTurnState]);
+
   // =============================================================================
   // MICROPHONE
   // =============================================================================
@@ -397,6 +411,7 @@ export function useRealtimeConnection(options: {
     connect,
     disconnect,
     sendTextMessage,
+    triggerResponse,
     startMicrophone,
     stopMicrophone,
     cancelResponse,
