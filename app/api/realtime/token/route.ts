@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     } catch {
       // Fallback to basic prompt if context fetch fails
       console.warn("[REALTIME-TOKEN] Failed to get context, using basic prompt");
-      systemPrompt = "You are Skippy, a warm British AI tutor for teachers. Keep responses short: 1-4 sentences then one question.";
+      systemPrompt = "You are Skippy, an expert AI tutor for teachers. Answer questions directly, keep it short (2-4 sentences), then ask a question to help them apply it to their classroom.";
     }
 
     // Request ephemeral client secret from OpenAI GA API
