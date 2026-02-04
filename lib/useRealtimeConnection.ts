@@ -278,6 +278,9 @@ export function useRealtimeConnection(options: {
     if (!dc || dc.readyState !== "open") return false;
     if (responseActiveRef.current) return false;
 
+    // Set immediately to prevent race condition with React re-renders
+    responseActiveRef.current = true;
+
     turnIdRef.current++;
     setTurnId(turnIdRef.current);
 
@@ -301,6 +304,9 @@ export function useRealtimeConnection(options: {
     const dc = dataChannelRef.current;
     if (!dc || dc.readyState !== "open") return false;
     if (responseActiveRef.current) return false;
+
+    // Set immediately to prevent race condition with React re-renders
+    responseActiveRef.current = true;
 
     turnIdRef.current++;
     setTurnId(turnIdRef.current);
