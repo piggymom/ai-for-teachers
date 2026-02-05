@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCompletionState } from "@/lib/useCompletionState";
 import { AuthButton } from "../components/auth-button";
 import { WelcomeVideo } from "../components/welcome-video";
+import { ArtifactGallery } from "../components/artifact-gallery";
 
 type WeekStatus = "available" | "comingSoon" | "completed";
 
@@ -196,6 +197,10 @@ export default function Home() {
           {weeks.map((week) => (
             <WeekCard key={week.weekNumber} {...week} />
           ))}
+        </section>
+
+        <section className="mt-8 border-t border-white/[0.06] pt-8">
+          <ArtifactGallery />
         </section>
       </div>
     </main>

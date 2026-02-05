@@ -23,6 +23,7 @@ model User {
   profile         UserProfile?
   skippyMessages  SkippyMessage[]
   ledgers         ConversationLedger[]
+  artifacts       Artifact[]
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
 }
@@ -168,4 +169,34 @@ model ConversationLedger {
 
   @@unique([userId, weekNumber])
   @@index([userId])
+}
+
+// Extracted artifacts from conversations
+// Prompts, templates, workflows saved during SAVE phase
+model Artifact {
+  id          String   @id @default(cuid())
+
+  // Ownership
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Context
+  weekNumber  Int
+  weekTopic   String   // e.g., "Prompting Fundamentals" - denormalized for display
+
+  // Content
+  title       String   // Generated or extracted, e.g., "Differentiated Fractions Prompt"
+  type        String   // prompt_template | workflow | lesson_outline | draft_feedback | email_template | etc.
+  content     String   @db.Text  // The actual artifact
+
+  // Metadata
+  description String?  // Optional 1-2 sentence summary
+  tags        String[] @default([])  // For future filtering/search
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, weekNumber])
 }

@@ -12,6 +12,7 @@ import {
   type ConversationLedger,
 } from "@/lib/ledger";
 import { getDiagnosticProbe } from "@/lib/progressions";
+import { extractArtifact } from "@/lib/artifacts";
 
 // Validate API key at startup
 if (!process.env.ANTHROPIC_API_KEY) {
@@ -206,6 +207,28 @@ async function handleSaveMessage(
 ) {
   try {
     await saveMessage(userId, week, role, content);
+
+    // When saving an assistant message, trigger the classifier
+    // to update the ledger based on this exchange
+    if (role === "assistant") {
+      // Fetch the ledger and last user message to update
+      const [ledger, context] = await Promise.all([
+        getOrCreateLedger(userId, week),
+        getSkippyContext(userId, week),
+      ]);
+
+      // Find the most recent user message (should be the one just before this assistant message)
+      const userMessages = context.history.filter((m) => m.role === "user");
+      const lastUserMessage = userMessages[userMessages.length - 1]?.content || "";
+
+      if (lastUserMessage && content) {
+        // ASYNC: Update ledger (fire and forget - zero latency impact)
+        updateLedgerFromExchange(ledger, lastUserMessage, content).catch((err) =>
+          console.error("Failed to update ledger from save_message:", err)
+        );
+      }
+    }
+
     return NextResponse.json({
       event: "save_message",
       success: true,
@@ -300,6 +323,29 @@ async function handleUserMessage(
 
 async function handleEndWeek(userId: string, week: number) {
   try {
+    // Get ledger to check for unsaved artifact
+    const ledger = await getOrCreateLedger(userId, week);
+
+    // Extract artifact if one exists and hasn't been saved yet (backup for early exit)
+    if (
+      ledger.artifact.inProgress &&
+      ledger.artifact.currentState &&
+      ledger.currentPhase !== "SAVE" // Only if we haven't already extracted in SAVE
+    ) {
+      try {
+        await extractArtifact(
+          userId,
+          week,
+          ledger.artifact.type || "other",
+          ledger.artifact.currentState,
+          ledger.sessionSummary
+        );
+        console.log("[SKIPPY] Artifact extracted on early exit");
+      } catch (err) {
+        console.error("[SKIPPY] Artifact extraction on complete failed:", err);
+      }
+    }
+
     // Mark week as completed
     await markWeekCompleted(userId, week);
 

@@ -12,6 +12,7 @@
 import { prisma } from "./prisma";
 import Anthropic from "@anthropic-ai/sdk";
 import { formatProgressionForClassifier } from "./progressions";
+import { extractArtifact } from "./artifacts";
 
 const anthropic = new Anthropic();
 
@@ -288,6 +289,10 @@ export async function updateLedgerFromExchange(
   userMessage: string,
   assistantResponse: string
 ): Promise<ConversationLedger> {
+  console.log("=== CLASSIFIER TRIGGERED ===");
+  console.log("User message:", userMessage.substring(0, 100));
+  console.log("Assistant response:", assistantResponse.substring(0, 100));
+
   const progressionText = formatProgressionForClassifier(ledger.weekNumber);
 
   const classifierPrompt = buildClassifierPrompt(
@@ -319,6 +324,26 @@ export async function updateLedgerFromExchange(
       console.error("[LEDGER] Failed to parse classifier response:", responseText);
       // Return ledger with incremented exchange count
       return incrementExchangeCount(ledger);
+    }
+
+    // Check if we've transitioned to SAVE phase with an artifact - trigger extraction
+    const previousPhase = ledger.currentPhase;
+    const newPhase = parsed.currentPhase;
+
+    if (
+      newPhase === "SAVE" &&
+      previousPhase !== "SAVE" &&
+      parsed.artifact.inProgress &&
+      parsed.artifact.currentState
+    ) {
+      // Extract the artifact (fire and forget - don't block ledger update)
+      extractArtifact(
+        ledger.userId,
+        ledger.weekNumber,
+        parsed.artifact.type || "other",
+        parsed.artifact.currentState,
+        parsed.sessionSummary
+      ).catch((err) => console.error("[LEDGER] Artifact extraction failed:", err));
     }
 
     // Update database
