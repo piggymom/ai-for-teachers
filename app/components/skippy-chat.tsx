@@ -263,6 +263,17 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
       setMessages(prev => prev.map(m =>
         m.id === id ? { ...m, text: "Processing..." } : m
       ));
+
+      // Fallback: if transcript doesn't arrive in 10s, show error
+      setTimeout(() => {
+        if (pendingVoiceMessageIdRef.current === id) {
+          console.warn("[UI] Transcript timeout - clearing stuck message");
+          setMessages(prev => prev.map(m =>
+            m.id === id ? { ...m, text: "(Recording failed - try again)", isStreaming: false } : m
+          ));
+          pendingVoiceMessageIdRef.current = null;
+        }
+      }, 10000);
     }
   }
 

@@ -275,8 +275,16 @@ export function useRealtimeConnection(options: {
 
   const sendTextMessage = useCallback((text: string) => {
     const dc = dataChannelRef.current;
-    if (!dc || dc.readyState !== "open") return false;
-    if (responseActiveRef.current) return false;
+    console.log("[REALTIME] sendTextMessage:", { dcState: dc?.readyState, responseActive: responseActiveRef.current, text: text.slice(0, 50) });
+
+    if (!dc || dc.readyState !== "open") {
+      console.error("[REALTIME] Data channel not open");
+      return false;
+    }
+    if (responseActiveRef.current) {
+      console.warn("[REALTIME] Response already active, skipping");
+      return false;
+    }
 
     // Set immediately to prevent race condition with React re-renders
     responseActiveRef.current = true;
@@ -284,6 +292,7 @@ export function useRealtimeConnection(options: {
     turnIdRef.current++;
     setTurnId(turnIdRef.current);
 
+    console.log("[REALTIME] Sending text message and requesting response");
     dc.send(JSON.stringify({
       type: "conversation.item.create",
       item: {
@@ -365,11 +374,20 @@ export function useRealtimeConnection(options: {
     microphoneStreamRef.current?.getTracks().forEach(t => t.stop());
     microphoneStreamRef.current = null;
 
-    if (commitAndRespond && dc?.readyState === "open" && !responseActiveRef.current) {
+    if (commitAndRespond && dc?.readyState === "open") {
+      // Always commit audio buffer - if there's a response in flight, cancel it first
+      if (responseActiveRef.current) {
+        console.log("[REALTIME] Cancelling active response to process new audio");
+        dc.send(JSON.stringify({ type: "response.cancel" }));
+        responseActiveRef.current = false;
+      }
+      console.log("[REALTIME] Committing audio buffer and requesting response");
       dc.send(JSON.stringify({ type: "input_audio_buffer.commit" }));
       dc.send(JSON.stringify({ type: "response.create" }));
+      responseActiveRef.current = true;
       updateTurnState("thinking");
     } else {
+      console.log("[REALTIME] stopMicrophone: not committing", { commitAndRespond, dcState: dc?.readyState });
       updateTurnState("idle");
     }
   }, [updateTurnState]);
