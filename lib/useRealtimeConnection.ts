@@ -72,10 +72,7 @@ export function useRealtimeConnection(options: {
           break;
 
         case "response.created":
-          if (responseActiveRef.current) {
-            console.warn("[REALTIME] Already have active response, ignoring");
-            break;
-          }
+          // Reset transcript state for new response
           transcriptRef.current = "";
           audioStartedRef.current = false;
           responseActiveRef.current = true;
