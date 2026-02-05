@@ -4,6 +4,14 @@ import Anthropic from "@anthropic-ai/sdk";
 import { authOptions } from "@/lib/auth";
 import { getSkippyContext, saveMessage, hasConversationStarted } from "@/lib/skippy";
 import { markWeekCompleted } from "@/lib/progress";
+import {
+  getOrCreateLedger,
+  formatLedgerForPrompt,
+  updateLedgerFromExchange,
+  resetLedger,
+  type ConversationLedger,
+} from "@/lib/ledger";
+import { getDiagnosticProbe } from "@/lib/progressions";
 
 // Validate API key at startup
 if (!process.env.ANTHROPIC_API_KEY) {
@@ -46,7 +54,7 @@ const SKIPPY_MAX_TOKENS = 300; // Short responses for conversation
 const SKIPPY_TEMPERATURE = 0.7;
 const MAX_HISTORY_MESSAGES = 10; // Only send last N messages
 
-type SkippyEventType = "start_week" | "user_message" | "end_week" | "save_message";
+type SkippyEventType = "start_week" | "user_message" | "end_week" | "save_message" | "reset_week";
 
 type SkippyRequest = {
   event: SkippyEventType;
@@ -108,6 +116,9 @@ export async function POST(req: NextRequest) {
         }
         return handleSaveMessage(userId, week, body.role, body.content);
 
+      case "reset_week":
+        return handleResetWeek(userId, week, userName);
+
       default:
         return NextResponse.json({ error: "Invalid event type" }, { status: 400 });
     }
@@ -137,16 +148,31 @@ export async function POST(req: NextRequest) {
 
 async function handleStartWeek(userId: string, week: number, userName: string) {
   try {
-    const context = await getSkippyContext(userId, week, userName);
+    // Fetch context and ledger in parallel
+    const [context, ledger] = await Promise.all([
+      getSkippyContext(userId, week, userName),
+      getOrCreateLedger(userId, week),
+    ]);
+
     const alreadyStarted = await hasConversationStarted(userId, week);
 
+    // Build system prompt with ledger context
+    const ledgerContext = formatLedgerForPrompt(ledger);
+    const diagnosticProbe = getDiagnosticProbe(week);
+    const fullSystemPrompt = `${context.systemPrompt}\n\n${ledgerContext}${
+      diagnosticProbe && !ledger.diagnostic.hasBeenAssessed
+        ? `\n\nDIAGNOSTIC PROBE FOR THIS WEEK:\n"${diagnosticProbe}"\n\nUse this probe naturally in your opening or early in the conversation to assess where this teacher is starting from.`
+        : ""
+    }`;
+
     if (alreadyStarted) {
-      // Return existing conversation with system prompt for Realtime API
+      // Return existing conversation with ledger-enhanced system prompt
       return NextResponse.json({
         event: "start_week",
         week,
         history: context.history,
-        systemPrompt: context.systemPrompt, // For Realtime API session config
+        systemPrompt: fullSystemPrompt,
+        ledger, // Include ledger for client-side awareness if needed
         resumed: true,
       });
     }
@@ -160,8 +186,9 @@ async function handleStartWeek(userId: string, week: number, userName: string) {
       event: "start_week",
       week,
       history: [],
-      systemPrompt: context.systemPrompt,
+      systemPrompt: fullSystemPrompt,
       openingHint, // The UI will inject this into the first response request
+      ledger, // Include ledger for client-side awareness
       resumed: false,
       userName, // Pass name for system prompt personalization
     });
@@ -196,12 +223,17 @@ async function handleUserMessage(
   timing: Partial<TimingLog>
 ) {
   try {
-    // OPTIMIZATION: Parallelize user message save with context fetch
-    const [, context] = await Promise.all([
+    // OPTIMIZATION: Parallelize user message save with context and ledger fetch
+    const [, context, ledger] = await Promise.all([
       saveMessage(userId, week, "user", message),
       getSkippyContext(userId, week),
+      getOrCreateLedger(userId, week),
     ]);
     timing.t2_contextFetched = Date.now();
+
+    // Build system prompt with ledger context
+    const ledgerContext = formatLedgerForPrompt(ledger);
+    const fullSystemPrompt = `${context.systemPrompt}\n\n${ledgerContext}`;
 
     // Build messages array for Anthropic - LIMIT to last N messages
     let historyMessages = context.history.map((msg) => ({
@@ -223,7 +255,7 @@ async function handleUserMessage(
       model: SKIPPY_MODEL,
       max_tokens: SKIPPY_MAX_TOKENS,
       temperature: SKIPPY_TEMPERATURE,
-      system: context.systemPrompt,
+      system: fullSystemPrompt,
       messages: historyMessages,
     });
     timing.t4_llmDone = Date.now();
@@ -239,6 +271,11 @@ async function handleUserMessage(
       console.error("Failed to save assistant message:", err)
     );
     timing.t5_messageSaved = Date.now();
+
+    // ASYNC: Update ledger from this exchange (fire and forget - zero latency impact)
+    updateLedgerFromExchange(ledger, message, assistantMessage).catch((err) =>
+      console.error("Failed to update ledger:", err)
+    );
 
     timing.t6_responseSent = Date.now();
     logTiming("user_message", timing);
@@ -273,6 +310,41 @@ async function handleEndWeek(userId: string, week: number) {
     });
   } catch (error) {
     console.error("End week error:", error);
+    throw error;
+  }
+}
+
+async function handleResetWeek(userId: string, week: number, userName: string) {
+  try {
+    // Reset the ledger for this week
+    const ledger = await resetLedger(userId, week);
+
+    // Get fresh context
+    const context = await getSkippyContext(userId, week, userName);
+
+    // Build system prompt with fresh ledger
+    const ledgerContext = formatLedgerForPrompt(ledger);
+    const diagnosticProbe = getDiagnosticProbe(week);
+    const fullSystemPrompt = `${context.systemPrompt}\n\n${ledgerContext}${
+      diagnosticProbe
+        ? `\n\nDIAGNOSTIC PROBE FOR THIS WEEK:\n"${diagnosticProbe}"\n\nUse this probe naturally in your opening or early in the conversation to assess where this teacher is starting from.`
+        : ""
+    }`;
+
+    const openingHint = context.modulePrompt.openingMessage.replace(/\{\{name\}\}/g, userName);
+
+    return NextResponse.json({
+      event: "reset_week",
+      week,
+      history: [], // Start fresh
+      systemPrompt: fullSystemPrompt,
+      openingHint,
+      ledger,
+      resumed: false,
+      userName,
+    });
+  } catch (error) {
+    console.error("Reset week error:", error);
     throw error;
   }
 }

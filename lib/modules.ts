@@ -1,7 +1,12 @@
 /**
  * Module prompts for each week of the AI for Teachers course.
  * These define Skippy's focus and learning objectives per week.
+ *
+ * Note: Diagnostic probes and readiness levels are defined in progressions.ts
+ * and injected into the system prompt via the ledger system.
  */
+
+import { getProgression, type WeekProgression } from "./progressions";
 
 export type ModulePrompt = {
   week: number;
@@ -149,4 +154,18 @@ export function getModulePrompt(week: number): ModulePrompt | null {
 
 export function getWeekTitle(week: number): string {
   return modulePrompts[week]?.title || `Week ${week}`;
+}
+
+/**
+ * Get combined module and progression data for a week.
+ * Useful for building comprehensive context about what a week covers.
+ */
+export function getWeekContext(week: number): {
+  module: ModulePrompt | null;
+  progression: WeekProgression | undefined;
+} {
+  return {
+    module: getModulePrompt(week),
+    progression: getProgression(week),
+  };
 }
