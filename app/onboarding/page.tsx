@@ -8,13 +8,11 @@ type FormData = {
   roleOther: string;
   gradeLevels: string[];
   subjects: string[];
-  schoolContext: string;
   aiExperienceLevel: string;
   constraints: string;
   biggestTimeDrains: string[];
-  goals: string;
-  successLooksLike: string;
-  tonePreference: string;
+  primaryGoal: string;
+  goalDetails: string;
 };
 
 const initialFormData: FormData = {
@@ -22,13 +20,11 @@ const initialFormData: FormData = {
   roleOther: "",
   gradeLevels: [],
   subjects: [],
-  schoolContext: "",
   aiExperienceLevel: "",
   constraints: "",
   biggestTimeDrains: [],
-  goals: "",
-  successLooksLike: "",
-  tonePreference: "",
+  primaryGoal: "",
+  goalDetails: "",
 };
 
 const ROLES = [
@@ -69,11 +65,12 @@ const AI_LEVELS = [
   { value: "advanced", label: "Advanced user" },
 ];
 
-const TONE_OPTIONS = [
-  { value: "direct", label: "Direct" },
-  { value: "supportive", label: "Supportive" },
-  { value: "collaborative", label: "Collaborative" },
-  { value: "no-fluff", label: "No fluff" },
+const PRIMARY_GOALS = [
+  { value: "save_time", label: "Save time on repetitive tasks" },
+  { value: "better_materials", label: "Create better differentiated materials" },
+  { value: "faster_feedback", label: "Give faster, more useful feedback" },
+  { value: "handle_admin", label: "Handle admin and communication tasks" },
+  { value: "build_confidence", label: "Feel more confident using AI" },
 ];
 
 export default function OnboardingPage() {
@@ -83,7 +80,7 @@ export default function OnboardingPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const totalSteps = 4;
+  const totalSteps = 3;
 
   const updateField = <K extends keyof FormData>(field: K, value: FormData[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -148,8 +145,11 @@ export default function OnboardingPage() {
       if (formData.biggestTimeDrains.length === 0) {
         newErrors.biggestTimeDrains = "Please select at least one";
       }
-      if (!formData.goals.trim()) {
-        newErrors.goals = "Please share your goals";
+      if (!formData.primaryGoal) {
+        newErrors.primaryGoal = "Please select your main goal";
+      }
+      if (!formData.goalDetails.trim()) {
+        newErrors.goalDetails = "Please share more details";
       }
     }
 
@@ -177,13 +177,11 @@ export default function OnboardingPage() {
         roleOther: formData.roleOther || null,
         gradeLevels: formData.gradeLevels,
         subjects: formData.subjects,
-        schoolContext: formData.schoolContext || null,
         aiExperienceLevel: formData.aiExperienceLevel,
         constraints: formData.constraints || null,
         biggestTimeDrains: formData.biggestTimeDrains,
-        goals: formData.goals,
-        successLooksLike: formData.successLooksLike || null,
-        tonePreference: formData.tonePreference || null,
+        primaryGoal: formData.primaryGoal,
+        goalDetails: formData.goalDetails,
       });
     } catch {
       setIsSubmitting(false);
@@ -245,12 +243,6 @@ export default function OnboardingPage() {
               errors={errors}
               updateField={updateField}
               toggleArrayItem={toggleArrayItem}
-            />
-          )}
-          {step === 4 && (
-            <Step4
-              formData={formData}
-              updateField={updateField}
             />
           )}
         </div>
@@ -395,7 +387,7 @@ function Step1({
   );
 }
 
-// Step 2: Your context
+// Step 2: Your Situation
 function Step2({
   formData,
   errors,
@@ -407,15 +399,6 @@ function Step2({
 }) {
   return (
     <>
-      <FieldGroup label="School context (optional)">
-        <TextArea
-          value={formData.schoolContext}
-          onChange={(e) => updateField("schoolContext", e.target.value)}
-          placeholder="e.g., Urban public school, Title I, diverse learners, large class sizes"
-          rows={3}
-        />
-      </FieldGroup>
-
       <FieldGroup label="AI experience level" error={errors.aiExperienceLevel}>
         <div className="flex flex-col gap-2">
           {AI_LEVELS.map((level) => (
@@ -442,7 +425,7 @@ function Step2({
   );
 }
 
-// Step 3: What you want
+// Step 3: What You Want
 function Step3({
   formData,
   errors,
@@ -456,7 +439,7 @@ function Step3({
 }) {
   return (
     <>
-      <FieldGroup label="Biggest time drains" error={errors.biggestTimeDrains}>
+      <FieldGroup label="What eats up most of your time?" error={errors.biggestTimeDrains}>
         <div className="flex flex-wrap gap-2">
           {TIME_DRAINS.map((item) => (
             <ChipButton
@@ -470,57 +453,28 @@ function Step3({
         </div>
       </FieldGroup>
 
-      <FieldGroup label="What do you want AI to help with this term?" error={errors.goals}>
-        <TextArea
-          value={formData.goals}
-          onChange={(e) => updateField("goals", e.target.value)}
-          placeholder="e.g., Save time on lesson planning, write better feedback, communicate with families more consistently"
-          rows={3}
-        />
-      </FieldGroup>
-
-      <FieldGroup label="What would success look like? (optional)">
-        <TextArea
-          value={formData.successLooksLike}
-          onChange={(e) => updateField("successLooksLike", e.target.value)}
-          placeholder="e.g., Spend 30 min less per week on planning, feel more confident giving feedback"
-          rows={3}
-        />
-      </FieldGroup>
-    </>
-  );
-}
-
-// Step 4: Preferences
-function Step4({
-  formData,
-  updateField,
-}: {
-  formData: FormData;
-  updateField: <K extends keyof FormData>(field: K, value: FormData[K]) => void;
-}) {
-  return (
-    <>
-      <FieldGroup label="How should Skippy talk to you? (optional)">
-        <div className="flex flex-wrap gap-2">
-          {TONE_OPTIONS.map((option) => (
-            <ChipButton
-              key={option.value}
-              selected={formData.tonePreference === option.value}
-              onClick={() => updateField("tonePreference", option.value)}
+      <FieldGroup label="What's the main thing you want from this course?" error={errors.primaryGoal}>
+        <div className="flex flex-col gap-2">
+          {PRIMARY_GOALS.map((goal) => (
+            <RadioOption
+              key={goal.value}
+              selected={formData.primaryGoal === goal.value}
+              onClick={() => updateField("primaryGoal", goal.value)}
             >
-              {option.label}
-            </ChipButton>
+              {goal.label}
+            </RadioOption>
           ))}
         </div>
       </FieldGroup>
 
-      <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-5">
-        <h3 className="text-sm font-medium text-white/80">Ready to go</h3>
-        <p className="mt-1 text-sm text-white/50">
-          You can always update these preferences later. Click "Save & Start" to begin the course.
-        </p>
-      </div>
+      <FieldGroup label="Tell me more — what specifically are you hoping to change?" error={errors.goalDetails}>
+        <TextArea
+          value={formData.goalDetails}
+          onChange={(e) => updateField("goalDetails", e.target.value)}
+          placeholder="e.g., I spend 2 hours every Sunday making different versions of worksheets for my three reading groups..."
+          rows={4}
+        />
+      </FieldGroup>
     </>
   );
 }

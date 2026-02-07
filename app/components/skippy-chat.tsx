@@ -59,17 +59,16 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
 
     onResponseStart: () => {
       console.log("[UI] Response starting");
-      // Create empty assistant message
       const id = genId();
       activeMessageIdRef.current = id;
       setMessages(prev => [...prev, { id, role: "assistant", text: "", isStreaming: true }]);
     },
 
     onTranscriptDelta: (delta, fullText) => {
-      // Update the message text as it streams in
+      // Show text immediately as it arrives
       const id = activeMessageIdRef.current;
       if (id) {
-        console.log("[UI] Text delta, total:", fullText.length);
+        console.log("[UI] Transcript delta, length:", fullText.length);
         setMessages(prev => prev.map(m =>
           m.id === id ? { ...m, text: fullText } : m
         ));
@@ -172,10 +171,7 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
   useEffect(() => {
     if (realtime.isConnected && needsOpeningRef.current) {
       needsOpeningRef.current = false;
-      // Small delay to ensure connection is fully ready
-      setTimeout(() => {
-        realtime.triggerResponse();
-      }, 500);
+      realtime.triggerResponse();
     }
   }, [realtime.isConnected, realtime]);
 

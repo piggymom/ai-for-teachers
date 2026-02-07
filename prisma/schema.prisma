@@ -99,24 +99,20 @@ model UserProfile {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  // Step 1: Role
+  // Step 1: Who You Are
   role               String
   roleOther          String?
   gradeLevels        String[] // ["PreK", "K", "1-2", etc.]
   subjects           String[] // User-entered tags
 
-  // Step 2: Context
-  schoolContext      String?
+  // Step 2: Your Situation
   aiExperienceLevel  String   // "new" | "some" | "advanced"
   constraints        String?
 
-  // Step 3: Goals
+  // Step 3: What You Want
   biggestTimeDrains  String[] // ["Lesson planning", "Differentiation", etc.]
-  goals              String
-  successLooksLike   String?
-
-  // Step 4: Preferences
-  tonePreference     String?  // "direct" | "supportive" | "collaborative" | "no-fluff"
+  primaryGoal        String   // save_time | better_materials | faster_feedback | handle_admin | build_confidence
+  goalDetails        String   // Renamed from 'goals' - Skippy-depth free-text
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

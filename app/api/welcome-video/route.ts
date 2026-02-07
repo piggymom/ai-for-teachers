@@ -20,33 +20,69 @@ function generateWelcomeScript(profile: {
   roleOther?: string | null;
   gradeLevels: string[];
   subjects: string[];
-  goals: string;
+  primaryGoal: string;
+  biggestTimeDrains: string[];
   aiExperienceLevel: string;
 }, userName?: string | null): string {
   const name = userName?.split(" ")[0] || "there";
   const role = profile.roleOther || profile.role;
-  const grades = profile.gradeLevels.join(" and ");
+  const grades = formatGrades(profile.gradeLevels);
   const subjects = profile.subjects.length > 0
     ? profile.subjects.slice(0, 2).join(" and ")
-    : "your classes";
+    : "your students";
 
-  const experienceIntro = profile.aiExperienceLevel === "new"
-    ? "I know AI might feel new and maybe a bit overwhelming"
-    : profile.aiExperienceLevel === "advanced"
-    ? "I can see you've already got some AI experience under your belt"
-    : "It sounds like you've started exploring AI a bit";
+  // Experience intro
+  const experienceIntro: Record<string, string> = {
+    new: "I know AI might feel new and maybe a bit overwhelming",
+    some: "It sounds like you've started exploring AI a bit",
+    advanced: "I can see you've already got some AI experience under your belt"
+  };
+  const experienceText = experienceIntro[profile.aiExperienceLevel] || "Wherever you're starting from";
+
+  // Pain acknowledgment (from top time drain)
+  const painMap: Record<string, string> = {
+    "Lesson planning": "I know lesson planning can eat up every free moment you have",
+    "Differentiation": "I know differentiation is one of those things that sounds simple until you're making three versions of everything",
+    "Feedback": "I know giving meaningful feedback to every student feels impossible some weeks",
+    "IEP/admin paperwork": "I know the paperwork never stops piling up",
+    "Family comms": "I know family communication takes way more time than anyone realizes",
+    "Assessment design": "I know building good assessments is its own full-time job",
+    "Classroom management": "I know some days the management piece takes everything you've got",
+    "Data analysis": "I know you're drowning in data but starving for insights"
+  };
+  const topTimeDrain = profile.biggestTimeDrains?.[0];
+  const painAcknowledgment = painMap[topTimeDrain] || "I know teaching asks more of you than any job should";
+
+  // Goal statement (from primary goal)
+  const goalMap: Record<string, string> = {
+    save_time: "You're here because you want to reclaim some of your time — and that's exactly what we're going to do",
+    better_materials: "You're here because you want to create better materials without working twice as hard — I've got you",
+    faster_feedback: "You're here because you want to give better feedback without it taking all night — we'll build that",
+    handle_admin: "You're here because you want the admin stuff off your plate so you can focus on teaching — let's make that happen",
+    build_confidence: "You're here because you want to feel confident with these tools, not confused — that's exactly where we're headed"
+  };
+  const goalStatement = goalMap[profile.primaryGoal] || "Whatever brought you here, we're going to make it worth your time";
 
   return `Hey ${name}! Welcome to AI for Teachers.
 
-I'm so glad you're here. As a ${role} teaching ${grades}, working with ${subjects}, you're exactly who this course was built for.
+I'm so glad you're here. As a ${role} teaching ${subjects} to ${grades} students, you're exactly who this course was built for.
 
-${experienceIntro}, and that's totally fine. Over the next six weeks, we're going to explore practical ways AI can save you time, without any of the hype or overwhelm.
+${experienceText}, and that's totally fine.
 
-Your goal of "${profile.goals.slice(0, 100)}" is something we'll work toward together.
+${painAcknowledgment}. ${goalStatement}.
 
-Skippy, your AI tutor, is ready to meet you. He's going to personalize everything based on what you just shared. No generic advice here.
+Over the next six weeks, we're going to build real prompts and workflows you can use in your classroom. No hype, no overwhelm — just practical tools that actually help.
 
-Ready to get started? Let's do this.`;
+Now, I want to introduce you to Skippy. He's your AI tutor, and he's going to personalize everything based on what you just shared. Think of him as your guide through the course — he'll help you build something useful every single week.
+
+Ready? Let's do this.`;
+}
+
+function formatGrades(gradeLevels: string[]): string {
+  if (!gradeLevels || gradeLevels.length === 0) return "your";
+  if (gradeLevels.length === 1) return gradeLevels[0];
+  if (gradeLevels.length === 2) return `${gradeLevels[0]} and ${gradeLevels[1]}`;
+  return `${gradeLevels[0]} through ${gradeLevels[gradeLevels.length - 1]}`;
 }
 
 /**

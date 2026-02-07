@@ -39,6 +39,7 @@ export function useRealtimeConnection(options: {
   const audioStartedRef = useRef<boolean>(false);
   const turnIdRef = useRef<number>(0);
 
+
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
@@ -89,22 +90,23 @@ export function useRealtimeConnection(options: {
           }
           break;
 
+        case "response.audio_transcript.delta":
         case "response.output_audio_transcript.delta": {
-          // THIS IS THE TEXT - accumulate it
+          // Pass text to callback - component handles throttling
           const delta = msg.delta || "";
           if (delta) {
             transcriptRef.current += delta;
-            console.log("[REALTIME] Transcript delta:", delta, "| Total:", transcriptRef.current.length);
             optionsRef.current.onTranscriptDelta?.(delta, transcriptRef.current);
           }
           break;
         }
 
+        case "response.audio_transcript.done":
         case "response.output_audio_transcript.done": {
           // Final transcript
           const transcript = msg.transcript || transcriptRef.current;
           transcriptRef.current = transcript;
-          console.log("[REALTIME] Transcript done:", transcript.slice(0, 50));
+          console.log("[REALTIME] *** TRANSCRIPT DONE ***:", transcript.slice(0, 100));
           break;
         }
 
@@ -157,7 +159,10 @@ export function useRealtimeConnection(options: {
         }
 
         default:
-          // Unhandled event types are logged above
+          // Log unknown response events to debug missing transcripts
+          if (type.startsWith("response.") && type.includes("transcript")) {
+            console.log("[REALTIME] *** UNHANDLED TRANSCRIPT EVENT ***:", type, JSON.stringify(msg));
+          }
           break;
       }
     } catch (err) {
@@ -224,7 +229,7 @@ export function useRealtimeConnection(options: {
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
-      const sdpRes = await fetch("https://api.openai.com/v1/realtime/calls", {
+      const sdpRes = await fetch("https://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${ephemeralKey}`,
@@ -233,7 +238,11 @@ export function useRealtimeConnection(options: {
         body: offer.sdp,
       });
 
-      if (!sdpRes.ok) throw new Error("SDP exchange failed");
+      if (!sdpRes.ok) {
+        const errorText = await sdpRes.text();
+        console.error("[REALTIME] SDP exchange failed:", sdpRes.status, errorText);
+        throw new Error(`SDP exchange failed: ${sdpRes.status} - ${errorText}`);
+      }
 
       const answerSdp = await sdpRes.text();
       await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });

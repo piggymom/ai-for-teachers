@@ -5,13 +5,11 @@ export type UserProfileData = {
   roleOther?: string | null;
   gradeLevels: string[];
   subjects: string[];
-  schoolContext?: string | null;
   aiExperienceLevel: string;
   constraints?: string | null;
   biggestTimeDrains: string[];
-  goals: string;
-  successLooksLike?: string | null;
-  tonePreference?: string | null;
+  primaryGoal: string; // save_time | better_materials | faster_feedback | handle_admin | build_confidence
+  goalDetails: string; // Skippy-depth free-text
 };
 
 export async function getUserProfile(userId: string) {
@@ -54,11 +52,6 @@ export function buildProfileContext(profile: UserProfileData): string {
     parts.push(`Subjects: ${profile.subjects.join(", ")}.`);
   }
 
-  // School context
-  if (profile.schoolContext) {
-    parts.push(`Context: ${profile.schoolContext}`);
-  }
-
   // AI experience
   const expMap: Record<string, string> = {
     new: "New to AI tools",
@@ -77,25 +70,21 @@ export function buildProfileContext(profile: UserProfileData): string {
     parts.push(`Biggest time drains: ${profile.biggestTimeDrains.join(", ")}.`);
   }
 
-  // Goals
-  if (profile.goals) {
-    parts.push(`Goals: ${profile.goals}`);
+  // Primary goal (structured)
+  const goalMap: Record<string, string> = {
+    save_time: "wants to save time on repetitive tasks",
+    better_materials: "wants to create better differentiated materials",
+    faster_feedback: "wants to give faster, more useful feedback",
+    handle_admin: "wants to handle admin and communication more efficiently",
+    build_confidence: "wants to build confidence using AI tools",
+  };
+  if (profile.primaryGoal) {
+    parts.push(`Goals: ${goalMap[profile.primaryGoal] || profile.primaryGoal}.`);
   }
 
-  // Success
-  if (profile.successLooksLike) {
-    parts.push(`Success looks like: ${profile.successLooksLike}`);
-  }
-
-  // Tone preference
-  if (profile.tonePreference) {
-    const toneMap: Record<string, string> = {
-      direct: "Prefer direct, concise responses",
-      supportive: "Prefer supportive, encouraging tone",
-      collaborative: "Prefer collaborative, exploratory tone",
-      "no-fluff": "Prefer no-fluff, practical responses only",
-    };
-    parts.push(toneMap[profile.tonePreference] || `Tone: ${profile.tonePreference}`);
+  // Goal details (free-text depth)
+  if (profile.goalDetails) {
+    parts.push(`Detailed goals: ${profile.goalDetails}`);
   }
 
   // Join and truncate if needed

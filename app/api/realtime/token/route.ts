@@ -56,32 +56,21 @@ export async function POST(req: NextRequest) {
       systemPrompt = "You are Skippy, an expert AI tutor for teachers. Answer questions directly, keep it short (2-4 sentences), then ask a question to help them apply it to their classroom.";
     }
 
-    // Request ephemeral client secret from OpenAI GA API
-    // Endpoint: POST /v1/realtime/client_secrets
+    // Request ephemeral client secret from OpenAI Realtime API
+    // Endpoint: POST /v1/realtime/sessions
     const requestBody = {
-      session: {
-        type: "realtime",
-        model: "gpt-realtime",
-        instructions: systemPrompt,
-        audio: {
-          input: {
-            // Disable automatic turn detection - user manually controls recording
-            turn_detection: null,
-            // Enable transcription of user's speech
-            transcription: {
-              model: "whisper-1",
-            },
-          },
-          output: {
-            voice: REALTIME_VOICE,
-          },
-        },
+      model: "gpt-4o-realtime-preview-2024-12-17",
+      voice: REALTIME_VOICE,
+      instructions: systemPrompt,
+      input_audio_transcription: {
+        model: "whisper-1",
       },
+      turn_detection: null,
     };
 
     console.log("[REALTIME-TOKEN] Request body:", JSON.stringify(requestBody, null, 2));
 
-    const response = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
+    const response = await fetch("https://api.openai.com/v1/realtime/sessions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
