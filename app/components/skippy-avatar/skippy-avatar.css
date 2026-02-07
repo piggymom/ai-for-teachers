@@ -1,0 +1,400 @@
+/* ============================================
+   SKIPPY AVATAR - Base Styles
+   ============================================ */
+
+.skippy-avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skippy-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ============================================
+   NUCLEUS - The central orb
+   ============================================ */
+
+.skippy-nucleus {
+  transform-origin: center;
+  transition: transform 0.3s ease-out;
+}
+
+.skippy-nucleus-highlight {
+  transform-origin: center;
+  opacity: 0.6;
+}
+
+/* ============================================
+   GLOW - Ambient warmth
+   ============================================ */
+
+.skippy-glow {
+  transform-origin: center;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+/* ============================================
+   ORBITALS - The orbiting elements
+   ============================================ */
+
+.skippy-orbital {
+  transform-origin: 50px 50px; /* Center of SVG viewBox */
+  transition: transform 0.3s ease-out;
+}
+
+/* Offset orbital starting positions */
+.skippy-orbital-1 {
+  /* Starts at top */
+}
+
+.skippy-orbital-2 {
+  transform: rotate(120deg);
+}
+
+.skippy-orbital-3 {
+  transform: rotate(240deg);
+}
+
+/* ============================================
+   STATE: IDLE - Calm, present, waiting
+   ============================================ */
+
+.skippy-idle .skippy-nucleus {
+  animation: skippy-idle-nucleus 3s ease-in-out infinite;
+}
+
+.skippy-idle .skippy-glow {
+  animation: skippy-idle-glow 3s ease-in-out infinite;
+}
+
+.skippy-idle .skippy-orbital-1 {
+  animation: skippy-idle-orbit-1 8s linear infinite;
+}
+
+.skippy-idle .skippy-orbital-2 {
+  animation: skippy-idle-orbit-2 10s linear infinite;
+}
+
+.skippy-idle .skippy-orbital-3 {
+  animation: skippy-idle-orbit-3 12s linear infinite;
+}
+
+@keyframes skippy-idle-nucleus {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes skippy-idle-glow {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes skippy-idle-orbit-1 {
+  from {
+    transform: rotate(0deg) translateX(30px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(30px) rotate(-360deg);
+  }
+}
+
+@keyframes skippy-idle-orbit-2 {
+  from {
+    transform: rotate(120deg) translateX(34px) rotate(-120deg);
+  }
+  to {
+    transform: rotate(480deg) translateX(34px) rotate(-480deg);
+  }
+}
+
+@keyframes skippy-idle-orbit-3 {
+  from {
+    transform: rotate(240deg) translateX(28px) rotate(-240deg);
+  }
+  to {
+    transform: rotate(600deg) translateX(28px) rotate(-600deg);
+  }
+}
+
+/* ============================================
+   STATE: LISTENING - Attentive, receptive
+   ============================================ */
+
+.skippy-listening .skippy-nucleus {
+  animation: skippy-listening-nucleus 1.5s ease-in-out infinite;
+}
+
+.skippy-listening .skippy-glow {
+  opacity: 0.5;
+  transform: scale(0.9);
+}
+
+.skippy-listening .skippy-orbital-1 {
+  animation: skippy-listening-orbit-1 12s linear infinite;
+}
+
+.skippy-listening .skippy-orbital-2 {
+  animation: skippy-listening-orbit-2 14s linear infinite;
+}
+
+.skippy-listening .skippy-orbital-3 {
+  animation: skippy-listening-orbit-3 16s linear infinite;
+}
+
+@keyframes skippy-listening-nucleus {
+  0%, 100% {
+    transform: scale(0.95);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* Orbitals come closer when listening */
+@keyframes skippy-listening-orbit-1 {
+  from {
+    transform: rotate(0deg) translateX(22px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(22px) rotate(-360deg);
+  }
+}
+
+@keyframes skippy-listening-orbit-2 {
+  from {
+    transform: rotate(120deg) translateX(25px) rotate(-120deg);
+  }
+  to {
+    transform: rotate(480deg) translateX(25px) rotate(-480deg);
+  }
+}
+
+@keyframes skippy-listening-orbit-3 {
+  from {
+    transform: rotate(240deg) translateX(20px) rotate(-240deg);
+  }
+  to {
+    transform: rotate(600deg) translateX(20px) rotate(-600deg);
+  }
+}
+
+/* ============================================
+   STATE: THINKING - Processing, working
+   ============================================ */
+
+.skippy-thinking .skippy-nucleus {
+  animation: skippy-thinking-nucleus 0.8s ease-in-out infinite;
+}
+
+.skippy-thinking .skippy-glow {
+  opacity: 1;
+  transform: scale(1.15);
+  animation: skippy-thinking-glow 0.8s ease-in-out infinite;
+}
+
+.skippy-thinking .skippy-orbital-1 {
+  animation: skippy-thinking-orbit-1 2s linear infinite;
+}
+
+.skippy-thinking .skippy-orbital-2 {
+  animation: skippy-thinking-orbit-2 2.5s linear infinite;
+}
+
+.skippy-thinking .skippy-orbital-3 {
+  animation: skippy-thinking-orbit-3 3s linear infinite;
+}
+
+@keyframes skippy-thinking-nucleus {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.1);
+  }
+  75% {
+    transform: scale(0.95);
+  }
+}
+
+@keyframes skippy-thinking-glow {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Fast orbits when thinking */
+@keyframes skippy-thinking-orbit-1 {
+  from {
+    transform: rotate(0deg) translateX(32px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(32px) rotate(-360deg);
+  }
+}
+
+@keyframes skippy-thinking-orbit-2 {
+  from {
+    transform: rotate(120deg) translateX(36px) rotate(-120deg);
+  }
+  to {
+    transform: rotate(480deg) translateX(36px) rotate(-480deg);
+  }
+}
+
+@keyframes skippy-thinking-orbit-3 {
+  from {
+    transform: rotate(240deg) translateX(30px) rotate(-240deg);
+  }
+  to {
+    transform: rotate(600deg) translateX(30px) rotate(-600deg);
+  }
+}
+
+/* ============================================
+   STATE: SPEAKING - Expressive, communicating
+   ============================================ */
+
+.skippy-speaking .skippy-nucleus {
+  animation: skippy-speaking-nucleus 0.5s ease-in-out infinite;
+}
+
+.skippy-speaking .skippy-glow {
+  opacity: 1;
+  transform: scale(1.1);
+  animation: skippy-speaking-glow 0.5s ease-in-out infinite;
+}
+
+.skippy-speaking .skippy-orbital-1 {
+  animation: skippy-speaking-orbit-1 4s linear infinite;
+}
+
+.skippy-speaking .skippy-orbital-2 {
+  animation: skippy-speaking-orbit-2 5s linear infinite;
+}
+
+.skippy-speaking .skippy-orbital-3 {
+  animation: skippy-speaking-orbit-3 6s linear infinite;
+}
+
+@keyframes skippy-speaking-nucleus {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes skippy-speaking-glow {
+  0%, 100% {
+    opacity: 0.9;
+    transform: scale(1.1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+/* Expanded orbits when speaking */
+@keyframes skippy-speaking-orbit-1 {
+  from {
+    transform: rotate(0deg) translateX(36px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(36px) rotate(-360deg);
+  }
+}
+
+@keyframes skippy-speaking-orbit-2 {
+  from {
+    transform: rotate(120deg) translateX(40px) rotate(-120deg);
+  }
+  to {
+    transform: rotate(480deg) translateX(40px) rotate(-480deg);
+  }
+}
+
+@keyframes skippy-speaking-orbit-3 {
+  from {
+    transform: rotate(240deg) translateX(34px) rotate(-240deg);
+  }
+  to {
+    transform: rotate(600deg) translateX(34px) rotate(-600deg);
+  }
+}
+
+/* ============================================
+   SIZE VARIANTS
+   ============================================ */
+
+/* Small - simplify for performance */
+.skippy-size-sm .skippy-orbital-3 {
+  display: none; /* Hide third orbital at small size */
+}
+
+.skippy-size-sm .skippy-glow {
+  filter: url(#skippy-blur);
+}
+
+/* Extra large - enhance glow */
+.skippy-size-xl .skippy-glow {
+  opacity: 1;
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .skippy-nucleus,
+  .skippy-glow,
+  .skippy-orbital {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Static positions for orbitals */
+  .skippy-orbital-1 {
+    transform: rotate(0deg) translateX(30px);
+  }
+
+  .skippy-orbital-2 {
+    transform: rotate(120deg) translateX(30px);
+  }
+
+  .skippy-orbital-3 {
+    transform: rotate(240deg) translateX(30px);
+  }
+
+  /* Indicate state through opacity instead */
+  .skippy-listening .skippy-nucleus {
+    opacity: 0.8;
+  }
+
+  .skippy-thinking .skippy-glow {
+    opacity: 0.9;
+  }
+
+  .skippy-speaking .skippy-glow {
+    opacity: 1;
+  }
+}

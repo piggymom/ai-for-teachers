@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { SkippyAvatar } from "./skippy-avatar";
 
 export function CourseSidebar() {
   const router = useRouter();
@@ -55,8 +56,8 @@ export function CourseSidebar() {
 
           {/* Skippy */}
           <div className="text-center">
-            <div className="w-14 h-14 rounded-full overflow-hidden bg-white/10 mb-2 flex items-center justify-center">
-              <span className="text-2xl">🤖</span>
+            <div className="w-14 h-14 mb-2 flex items-center justify-center">
+              <SkippyAvatar state="idle" size="sm" />
             </div>
             <p className="text-xs text-white font-medium">Skippy</p>
             <p className="text-xs text-white/50">AI Tutor</p>
