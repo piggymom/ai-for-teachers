@@ -5,6 +5,8 @@ import { useCompletionState } from "@/lib/useCompletionState";
 import { AuthButton } from "../components/auth-button";
 import { WelcomeVideo } from "../components/welcome-video";
 import { ArtifactGallery } from "../components/artifact-gallery";
+import { CourseSidebar } from "../components/course-sidebar";
+import { SupportChatPanel } from "../components/support-chat-panel";
 
 type WeekStatus = "available" | "comingSoon" | "completed";
 
@@ -176,33 +178,37 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#191919] text-white">
-      <div className="fixed right-6 top-6 z-10">
-        <AuthButton />
-      </div>
-      <div className="mx-auto flex max-w-xl flex-col gap-12 px-6 py-20">
-        {/* Welcome video tile - shows while generating, then video when ready */}
-        <WelcomeVideo />
+    <div className="flex min-h-screen bg-[#191919] text-white">
+      <CourseSidebar />
+      <main className="flex-1">
+        <div className="fixed right-6 top-6 z-10">
+          <AuthButton />
+        </div>
+        <div className="mx-auto flex max-w-xl flex-col gap-12 px-6 py-20">
+          {/* Welcome video tile - shows while generating, then video when ready */}
+          <WelcomeVideo />
 
-        <header className="space-y-3">
-          <h1 className="text-2xl font-normal tracking-tight text-white/90">
-            AI for Teachers
-          </h1>
-          <p className="text-[15px] font-light leading-relaxed text-white/40">
-            Practical guidance for using AI with clarity.
-          </p>
-        </header>
+          <header className="space-y-3">
+            <h1 className="text-2xl font-normal tracking-tight text-white/90">
+              AI for Teachers
+            </h1>
+            <p className="text-[15px] font-light leading-relaxed text-white/40">
+              Practical guidance for using AI with clarity.
+            </p>
+          </header>
 
-        <section className="flex flex-col divide-y divide-white/[0.06]">
-          {weeks.map((week) => (
-            <WeekCard key={week.weekNumber} {...week} />
-          ))}
-        </section>
+          <section className="flex flex-col divide-y divide-white/[0.06]">
+            {weeks.map((week) => (
+              <WeekCard key={week.weekNumber} {...week} />
+            ))}
+          </section>
 
-        <section className="mt-8 border-t border-white/[0.06] pt-8">
-          <ArtifactGallery />
-        </section>
-      </div>
-    </main>
+          <section className="mt-8 border-t border-white/[0.06] pt-8">
+            <ArtifactGallery />
+          </section>
+        </div>
+      </main>
+      <SupportChatPanel />
+    </div>
   );
 }
