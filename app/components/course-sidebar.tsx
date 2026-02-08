@@ -10,7 +10,11 @@ interface UserProgress {
   totalWeeks: number;
 }
 
-export function CourseSidebar() {
+interface CourseSidebarProps {
+  variant?: "full" | "minimal";
+}
+
+export function CourseSidebar({ variant = "full" }: CourseSidebarProps) {
   const router = useRouter();
   const [participantCount, setParticipantCount] = useState<number | null>(null);
   const [progress, setProgress] = useState<UserProgress | null>(null);
@@ -62,8 +66,35 @@ export function CourseSidebar() {
     }
   };
 
+  // Minimal variant for chat view
+  if (variant === "minimal") {
+    return (
+      <aside className="hidden lg:flex w-16 bg-[#0a0a0a] border-r border-[#262626] flex-col items-center py-4 h-screen sticky top-0">
+        {/* Skippy avatar */}
+        <div className="mb-4">
+          <SkippyAvatar state="idle" size="sm" />
+        </div>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Home link */}
+        <a
+          href="/home"
+          className="text-[#525252] hover:text-[#a1a1a1] transition-colors p-2"
+          title="Back to Dashboard"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+        </a>
+      </aside>
+    );
+  }
+
+  // Full variant
   return (
-    <aside className="hidden lg:flex w-60 bg-[#0a0a0a] border-r border-[#262626] p-5 flex-col h-screen">
+    <aside className="hidden lg:flex w-60 bg-[#0a0a0a] border-r border-[#262626] p-5 flex-col h-screen sticky top-0">
       {/* Course Team Section */}
       <div className="space-y-4">
         <h3 className="text-xs font-medium text-[#525252] uppercase tracking-wider">
