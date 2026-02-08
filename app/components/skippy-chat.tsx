@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useRealtimeConnection } from "@/lib/useRealtimeConnection";
 import { SkippyAvatar } from "./skippy-avatar";
 import { ChatPhaseIndicator } from "./chat-phase-indicator";
+import { LedgerDebugPanel } from "./debug/ledger-debug-panel";
 
 type Message = {
   id: string;
@@ -447,6 +448,11 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
             {realtime.isConnected ? "Cmd+Enter to send" : "Connecting..."}
           </p>
         </div>
+      )}
+
+      {/* Debug panel - only in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <LedgerDebugPanel weekNumber={week} />
       )}
     </main>
   );

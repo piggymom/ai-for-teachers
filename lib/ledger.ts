@@ -17,6 +17,18 @@ import { extractArtifact } from "./artifacts";
 const anthropic = new Anthropic();
 
 // =============================================================================
+// DEBUG LOGGING
+// =============================================================================
+
+const DEBUG_LEDGER = process.env.DEBUG_LEDGER === 'true' || process.env.NODE_ENV === 'development';
+
+function logLedger(step: string, data: Record<string, unknown>) {
+  if (DEBUG_LEDGER) {
+    console.log(`[LEDGER:${step}]`, JSON.stringify(data, null, 2));
+  }
+}
+
+// =============================================================================
 // TYPES
 // =============================================================================
 
@@ -87,6 +99,8 @@ export async function getOrCreateLedger(
   userId: string,
   weekNumber: number
 ): Promise<ConversationLedger> {
+  logLedger('FETCH_START', { userId: userId.slice(-8), weekNumber });
+
   const existing = await prisma.conversationLedger.findUnique({
     where: {
       userId_weekNumber: { userId, weekNumber },
@@ -94,8 +108,17 @@ export async function getOrCreateLedger(
   });
 
   if (existing) {
-    return transformFromDb(existing);
+    const ledger = transformFromDb(existing);
+    logLedger('FETCH_FOUND', {
+      ledgerId: ledger.id.slice(-8),
+      currentPhase: ledger.currentPhase,
+      diagnosticLevel: ledger.diagnostic.level,
+      exchangeCount: ledger.exchangeCount
+    });
+    return ledger;
   }
+
+  logLedger('CREATE_START', { userId: userId.slice(-8), weekNumber });
 
   // Create new ledger with defaults
   const created = await prisma.conversationLedger.create({
@@ -113,6 +136,7 @@ export async function getOrCreateLedger(
     },
   });
 
+  logLedger('CREATE_SUCCESS', { ledgerId: created.id.slice(-8), weekNumber });
   return transformFromDb(created);
 }
 
@@ -289,9 +313,13 @@ export async function updateLedgerFromExchange(
   userMessage: string,
   assistantResponse: string
 ): Promise<ConversationLedger> {
-  console.log("=== CLASSIFIER TRIGGERED ===");
-  console.log("User message:", userMessage.substring(0, 100));
-  console.log("Assistant response:", assistantResponse.substring(0, 100));
+  logLedger('CLASSIFY_START', {
+    ledgerId: ledger.id.slice(-8),
+    currentPhase: ledger.currentPhase,
+    exchangeCount: ledger.exchangeCount,
+    userMessagePreview: userMessage.slice(0, 100) + (userMessage.length > 100 ? '...' : ''),
+    assistantPreview: assistantResponse.slice(0, 100) + (assistantResponse.length > 100 ? '...' : '')
+  });
 
   const progressionText = formatProgressionForClassifier(ledger.weekNumber);
 
@@ -301,6 +329,8 @@ export async function updateLedgerFromExchange(
     userMessage,
     assistantResponse
   );
+
+  logLedger('CLASSIFY_PROMPT_BUILT', { promptLength: classifierPrompt.length });
 
   try {
     const response = await anthropic.messages.create({
@@ -312,6 +342,11 @@ export async function updateLedgerFromExchange(
     const responseText =
       response.content[0].type === "text" ? response.content[0].text : "";
 
+    logLedger('CLASSIFY_RAW_RESPONSE', {
+      responseLength: responseText.length,
+      preview: responseText.slice(0, 300) + (responseText.length > 300 ? '...' : '')
+    });
+
     let parsed: ClassifierOutput;
     try {
       // Try to extract JSON from the response (handle markdown code blocks)
@@ -320,7 +355,18 @@ export async function updateLedgerFromExchange(
         throw new Error("No JSON found in response");
       }
       parsed = JSON.parse(jsonMatch[0]);
+      logLedger('CLASSIFY_PARSED', {
+        phase: parsed.currentPhase,
+        level: parsed.diagnostic?.level,
+        hasBeenAssessed: parsed.diagnostic?.hasBeenAssessed,
+        artifactInProgress: parsed.artifact?.inProgress,
+        guidance: parsed.guidance?.slice(0, 100)
+      });
     } catch (e) {
+      logLedger('CLASSIFY_PARSE_ERROR', {
+        error: String(e),
+        rawResponse: responseText.slice(0, 500)
+      });
       console.error("[LEDGER] Failed to parse classifier response:", responseText);
       // Return ledger with incremented exchange count
       return incrementExchangeCount(ledger);
@@ -336,6 +382,10 @@ export async function updateLedgerFromExchange(
       parsed.artifact.inProgress &&
       parsed.artifact.currentState
     ) {
+      logLedger('ARTIFACT_EXTRACTION_TRIGGERED', {
+        type: parsed.artifact.type,
+        stateLength: parsed.artifact.currentState?.length
+      });
       // Extract the artifact (fire and forget - don't block ledger update)
       extractArtifact(
         ledger.userId,
@@ -369,12 +419,20 @@ export async function updateLedgerFromExchange(
       },
     });
 
-    console.log(
-      `[LEDGER] Updated: phase=${parsed.currentPhase}, exchange=${parsed.exchangeCount}, level=${parsed.diagnostic.level}`
-    );
+    logLedger('UPDATE_SUCCESS', {
+      ledgerId: ledger.id.slice(-8),
+      phase: parsed.currentPhase,
+      previousPhase: previousPhase,
+      level: parsed.diagnostic.level,
+      exchangeCount: parsed.exchangeCount
+    });
 
     return transformFromDb(updated);
   } catch (error) {
+    logLedger('CLASSIFY_ERROR', {
+      error: String(error),
+      ledgerId: ledger.id.slice(-8)
+    });
     console.error("[LEDGER] Classifier error:", error);
     // Graceful degradation: increment exchange count only
     return incrementExchangeCount(ledger);
