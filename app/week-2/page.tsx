@@ -1,15 +1,10 @@
 import { SkippyChat } from "../components/skippy-chat";
-import { CourseSidebar } from "../components/course-sidebar";
-import { SupportChatPanel } from "../components/support-chat-panel";
+import { DashboardLayout } from "../components/layouts/dashboard-layout";
 
 export default function Week2Page() {
   return (
-    <div className="flex min-h-screen bg-neutral-900">
-      <CourseSidebar />
-      <div className="flex-1">
-        <SkippyChat week={2} weekTitle="Prompting Fundamentals" />
-      </div>
-      <SupportChatPanel />
-    </div>
+    <DashboardLayout>
+      <SkippyChat week={2} weekTitle="Prompting Fundamentals" />
+    </DashboardLayout>
   );
 }

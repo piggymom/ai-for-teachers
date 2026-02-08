@@ -8,19 +8,34 @@ export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
-    return NextResponse.json({ progress: {} }, { status: 200 });
+    return NextResponse.json({ progress: [] }, { status: 200 });
   }
 
   const progressRecords = await prisma.progress.findMany({
     where: { userId: session.user.id },
+    orderBy: { weekNumber: "asc" }
   });
 
-  const progress: Record<number, string> = {};
-  for (const record of progressRecords) {
-    progress[record.weekNumber] = record.status;
+  // Calculate days since last activity
+  let daysSinceLastVisit: number | undefined;
+  try {
+    const lastActivity = await prisma.skippyMessage.findFirst({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" }
+    });
+
+    if (lastActivity) {
+      const diffMs = Date.now() - new Date(lastActivity.createdAt).getTime();
+      daysSinceLastVisit = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    }
+  } catch {
+    // Ignore errors fetching last activity
   }
 
-  return NextResponse.json({ progress });
+  return NextResponse.json({
+    progress: progressRecords,
+    daysSinceLastVisit
+  });
 }
 
 // POST /api/progress - Update progress for a week
@@ -37,7 +52,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const { weekNumber, status } = body;
 
-  if (typeof weekNumber !== "number" || weekNumber < 1 || weekNumber > 6) {
+  if (typeof weekNumber !== "number" || weekNumber < 0 || weekNumber > 6) {
     return NextResponse.json(
       { error: "Invalid week number" },
       { status: 400 }
