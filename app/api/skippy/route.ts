@@ -155,16 +155,34 @@ async function handleStartWeek(userId: string, week: number, userName: string) {
       getOrCreateLedger(userId, week),
     ]);
 
+    // Log ledger state
+    console.log('[SKIPPY:LEDGER_FETCHED]', {
+      event: 'start_week',
+      week,
+      found: !!ledger,
+      phase: ledger?.currentPhase,
+      level: ledger?.diagnostic?.level,
+      guidance: ledger?.guidance?.slice(0, 100),
+      exchangeCount: ledger?.exchangeCount
+    });
+
     const alreadyStarted = await hasConversationStarted(userId, week);
 
     // Build system prompt with ledger context
     const ledgerContext = formatLedgerForPrompt(ledger);
+    console.log('[SKIPPY:LEDGER_INJECTION]', ledgerContext.slice(0, 500) + '...');
+
     const diagnosticProbe = getDiagnosticProbe(week);
     const fullSystemPrompt = `${context.systemPrompt}\n\n${ledgerContext}${
       diagnosticProbe && !ledger.diagnostic.hasBeenAssessed
         ? `\n\nDIAGNOSTIC PROBE FOR THIS WEEK:\n"${diagnosticProbe}"\n\nUse this probe naturally in your opening or early in the conversation to assess where this teacher is starting from.`
         : ""
     }`;
+
+    console.log('[SKIPPY:SYSTEM_PROMPT_PREVIEW]', {
+      totalLength: fullSystemPrompt.length,
+      preview: fullSystemPrompt.slice(0, 300) + '...'
+    });
 
     if (alreadyStarted) {
       // Return existing conversation with ledger-enhanced system prompt
@@ -207,6 +225,7 @@ async function handleSaveMessage(
 ) {
   try {
     await saveMessage(userId, week, role, content);
+    console.log('[SKIPPY:SAVE_MESSAGE]', { week, role, contentLength: content.length });
 
     // When saving an assistant message, trigger the classifier
     // to update the ledger based on this exchange
@@ -217,15 +236,28 @@ async function handleSaveMessage(
         getSkippyContext(userId, week),
       ]);
 
+      console.log('[SKIPPY:CLASSIFIER_TRIGGER]', {
+        week,
+        ledgerId: ledger.id.slice(-8),
+        currentPhase: ledger.currentPhase,
+        exchangeCount: ledger.exchangeCount
+      });
+
       // Find the most recent user message (should be the one just before this assistant message)
       const userMessages = context.history.filter((m) => m.role === "user");
       const lastUserMessage = userMessages[userMessages.length - 1]?.content || "";
 
       if (lastUserMessage && content) {
+        console.log('[SKIPPY:CLASSIFIER_INPUTS]', {
+          userMessagePreview: lastUserMessage.slice(0, 100),
+          assistantPreview: content.slice(0, 100)
+        });
         // ASYNC: Update ledger (fire and forget - zero latency impact)
         updateLedgerFromExchange(ledger, lastUserMessage, content).catch((err) =>
           console.error("Failed to update ledger from save_message:", err)
         );
+      } else {
+        console.log('[SKIPPY:CLASSIFIER_SKIPPED]', { reason: 'missing messages', hasUser: !!lastUserMessage, hasAssistant: !!content });
       }
     }
 
@@ -254,9 +286,26 @@ async function handleUserMessage(
     ]);
     timing.t2_contextFetched = Date.now();
 
+    // Log ledger state
+    console.log('[SKIPPY:LEDGER_FETCHED]', {
+      event: 'user_message',
+      week,
+      found: !!ledger,
+      phase: ledger?.currentPhase,
+      level: ledger?.diagnostic?.level,
+      guidance: ledger?.guidance?.slice(0, 100),
+      exchangeCount: ledger?.exchangeCount
+    });
+
     // Build system prompt with ledger context
     const ledgerContext = formatLedgerForPrompt(ledger);
+    console.log('[SKIPPY:LEDGER_INJECTION]', ledgerContext.slice(0, 500) + '...');
+
     const fullSystemPrompt = `${context.systemPrompt}\n\n${ledgerContext}`;
+    console.log('[SKIPPY:SYSTEM_PROMPT_PREVIEW]', {
+      totalLength: fullSystemPrompt.length,
+      preview: fullSystemPrompt.slice(0, 300) + '...'
+    });
 
     // Build messages array for Anthropic - LIMIT to last N messages
     let historyMessages = context.history.map((msg) => ({
