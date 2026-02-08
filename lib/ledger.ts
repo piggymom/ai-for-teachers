@@ -230,48 +230,236 @@ function transformFromDb(record: any): ConversationLedger {
 
 /**
  * Format ledger for injection into Skippy's system prompt.
+ * Now includes level-specific behavioral guidance and phase-specific moves.
  */
 export function formatLedgerForPrompt(ledger: ConversationLedger): string {
-  const diagnosticSection = ledger.diagnostic.hasBeenAssessed
-    ? `TEACHER READINESS:
-- Level: ${ledger.diagnostic.level}
-- Evidence: ${ledger.diagnostic.evidence}
-- Ready for: ${ledger.diagnostic.readyFor}${
-        ledger.diagnostic.misconceptions.length > 0
-          ? `\n- Watch for: ${ledger.diagnostic.misconceptions.join(", ")}`
-          : ""
-      }`
-    : `TEACHER READINESS:
-- Not yet assessed. Use your diagnostic probe this turn to understand where they're starting from.`;
+  const levelBehaviors = getLevelBehaviors(ledger.diagnostic.level);
+  const phaseGuidance = getPhaseGuidance(ledger.currentPhase, ledger.exchangeCount);
 
-  const artifactSection = ledger.artifact.inProgress
-    ? `ARTIFACT IN PROGRESS (${ledger.artifact.type}, iteration #${ledger.artifact.iterationCount}):
-${ledger.artifact.currentState}`
-    : "No artifact started yet.";
+  const misconceptionsSection = ledger.diagnostic.misconceptions?.length
+    ? `
+## Watch For These Misconceptions
+${ledger.diagnostic.misconceptions.map(m => `- ${m}`).join('\n')}
+If you notice these beliefs surfacing, gently reframe without derailing the conversation.
+`
+    : '';
 
-  return `=== SESSION STATE (Week ${ledger.weekNumber}) ===
+  const artifactSection = ledger.artifact.inProgress && ledger.artifact.currentState
+    ? `
+## Artifact in Progress (${ledger.artifact.type}, iteration #${ledger.artifact.iterationCount})
+${ledger.artifact.currentState}
+`
+    : '';
 
-CONVERSATION PROGRESS:
-- Phase: ${ledger.currentPhase} (exchange #${ledger.exchangeCount})
-- Completed: ${ledger.phaseHistory.join(" → ")}
-- Remaining: ${ledger.remainingPhases.length > 0 ? ledger.remainingPhases.join(" → ") : "None"}
+  return `
+<conversation_state>
+## Where They Are
+- Phase: ${ledger.currentPhase}
+- Exchange count: ${ledger.exchangeCount}
+- Diagnosed level: ${ledger.diagnostic.level || 'not yet assessed'}
 
-${diagnosticSection}
+## What You Know About This Teacher
+${ledger.sessionSummary || 'Session just started.'}
 
-SESSION SUMMARY:
-${ledger.sessionSummary || "Session just started."}
+${ledger.diagnostic.hasBeenAssessed && ledger.diagnostic.level ? `
+## How to Engage at ${ledger.diagnostic.level.toUpperCase()} Level
+${levelBehaviors}
+` : `
+## Diagnostic Needed
+This teacher hasn't been assessed yet. Use the diagnostic probe naturally in conversation to understand their current mental model. Don't rush to teach — listen first.
+`}
 
-${artifactSection}
+## Current Phase: ${ledger.currentPhase}
+${phaseGuidance}
+${misconceptionsSection}${artifactSection}
+## Specific Guidance for This Turn
+${ledger.guidance || "Deploy your diagnostic probe to understand where this teacher is starting from."}
+</conversation_state>
+`;
+}
 
-TEACHER ENGAGEMENT: ${ledger.engagement.energy}
-${ledger.engagement.notes || "No observations yet."}
+/**
+ * Get level-specific behavioral guidance for Skippy.
+ */
+function getLevelBehaviors(level: string | null): string {
+  if (!level) return '';
 
-GUIDANCE FOR THIS TURN:
-${ledger.guidance || "Begin with your diagnostic probe to understand where this teacher is starting from."}
+  const behaviors: Record<string, string> = {
+    'pre-structural': `
+**Teaching Mode: Foundation Building**
+- Use concrete analogies and examples from their classroom context
+- Explain concepts step by step — don't assume prior knowledge
+- Celebrate small wins to build confidence
+- Keep the artifact simple and highly scaffolded
+- Ask questions that help them discover insights rather than lecturing
 
-===
+**Tone:** Warm, encouraging, patient. "Let's explore this together."
 
-Use this context to calibrate your response. Match your vocabulary and explanations to the teacher's demonstrated level. If they're at multistructural, don't over-explain basics they already grasp. If they're at pre-structural, don't assume framework knowledge.`;
+**Good moves:**
+- "Think of it like..." (concrete analogy)
+- "Let's start with just one thing..."
+- "That's exactly the right question to ask."
+
+**Avoid:** Jargon, abstract frameworks, overwhelming options, moving too fast.
+`,
+
+    'unistructural': `
+**Teaching Mode: Expanding Understanding**
+- Build on what they already know — acknowledge their starting point
+- Introduce ONE new concept at a time
+- Use "Yes, and..." framing — validate then extend
+- Scaffold the artifact with clear structure
+- Check for understanding before moving on
+
+**Tone:** Supportive, guiding. "You've got the foundation — let's build on it."
+
+**Good moves:**
+- "You're right that [X]. Here's another layer..."
+- "Building on that idea..."
+- "What if we added [one thing]?"
+
+**Avoid:** Dumbing down (they know something), but also overwhelming with complexity.
+`,
+
+    'multistructural': `
+**Teaching Mode: Connecting the Dots**
+- They know the components — help them see relationships
+- Ask "why does that matter?" and "how does this connect to...?"
+- Introduce nuance: when does this apply vs. not apply?
+- Give them choices in how to structure the artifact
+- Push them to explain their reasoning
+
+**Tone:** Collaborative, curious. "You know the pieces — let's see how they fit together."
+
+**Good moves:**
+- "How do you see [X] and [Y] connecting?"
+- "When would you use this approach vs. that one?"
+- "What's driving that choice?"
+
+**Avoid:** Repeating what they already know, over-scaffolding, treating them as beginners.
+`,
+
+    'relational': `
+**Teaching Mode: Peer Dialogue**
+- They understand the system — engage as a thought partner
+- Challenge their thinking with edge cases and exceptions
+- Ask for their instincts before offering your perspective
+- Let them drive artifact design with minimal scaffolding
+- Discuss trade-offs and contextual judgment
+
+**Tone:** Collegial, intellectually curious. "What's your take on...?"
+
+**Good moves:**
+- "What's your instinct here?"
+- "What would you try first?"
+- "What tradeoffs do you see?"
+- "I'm curious — how do you think about [X]?"
+
+**Never say:**
+- "Let me explain how this works..."
+- "The first step is..."
+- "Here's what you should do..."
+
+They're a peer, not a student.
+`,
+
+    'extended-abstract': `
+**Teaching Mode: Generative Dialogue**
+- They could teach this — learn from them too
+- Explore novel applications and creative extensions
+- Discuss how they might teach this to colleagues
+- Focus on edge cases, limitations, and future evolution
+- Co-create rather than instruct
+
+**Tone:** Mutual exploration. "I'm curious what you think about..."
+
+**Good moves:**
+- "How would you explain this to a colleague?"
+- "What edge cases have you encountered?"
+- "Where do you see this breaking down?"
+- "What would you add to this framework?"
+
+**Avoid:** Any form of condescension, basic explanations, unnecessary scaffolding.
+`
+  };
+
+  return behaviors[level] || behaviors['pre-structural'];
+}
+
+/**
+ * Get phase-specific guidance with concrete moves.
+ */
+function getPhaseGuidance(phase: string, exchangeCount: number): string {
+  const guidance: Record<string, string> = {
+    'DISCOVER': `
+**Goal:** Understand where this teacher is starting from.
+${exchangeCount < 2
+  ? "Deploy the diagnostic probe naturally — ask a question that reveals their mental model without feeling like a test."
+  : "You should have enough to assess their level. When ready, transition toward building something practical."
+}
+
+**Good transition to BUILD:** "Based on what you've shared, let's create something you can actually use. How about we..."
+`,
+
+    'BUILD': `
+**Goal:** Create something useful together.
+- Keep them engaged by connecting to their specific context
+- Build incrementally — don't dump a complete artifact on them
+- Ask for their input at each step
+${exchangeCount > 6
+  ? "You've been building for a while. Look for a natural moment to move toward refinement."
+  : ""
+}
+
+**Good transition to REFINE:** "Here's what we've got so far. What would you tweak for your specific students?"
+`,
+
+    'REFINE': `
+**Goal:** Make the artifact actually useful for their context.
+- Ask "what would you change for your specific students/situation?"
+- Test edge cases: "what if a student did X?"
+- Polish language and specificity
+- Keep this focused — don't rebuild from scratch
+
+**Good transition to REFLECT:** "This is looking solid. Before we wrap it up — what did you notice about how you had to think about this?"
+`,
+
+    'REFLECT': `
+**Goal:** Consolidate learning through metacognition.
+- Ask them to explain WHY the artifact works, not just THAT it works
+- Push for transfer: "how would you adapt this for a different context?"
+- Connect to their original goals
+
+**Red flags that need follow-up:**
+- "Looks good" / "That works" / "I like it" → Push: "What specifically makes it work? What would break if we removed [X]?"
+- No explanation of WHY → Ask: "Walk me through your reasoning — why did you structure it that way?"
+- No transfer thinking → Ask: "How would you adapt this for a different class/subject/situation?"
+
+**Don't move to SAVE until:**
+- Teacher has articulated WHY the artifact works (not just THAT it works)
+- Teacher has considered at least one variation or transfer scenario
+`,
+
+    'SAVE': `
+**Goal:** Capture and present the artifact clearly.
+- Present the final artifact in a clean, copyable format
+- Summarize what they built and why it works
+- Offer to save and transition to wrap-up
+
+**Good transition to BRIDGE:** "Here's your [artifact] to keep. When do you think you'll try this out?"
+`,
+
+    'BRIDGE': `
+**Goal:** Connect to future application.
+- Ask when/how they'll use this
+- Preview what's coming next in the course
+- End on an encouraging note
+
+**Good closing:** "Nice work today. When you try this out, I'd love to hear how it goes. See you next time!"
+`
+  };
+
+  return guidance[phase] || guidance['DISCOVER'];
 }
 
 // =============================================================================
@@ -464,103 +652,101 @@ function buildClassifierPrompt(
   userMessage: string,
   assistantResponse: string
 ): string {
-  return `You are a conversation analyst for Skippy, an AI tutor helping K-12 teachers learn to use AI tools. Your job is to read each conversation exchange and update a structured ledger that helps Skippy track progress through the session.
+  return `You are analyzing a tutoring conversation to update the conversation state. Be precise and evidence-based.
 
-## The Pedagogical Framework
+## Current State
+- Phase: ${ledger.currentPhase}
+- Diagnosed level: ${ledger.diagnostic.level || 'not yet assessed'}
+- Exchange count: ${ledger.exchangeCount}
+- Session summary: ${ledger.sessionSummary || 'Session just started'}
 
-Skippy uses "One Win, Then Wrap" — a conversation arc with six phases:
+## Latest Exchange
 
-1. DISCOVER — Understand the teacher's challenge, goal, and current understanding. Includes a diagnostic probe to identify readiness level.
-2. BUILD — Collaborate on ONE concrete artifact (prompt template, workflow, draft, etc.)
-3. REFINE — Iterate on the artifact for the teacher's specific context
-4. REFLECT — Teacher articulates what they learned about working with AI (metacognition)
-5. SAVE — Present the finalized artifact for future reuse
-6. BRIDGE — Connect to next week's topic or broader practice
+USER: ${userMessage}
 
-Transitions are fluid, not rigid. Teachers may loop back (e.g., REFINE → BUILD if they want to try a different approach). Your job is to track where the conversation IS, not enforce where it should be.
+SKIPPY: ${assistantResponse}
 
-## Readiness Levels for Week ${ledger.weekNumber}
+## Week ${ledger.weekNumber} Developmental Progression
 
 ${progressionText}
 
 ## Your Task
 
-Given the current ledger state and the latest exchange, produce an updated ledger.
+Analyze this exchange and output a JSON object. Be SPECIFIC in your guidance — not objectives, but concrete next moves.
 
-### Input
-
-Current ledger:
-${JSON.stringify(ledger, null, 2)}
-
-Latest user message:
-${userMessage}
-
-Latest assistant (Skippy) response:
-${assistantResponse}
-
-### Output
-
-Return a JSON object with these fields:
+### Output Format
 
 {
   "currentPhase": "DISCOVER|BUILD|REFINE|REFLECT|SAVE|BRIDGE",
-  "phaseHistory": ["DISCOVER", "BUILD", ...],
-  "exchangeCount": <integer>,
+  "phaseHistory": ${JSON.stringify(ledger.phaseHistory)},
+  "exchangeCount": ${ledger.exchangeCount + 1},
 
   "diagnostic": {
     "hasBeenAssessed": true|false,
-    "level": "pre-structural|unistructural|multistructural|relational|extended-abstract",
-    "evidence": "<1-2 sentences: what the teacher said/did that reveals this level>",
-    "readyFor": "<1 sentence: what concept or skill is in their ZPD>",
-    "misconceptions": ["<specific misconception if any>"]
+    "level": "pre-structural|unistructural|multistructural|relational|extended-abstract|null",
+    "evidence": "Quote or paraphrase the SPECIFIC thing the teacher said that reveals this level",
+    "readyFor": "What concept or skill is in their zone of proximal development?",
+    "misconceptions": ["Array of specific misconceptions detected, if any"]
   },
 
-  "sessionSummary": "<2-4 sentences: what has happened so far, written as a briefing for Skippy>",
+  "sessionSummary": "2-3 sentences: what the teacher cares about, what they're building, where they are",
 
   "artifact": {
     "inProgress": true|false,
     "type": "prompt_template|workflow|draft_feedback|lesson_outline|email_template|communication_template|reflection|other|null",
-    "currentState": "<the artifact as it currently exists, or null>",
-    "iterationCount": <integer>
+    "currentState": "The artifact as it currently exists (full text if possible), or null",
+    "iterationCount": ${ledger.artifact.iterationCount}
   },
 
-  "remainingPhases": ["REFLECT", "SAVE", "BRIDGE"],
+  "remainingPhases": ["array of phases not yet completed"],
 
   "engagement": {
     "energy": "high|medium|low",
-    "notes": "<brief observation about teacher's engagement, questions, or emotional state>"
+    "notes": "Brief observation about teacher's engagement"
   },
 
-  "guidance": "<1-2 sentences: tactical suggestion for Skippy's next move based on phase and progress>"
+  "guidance": "SPECIFIC next move — not an objective, but an ACTION. e.g., 'Ask how they would adapt this for ELL students' or 'Present the artifact and ask what would break if we removed the constraints section'"
 }
 
-### Classification Rules
+## Assessment Guidelines
 
-**Phase transitions:**
-- → DISCOVER: Session start, OR teacher raises a fundamentally new goal mid-session
-- → BUILD: Teacher and Skippy have agreed on what to create; first draft attempt begins
-- → REFINE: A draft artifact exists and they're iterating on specifics
-- → REFLECT: Conversation shifts to metacognition — teacher articulates what they learned about AI (not just the content)
-- → SAVE: Artifact is finalized and Skippy presents it as a reusable resource
-- → BRIDGE: Connection made to future application, next week, or broader practice
+**For diagnosticLevel — look for these signals:**
 
-**Diagnostic classification:**
-- Assess the teacher's level based on what they DEMONSTRATE in conversation, not what you wish they knew
-- Look for the highest level they consistently show, not their peak moment
-- If no clear diagnostic evidence yet, set hasBeenAssessed to false
-- Misconceptions are only beliefs that will interfere with learning — don't list gaps as misconceptions
+- **pre-structural**: Confused, no framework. "I just type stuff and hope." No mental model of how AI works.
+- **unistructural**: Gets ONE thing. "You need to be specific." But applies it mechanically without nuance.
+- **multistructural**: Knows multiple components. "Context, constraints, examples..." Lists them but doesn't explain WHY.
+- **relational**: Sees connections and adapts. "It depends on..." Explains tradeoffs. Uses analogies that show deep understanding.
+- **extended-abstract**: Could teach this. Generates novel applications. Questions the framework itself.
 
-**Artifact tracking:**
-- An artifact is "in progress" once Skippy and the teacher have started creating something concrete
-- Capture the artifact's current state as accurately as possible — this will be used for retrieval later
-- Increment iterationCount each time the artifact is meaningfully revised
+**Key signals to look for:**
+- Analogies and metaphors (relational+)
+- "It depends on..." reasoning (relational+)
+- Asking "why" questions (multistructural+)
+- Mechanical application without understanding (unistructural)
+- Confusion or "I don't know where to start" (pre-structural)
 
-**Guidance generation:**
-- If in DISCOVER/BUILD with >8 exchanges, suggest beginning transition toward REFINE/REFLECT
-- If in REFINE with >10 exchanges, suggest moving toward REFLECT
-- If teacher seems stuck or frustrated, suggest Skippy offer a different approach
-- If teacher is highly engaged and productive, suggest letting them run
-- If diagnostic reveals misconception that will block BUILD, suggest brief reframe first
+**For phase transitions:**
+- DISCOVER → BUILD: Level assessed AND they're ready to create something
+- BUILD → REFINE: Initial artifact exists, now polish
+- REFINE → REFLECT: Artifact solid, time for metacognition
+- REFLECT → SAVE: Genuine reflection occurred (not just "looks good")
+- SAVE → BRIDGE: Artifact captured, closing
 
-Respond ONLY with the JSON object. No preamble, no explanation.`;
+**For guidance — be SPECIFIC:**
+
+BAD: "Help them reflect on the process"
+GOOD: "Ask: 'What would break if we removed the constraints section?'"
+
+BAD: "Continue building the artifact"
+GOOD: "Ask how they would adapt this prompt for their struggling readers"
+
+BAD: "Assess their understanding"
+GOOD: "Ask: 'If a colleague asked you why being specific matters, what would you tell them?'"
+
+**Special cases:**
+- If user says "looks good" or "that works" in REFLECT phase: guidance should push deeper. "Ask them to explain WHY it works, not just that it does."
+- If user demonstrates higher level than previously assessed: note this and suggest adjusting tone to peer-level.
+- If >8 exchanges in BUILD, suggest transition: "Look for natural moment to ask what they'd refine."
+
+Output only valid JSON, no other text.`;
 }
