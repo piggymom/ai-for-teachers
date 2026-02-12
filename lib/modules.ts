@@ -7,6 +7,7 @@
  */
 
 import { getProgression, type WeekProgression } from "./progressions";
+import { WEEK_2_SYSTEM_PROMPT, WEEK_2_OPENING_MESSAGE } from "./prompts/week-2";
 
 export type ModulePrompt = {
   week: number;
@@ -55,19 +56,8 @@ Here's a question I find interesting: if a colleague asked you 'how does ChatGPT
   2: {
     week: 2,
     title: "Prompting Fundamentals",
-    prompt: `This is Week 2: Prompting Fundamentals.
-Focus on the building blocks of effective prompts.
-Key topics:
-- The 4C framework: Context, Constraints, Command, Criteria
-- Starting simple and iterating
-- Providing examples (few-shot prompting)
-- Being specific about format and length
-Help them practice: Taking a vague request and refining it using the 4C framework.`,
-    openingMessage: `Hey {{name}}! This week is the one that makes everything else click: writing prompts that actually work.
-
-I'll teach you the 4Cs—Context, Constraints, Command, Criteria. By the end, you'll have a refined prompt you can reuse.
-
-When you've tried asking AI for help with something — or imagined doing it — what do you think makes the difference between getting something useful versus something useless?`,
+    prompt: WEEK_2_SYSTEM_PROMPT,
+    openingMessage: WEEK_2_OPENING_MESSAGE,
   },
 
   3: {

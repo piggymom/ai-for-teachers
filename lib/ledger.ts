@@ -13,6 +13,11 @@ import { prisma } from "./prisma";
 import Anthropic from "@anthropic-ai/sdk";
 import { formatProgressionForClassifier } from "./progressions";
 import { extractArtifact } from "./artifacts";
+import {
+  getWeek2Example,
+  formatInsightsForInjection,
+  formatMisconceptionForInjection,
+} from "./prompts/week-2";
 
 const anthropic = new Anthropic();
 
@@ -230,19 +235,48 @@ function transformFromDb(record: any): ConversationLedger {
 
 /**
  * Format ledger for injection into Skippy's system prompt.
- * Now includes level-specific behavioral guidance and phase-specific moves.
+ * Now includes level-specific behavioral guidance, phase-specific moves,
+ * and week-specific example dialogues.
  */
 export function formatLedgerForPrompt(ledger: ConversationLedger): string {
   const levelBehaviors = getLevelBehaviors(ledger.diagnostic.level);
   const phaseGuidance = getPhaseGuidance(ledger.currentPhase, ledger.exchangeCount);
 
-  const misconceptionsSection = ledger.diagnostic.misconceptions?.length
-    ? `
+  // Get week-specific example dialogue based on level (only for Week 2 for now)
+  const exampleDialogue = ledger.weekNumber === 2 && ledger.diagnostic.level
+    ? getWeek2Example(ledger.diagnostic.level)
+    : '';
+
+  // Format misconceptions for Week 2 with specific handling
+  let misconceptionsSection = '';
+  if (ledger.diagnostic.misconceptions?.length) {
+    if (ledger.weekNumber === 2) {
+      // Use Week 2's specific misconception handling
+      const misconceptionHandling = ledger.diagnostic.misconceptions
+        .map(m => {
+          // Try to match to known misconception types
+          const key = m.toLowerCase().includes('word') || m.toLowerCase().includes('length')
+            ? 'more_words'
+            : m.toLowerCase().includes('know') || m.toLowerCase().includes('mind')
+            ? 'mind_reading'
+            : m.toLowerCase().includes('right') || m.toLowerCase().includes('perfect')
+            ? 'one_right_way'
+            : m.toLowerCase().includes('first') || m.toLowerCase().includes('draft')
+            ? 'first_draft_final'
+            : null;
+          return key ? formatMisconceptionForInjection(key) : `- ${m}`;
+        })
+        .filter(Boolean)
+        .join('\n');
+      misconceptionsSection = misconceptionHandling || '';
+    } else {
+      misconceptionsSection = `
 ## Watch For These Misconceptions
 ${ledger.diagnostic.misconceptions.map(m => `- ${m}`).join('\n')}
 If you notice these beliefs surfacing, gently reframe without derailing the conversation.
-`
-    : '';
+`;
+    }
+  }
 
   const artifactSection = ledger.artifact.inProgress && ledger.artifact.currentState
     ? `
@@ -251,8 +285,51 @@ ${ledger.artifact.currentState}
 `
     : '';
 
+  // Build insights section for Week 2 based on exchange patterns
+  let insightsSection = '';
+  if (ledger.weekNumber === 2 && ledger.exchangeCount >= 2) {
+    // Select relevant insights based on phase and patterns
+    const insightKeys: string[] = [];
+    if (ledger.currentPhase === 'BUILD' || ledger.currentPhase === 'REFINE') {
+      // Add 2-3 relevant insights during build/refine
+      if (ledger.exchangeCount < 6) {
+        insightKeys.push('first_output_data');
+      }
+      if (ledger.artifact.iterationCount > 0) {
+        insightKeys.push('positive_framing');
+      }
+      // Add task emphasis insight if they're working on a specific task type
+      if (ledger.sessionSummary?.includes('feedback') || ledger.sessionSummary?.includes('brainstorm')) {
+        insightKeys.push('task_emphasis');
+      }
+    }
+    insightsSection = formatInsightsForInjection(insightKeys);
+  }
+
+  // Check for completion or frustration signals in engagement notes
+  const isFrustrated = ledger.engagement.notes?.toLowerCase().includes('frustration') || false;
+  const isComplete = ledger.currentPhase === 'SAVE' || ledger.currentPhase === 'BRIDGE';
+
+  // Build completion/frustration warning if needed
+  let urgentWarning = '';
+  if (isFrustrated) {
+    urgentWarning = `
+## ⚠️ CRITICAL: FRUSTRATION DETECTED
+The user has corrected you or expressed frustration. DO NOT ask more questions.
+Your ONLY move: "Got it — here's your artifact. Great work today." Then END.
+`;
+  } else if (isComplete) {
+    urgentWarning = `
+## ⚠️ WRAP UP NOW
+User has completed the session or signaled they're done.
+Present the artifact cleanly if needed, offer ONE closing statement, then END.
+Do NOT ask another question.
+`;
+  }
+
   return `
 <conversation_state>
+${urgentWarning}
 ## Where They Are
 - Phase: ${ledger.currentPhase}
 - Exchange count: ${ledger.exchangeCount}
@@ -271,11 +348,15 @@ This teacher hasn't been assessed yet. Use the diagnostic probe naturally in con
 
 ## Current Phase: ${ledger.currentPhase}
 ${phaseGuidance}
-${misconceptionsSection}${artifactSection}
+${misconceptionsSection}${artifactSection}${insightsSection}
 ## Specific Guidance for This Turn
 ${ledger.guidance || "Deploy your diagnostic probe to understand where this teacher is starting from."}
 </conversation_state>
-`;
+${exampleDialogue ? `
+---
+
+${exampleDialogue}
+` : ''}`;
 }
 
 /**
@@ -725,12 +806,37 @@ Analyze this exchange and output a JSON object. Be SPECIFIC in your guidance —
 - Mechanical application without understanding (unistructural)
 - Confusion or "I don't know where to start" (pre-structural)
 
-**For phase transitions:**
+**For phase transitions — be aggressive about advancing:**
+
 - DISCOVER → BUILD: Level assessed AND they're ready to create something
-- BUILD → REFINE: Initial artifact exists, now polish
-- REFINE → REFLECT: Artifact solid, time for metacognition
-- REFLECT → SAVE: Genuine reflection occurred (not just "looks good")
-- SAVE → BRIDGE: Artifact captured, closing
+- BUILD → REFINE: Skippy presents a structured artifact with labeled sections (CONTEXT/CONSTRAINTS/COMMAND/CRITERIA)
+- REFINE → REFLECT: User indicates satisfaction ("looks good", "that works", "I like it")
+- REFLECT → SAVE: User gives ANY substantive reflection about what they learned
+- SAVE → BRIDGE: Artifact captured
+
+**CRITICAL: Completion signals override everything**
+
+If user says ANY of these, set phase to SAVE or BRIDGE immediately:
+- "I'm done" / "I'm finished" / "I think I'm done"
+- "I already did this" / "We already covered that" / "We already completed..."
+- "I'm good" / "That's all I need" / "I'm all set"
+- "That's it for me" / "I think we're done"
+
+When completion detected:
+- Set currentPhase to "SAVE" or "BRIDGE"
+- Set guidance to "User has signaled completion. Present artifact and end gracefully. Do NOT ask more questions."
+
+**CRITICAL: Frustration detection**
+
+If user says ANY of these, set frustration_detected in engagement.notes:
+- "I already said..." / "I already did..." / "We already..."
+- "Within this context window..." (user explaining conversation mechanics)
+- User corrects Skippy about what happened in the conversation
+
+When frustration detected:
+- Set engagement.energy to "low"
+- Set engagement.notes to "FRUSTRATION: User corrected repetition"
+- Set guidance to "STOP asking questions. Apologize briefly, present artifact, end session."
 
 **For guidance — be SPECIFIC:**
 
@@ -743,10 +849,21 @@ GOOD: "Ask how they would adapt this prompt for their struggling readers"
 BAD: "Assess their understanding"
 GOOD: "Ask: 'If a colleague asked you why being specific matters, what would you tell them?'"
 
+**Artifact-based phase detection:**
+
+If Skippy's response contains a formatted artifact with CONTEXT/CONSTRAINTS/COMMAND/CRITERIA:
+- This means BUILD is complete → advance to REFINE
+- If user already expressed satisfaction → advance to REFLECT or SAVE
+
+If Skippy asked a reflection question ("what did you notice", "what made the difference", "how would you explain"):
+AND user responded with insight about their learning process:
+- REFLECT is complete → advance to SAVE
+
 **Special cases:**
-- If user says "looks good" or "that works" in REFLECT phase: guidance should push deeper. "Ask them to explain WHY it works, not just that it does."
-- If user demonstrates higher level than previously assessed: note this and suggest adjusting tone to peer-level.
+- If user says "looks good" after artifact is presented: Move to SAVE, don't push for more reflection
+- If user gives genuine reflection (explains WHY something worked, mentions transfer): REFLECT is complete
 - If >8 exchanges in BUILD, suggest transition: "Look for natural moment to ask what they'd refine."
+- If user corrects Skippy twice: guidance must be "End session gracefully. No more questions."
 
 Output only valid JSON, no other text.`;
 }
