@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 // NextAuth.js required models
@@ -149,6 +150,15 @@ model ConversationLedger {
   artifactType             String?  // prompt_template|workflow|draft_feedback|lesson_outline|email_template|etc.
   artifactState            String?  @db.Text
   artifactIterations       Int      @default(0)
+
+  // 4C component tracking (Week 2)
+  fourCContext              Boolean  @default(false)
+  fourCConstraints          Boolean  @default(false)
+  fourCCommand              Boolean  @default(false)
+  fourCCriteria             Boolean  @default(false)
+
+  // Redirect tracking
+  redirectCount             Int      @default(0)
 
   // Engagement signals
   engagementEnergy         String   @default("medium") // high|medium|low

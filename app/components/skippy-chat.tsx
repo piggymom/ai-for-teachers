@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef, FormEvent, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useRealtimeConnection } from "@/lib/useRealtimeConnection";
 import { SkippyAvatar } from "./skippy-avatar";
 import { ChatPhaseIndicator } from "./chat-phase-indicator";
 import { LedgerDebugPanel } from "./debug/ledger-debug-panel";
+
+// Feature flag: set to true to re-enable voice/realtime
+const VOICE_ENABLED = false;
 
 type Message = {
   id: string;
@@ -22,33 +24,18 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPhase, setCurrentPhase] = useState<Phase>("discover");
+  const [isReady, setIsReady] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const activeMessageIdRef = useRef<string | null>(null);
-  const pendingVoiceMessageIdRef = useRef<string | null>(null);
   const initCalledRef = useRef(false);
 
   // Generate message ID
   const nextId = useRef(0);
   const genId = () => `msg_${++nextId.current}`;
-
-  // Save to server
-  const saveMessage = useCallback(async (role: "user" | "assistant", content: string) => {
-    if (!content) return;
-    try {
-      await fetch("/api/skippy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ event: "save_message", week, role, content }),
-      });
-    } catch (e) {
-      console.error("Save failed:", e);
-    }
-  }, [week]);
 
   // Fetch ledger to get current phase
   const fetchLedger = useCallback(async () => {
@@ -66,82 +53,49 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
   }, [week]);
 
   // =============================================================================
-  // REALTIME CONNECTION
+  // TEXT-ONLY: Send message via standard API
   // =============================================================================
 
-  const realtime = useRealtimeConnection({
-    onConnectionStateChange: (state) => {
-      if (state === "error") setError("Connection lost");
-    },
+  const sendTextMessage = useCallback(async (text: string) => {
+    setIsSending(true);
+    setError(null);
 
-    onResponseStart: () => {
-      console.log("[UI] Response starting");
-      const id = genId();
-      activeMessageIdRef.current = id;
-      setMessages(prev => [...prev, { id, role: "assistant", text: "", isStreaming: true }]);
-    },
+    try {
+      const res = await fetch("/api/skippy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event: "user_message", week, message: text }),
+      });
 
-    onTranscriptDelta: (delta, fullText) => {
-      // Show text immediately as it arrives
-      const id = activeMessageIdRef.current;
-      if (id) {
-        console.log("[UI] Transcript delta, length:", fullText.length);
-        setMessages(prev => prev.map(m =>
-          m.id === id ? { ...m, text: fullText } : m
-        ));
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error?.message || "Failed to send message");
       }
-    },
 
-    onResponseDone: (text) => {
-      console.log("[UI] Response done, text:", text.length);
-      const id = activeMessageIdRef.current;
-      if (id) {
-        setMessages(prev => prev.map(m =>
-          m.id === id ? { ...m, text: text || m.text, isStreaming: false } : m
-        ));
-        if (text) saveMessage("assistant", text);
-        activeMessageIdRef.current = null;
-        // Refresh ledger after each exchange
-        fetchLedger();
-      }
-    },
+      const data = await res.json();
+      const assistantText = data.response || "";
 
-    onError: (err) => {
-      console.error("[UI] Error:", err);
-      setError(err.message);
-      const id = activeMessageIdRef.current;
-      if (id) {
-        setMessages(prev => prev.map(m =>
-          m.id === id ? { ...m, isStreaming: false } : m
-        ));
-        activeMessageIdRef.current = null;
-      }
-    },
+      // Add assistant response
+      setMessages(prev => [...prev, {
+        id: genId(),
+        role: "assistant",
+        text: assistantText,
+        isStreaming: false,
+      }]);
 
-    onUserTranscript: (transcript) => {
-      console.log("[UI] User transcript:", transcript);
-      const id = pendingVoiceMessageIdRef.current;
-      if (id && transcript) {
-        // Update the pending voice message with the transcript
-        setMessages(prev => prev.map(m =>
-          m.id === id ? { ...m, text: transcript, isStreaming: false } : m
-        ));
-        saveMessage("user", transcript);
-        pendingVoiceMessageIdRef.current = null;
-      } else if (transcript) {
-        // No pending message, create one
-        const newId = genId();
-        setMessages(prev => [...prev, { id: newId, role: "user", text: transcript, isStreaming: false }]);
-        saveMessage("user", transcript);
-      }
-    },
-  });
+      // Refresh ledger after each exchange
+      fetchLedger();
+    } catch (err) {
+      console.error("[CHAT] Send error:", err);
+      setError(err instanceof Error ? err.message : "Failed to send");
+    } finally {
+      setIsSending(false);
+    }
+  }, [week, fetchLedger]);
 
   // =============================================================================
   // INIT
   // =============================================================================
-
-  const needsOpeningRef = useRef(false);
 
   useEffect(() => {
     if (initCalledRef.current) return;
@@ -168,16 +122,33 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
           })));
         }
 
-        // If this is a new conversation (not resumed), we'll need to trigger the opening
-        needsOpeningRef.current = !data.resumed && data.history?.length === 0;
-
         setIsLoading(false);
+        setIsReady(true);
 
         // Fetch initial ledger state
         fetchLedger();
 
-        if (audioRef.current) {
-          await realtime.connect(week, audioRef.current);
+        // If new conversation, get opening message via text API
+        if (!data.resumed && data.history?.length === 0) {
+          // Send an empty-ish init to get the opening message
+          // The start_week already set up the system prompt with opening instructions
+          // We trigger a user_message with a start signal
+          const openRes = await fetch("/api/skippy", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ event: "user_message", week, message: "[Session starting — deliver your opening message for this week]" }),
+          });
+          if (openRes.ok) {
+            const openData = await openRes.json();
+            if (openData.response) {
+              setMessages([{
+                id: genId(),
+                role: "assistant",
+                text: openData.response,
+                isStreaming: false,
+              }]);
+            }
+          }
         }
       } catch (err) {
         console.error("Init error:", err);
@@ -187,15 +158,7 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
     }
 
     init();
-  }, [week, realtime, fetchLedger]);
-
-  // Trigger opening message after realtime connects (for new conversations)
-  useEffect(() => {
-    if (realtime.isConnected && needsOpeningRef.current) {
-      needsOpeningRef.current = false;
-      realtime.triggerResponse();
-    }
-  }, [realtime.isConnected, realtime]);
+  }, [week, fetchLedger, sendTextMessage]);
 
   // Scroll
   useEffect(() => {
@@ -204,10 +167,10 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
 
   // Focus
   useEffect(() => {
-    if (!isLoading && realtime.turnState === "idle") {
+    if (!isLoading && !isSending) {
       inputRef.current?.focus();
     }
-  }, [isLoading, realtime.turnState]);
+  }, [isLoading, isSending]);
 
   // =============================================================================
   // HANDLERS
@@ -216,23 +179,13 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const text = input.trim();
-    if (!text || !realtime.isConnected || realtime.isResponseInFlight()) return;
+    if (!text || !isReady || isSending) return;
 
     setInput("");
-    setError(null);
-
-    // Finalize any previous
-    if (activeMessageIdRef.current) {
-      setMessages(prev => prev.map(m =>
-        m.id === activeMessageIdRef.current ? { ...m, isStreaming: false } : m
-      ));
-      activeMessageIdRef.current = null;
-    }
 
     // Add user message
     setMessages(prev => [...prev, { id: genId(), role: "user", text, isStreaming: false }]);
-    saveMessage("user", text);
-    realtime.sendTextMessage(text);
+    sendTextMessage(text);
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -243,7 +196,6 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
   }
 
   async function handleEndWeek() {
-    realtime.disconnect();
     setIsLoading(true);
     try {
       await fetch("/api/skippy", {
@@ -258,47 +210,7 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
     }
   }
 
-  async function startRecording() {
-    if (!realtime.isConnected) return;
-    if (realtime.hasActiveResponse()) {
-      realtime.cancelResponse();
-      realtime.stopAudio();
-    }
-
-    // Create a placeholder user message for voice recording
-    const id = genId();
-    pendingVoiceMessageIdRef.current = id;
-    setMessages(prev => [...prev, { id, role: "user", text: "Recording...", isStreaming: true }]);
-
-    await realtime.startMicrophone();
-  }
-
-  function stopRecording() {
-    realtime.stopMicrophone();
-    // Update placeholder to show "Processing..."
-    const id = pendingVoiceMessageIdRef.current;
-    if (id) {
-      setMessages(prev => prev.map(m =>
-        m.id === id ? { ...m, text: "Processing..." } : m
-      ));
-
-      // Fallback: if transcript doesn't arrive in 10s, show error
-      setTimeout(() => {
-        if (pendingVoiceMessageIdRef.current === id) {
-          console.warn("[UI] Transcript timeout - clearing stuck message");
-          setMessages(prev => prev.map(m =>
-            m.id === id ? { ...m, text: "(Recording failed - try again)", isStreaming: false } : m
-          ));
-          pendingVoiceMessageIdRef.current = null;
-        }
-      }, 10000);
-    }
-  }
-
-  const isRecording = realtime.turnState === "listening";
-  const isThinking = realtime.turnState === "thinking";
-  const isSpeaking = realtime.turnState === "speaking";
-  const canSend = realtime.isConnected && !realtime.isResponseInFlight();
+  const canSend = isReady && !isSending;
 
   // =============================================================================
   // RENDER
@@ -306,16 +218,6 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
 
   return (
     <main className="flex min-h-screen flex-col bg-[#0a0a0a] text-white">
-      <audio ref={audioRef} autoPlay playsInline />
-
-      {/* Debug - only in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed top-2 right-2 z-50 rounded bg-black/80 px-2 py-1 text-[10px] font-mono text-white/70">
-          <div>Turn: {realtime.turnId} | {realtime.turnState}</div>
-          <div>Conn: {realtime.connectionState}</div>
-          {realtime.lastEvent && <div>Event: {realtime.lastEvent}</div>}
-        </div>
-      )}
 
       {/* Header */}
       <header className="border-b border-[#262626] px-6 py-4">
@@ -352,16 +254,16 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
             </div>
           ) : (
             <>
-              {messages.map((msg, index) => (
+              {messages.map((msg) => (
                 <MessageBubble
                   key={msg.id}
                   message={msg}
-                  isLastAssistant={msg.role === "assistant" && index === messages.length - 1}
-                  isSpeaking={isSpeaking}
+                  isLastAssistant={false}
+                  isSpeaking={false}
                 />
               ))}
 
-              {isThinking && !activeMessageIdRef.current && (
+              {isSending && (
                 <div className="flex justify-start gap-3">
                   <div className="flex-shrink-0 mt-1">
                     <SkippyAvatar state="thinking" size="sm" />
@@ -388,67 +290,31 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
         </div>
       )}
 
-      {/* Recording */}
-      {isRecording && (
-        <div className="border-t border-red-500/20 bg-red-500/10 px-6 py-4">
-          <div className="mx-auto max-w-3xl flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-sm text-red-400">Listening...</span>
-            </div>
-            <button onClick={stopRecording} className="rounded-lg bg-red-500/20 px-4 py-2 text-sm text-red-400">
-              Stop
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Input */}
-      {!isRecording && (
-        <div className="border-t border-[#262626] px-6 py-4">
-          <form onSubmit={handleSubmit} className="mx-auto max-w-3xl flex gap-2">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={realtime.isConnected ? (isSpeaking ? "Type to interrupt..." : "Type or record...") : "Connecting..."}
-              disabled={isLoading || !realtime.isConnected}
-              rows={1}
-              className="flex-1 resize-none rounded-xl border border-[#333333] bg-[#141414] px-4 py-3 text-[#fafafa] placeholder-[#525252] focus:outline-none focus:border-[#3b82f6] disabled:opacity-50"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || !canSend}
-              className="rounded-xl bg-[#262626] hover:bg-[#333333] px-4 py-3 disabled:opacity-50 transition-colors"
-            >
-              <SendIcon />
-            </button>
-            <button
-              type="button"
-              onClick={startRecording}
-              disabled={isLoading || !realtime.isConnected}
-              className="rounded-xl bg-[#262626] hover:bg-[#333333] px-4 py-3 disabled:opacity-50 transition-colors"
-            >
-              <MicIcon />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                realtime.cancelResponse();
-                realtime.stopAudio();
-              }}
-              disabled={!isSpeaking}
-              className="rounded-xl bg-[#262626] hover:bg-[#333333] px-4 py-3 disabled:opacity-50 transition-colors"
-            >
-              <StopIcon />
-            </button>
-          </form>
-          <p className="mt-2 text-xs text-[#525252] text-center">
-            {realtime.isConnected ? "Cmd+Enter to send" : "Connecting..."}
-          </p>
-        </div>
-      )}
+      <div className="border-t border-[#262626] px-6 py-4">
+        <form onSubmit={handleSubmit} className="mx-auto max-w-3xl flex gap-2">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={isSending ? "Skippy is thinking..." : "Type your message..."}
+            disabled={isLoading || isSending}
+            rows={1}
+            className="flex-1 resize-none rounded-xl border border-[#333333] bg-[#141414] px-4 py-3 text-[#fafafa] placeholder-[#525252] focus:outline-none focus:border-[#3b82f6] disabled:opacity-50"
+          />
+          <button
+            type="submit"
+            disabled={!input.trim() || !canSend}
+            className="rounded-xl bg-[#262626] hover:bg-[#333333] px-4 py-3 disabled:opacity-50 transition-colors"
+          >
+            <SendIcon />
+          </button>
+        </form>
+        <p className="mt-2 text-xs text-[#525252] text-center">
+          Cmd+Enter to send
+        </p>
+      </div>
 
       {/* Debug panel - only in development */}
       {process.env.NODE_ENV === 'development' && (
@@ -543,18 +409,6 @@ function SendIcon() {
   );
 }
 
-function MicIcon() {
-  return (
-    <svg className="h-5 w-5 text-[#a1a1a1]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-    </svg>
-  );
-}
-
-function StopIcon() {
-  return (
-    <svg className="h-5 w-5 text-[#a1a1a1]" fill="currentColor" viewBox="0 0 24 24">
-      <rect x="6" y="6" width="12" height="12" rx="2" />
-    </svg>
-  );
-}
+// Voice icons preserved for re-enable (VOICE_ENABLED flag)
+// function MicIcon() { ... }
+// function StopIcon() { ... }

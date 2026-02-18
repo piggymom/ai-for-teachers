@@ -66,11 +66,19 @@ export interface DiagnosticData {
   misconceptions: string[];
 }
 
+export interface FourCStatus {
+  context: boolean;
+  constraints: boolean;
+  command: boolean;
+  criteria: boolean;
+}
+
 export interface ArtifactData {
   inProgress: boolean;
   type: ArtifactType;
   currentState: string | null;
   iterationCount: number;
+  fourC: FourCStatus;
 }
 
 export interface EngagementData {
@@ -91,6 +99,7 @@ export interface ConversationLedger {
   remainingPhases: string[];
   engagement: EngagementData;
   guidance: string | null;
+  redirectCount: number;
 }
 
 // =============================================================================
@@ -219,6 +228,12 @@ function transformFromDb(record: any): ConversationLedger {
       type: record.artifactType as ArtifactType,
       currentState: record.artifactState,
       iterationCount: record.artifactIterations,
+      fourC: {
+        context: record.fourCContext || false,
+        constraints: record.fourCConstraints || false,
+        command: record.fourCCommand || false,
+        criteria: record.fourCCriteria || false,
+      },
     },
     remainingPhases,
     engagement: {
@@ -226,6 +241,7 @@ function transformFromDb(record: any): ConversationLedger {
       notes: record.engagementNotes,
     },
     guidance: record.guidance,
+    redirectCount: record.redirectCount || 0,
   };
 }
 
@@ -278,10 +294,45 @@ If you notice these beliefs surfacing, gently reframe without derailing the conv
     }
   }
 
+  // 4C component tracking for Week 2
+  const fourC = ledger.artifact.fourC;
+  const fourCComplete = fourC.context && fourC.constraints && fourC.command && fourC.criteria;
+  let fourCSection = '';
+  if (ledger.weekNumber === 2) {
+    const components = [
+      `Context: ${fourC.context ? 'PROVIDED' : 'NEEDED'}`,
+      `Constraints: ${fourC.constraints ? 'PROVIDED' : 'NEEDED'}`,
+      `Command: ${fourC.command ? 'PROVIDED' : 'NEEDED'}`,
+      `Criteria: ${fourC.criteria ? 'PROVIDED' : 'NEEDED'}`,
+    ];
+    fourCSection = `
+## 4C Component Status
+${components.join('\n')}
+${fourCComplete
+  ? '**ALL 4C COMPONENTS ARE COMPLETE.** The prompt template is DONE. Do NOT generate content or role-play as AI. Redirect to external testing: "This is ready to test. Try it in ChatGPT or Gemini and see what comes back." Then move to SAVE.'
+  : `**Still needed:** ${[!fourC.context && 'Context', !fourC.constraints && 'Constraints', !fourC.command && 'Command', !fourC.criteria && 'Criteria'].filter(Boolean).join(', ')}. Do NOT re-ask for components already provided.`
+}
+`;
+  }
+
+  // Redirect warning
+  let redirectWarning = '';
+  if (ledger.redirectCount >= 2) {
+    redirectWarning = `
+## ⚠️ CRITICAL: USER HAS REDIRECTED YOU ${ledger.redirectCount} TIMES
+Something is off. STOP your current approach. Summarize what has been accomplished so far, then ask: "What would YOU like to focus on?"
+Do NOT continue the same direction. Do NOT ask more probing questions.
+`;
+  }
+
   const artifactSection = ledger.artifact.inProgress && ledger.artifact.currentState
     ? `
 ## Artifact in Progress (${ledger.artifact.type}, iteration #${ledger.artifact.iterationCount})
 ${ledger.artifact.currentState}
+`
+    : fourCComplete ? `
+## Artifact Status: COMPLETE
+The 4C prompt template has been built from the conversation. Present it cleanly and move to SAVE.
 `
     : '';
 
@@ -329,11 +380,12 @@ Do NOT ask another question.
 
   return `
 <conversation_state>
-${urgentWarning}
+${urgentWarning}${redirectWarning}
 ## Where They Are
 - Phase: ${ledger.currentPhase}
 - Exchange count: ${ledger.exchangeCount}
 - Diagnosed level: ${ledger.diagnostic.level || 'not yet assessed'}
+- Redirect count: ${ledger.redirectCount}
 
 ## What You Know About This Teacher
 ${ledger.sessionSummary || 'Session just started.'}
@@ -348,7 +400,7 @@ This teacher hasn't been assessed yet. Use the diagnostic probe naturally in con
 
 ## Current Phase: ${ledger.currentPhase}
 ${phaseGuidance}
-${misconceptionsSection}${artifactSection}${insightsSection}
+${fourCSection}${misconceptionsSection}${artifactSection}${insightsSection}
 ## Specific Guidance for This Turn
 ${ledger.guidance || "Deploy your diagnostic probe to understand where this teacher is starting from."}
 </conversation_state>
@@ -373,6 +425,12 @@ function getLevelBehaviors(level: string | null): string {
 - Celebrate small wins to build confidence
 - Keep the artifact simple and highly scaffolded
 - Ask questions that help them discover insights rather than lecturing
+
+**CRITICAL: USE A CONCRETE METAPHOR.** This teacher needs tangible anchors for abstract concepts. You MUST use at least one metaphor per response:
+- "Think of it like giving directions to someone who's never been to your school — AI can't see what you see."
+- "You don't need to be a mechanic to be a good driver. You don't need to understand how AI works to use it well."
+- "That's cruise control mode — typing a prompt and hoping for the best. Let's try active driving."
+Analogies help them anchor abstract concepts. Don't just explain — illustrate.
 
 **Tone:** Warm, encouraging, patient. "Let's explore this together."
 
@@ -487,6 +545,8 @@ ${exchangeCount < 2
 - Keep them engaged by connecting to their specific context
 - Build incrementally — don't dump a complete artifact on them
 - Ask for their input at each step
+- **Keep responses under 4 sentences unless presenting an artifact.** This is collaborative building, not lecturing.
+- **Avoid bold formatting and bullet lists in conversational exchanges.** Save structured formatting for artifact presentation only.
 ${exchangeCount > 6
   ? "You've been building for a while. Look for a natural moment to move toward refinement."
   : ""
@@ -501,6 +561,8 @@ ${exchangeCount > 6
 - Test edge cases: "what if a student did X?"
 - Polish language and specificity
 - Keep this focused — don't rebuild from scratch
+- **Keep responses under 3 sentences.** This is quick back-and-forth iteration. Be punchy.
+- **Avoid bold formatting and bullet lists.** Save structured formatting for artifact presentation only.
 
 **Good transition to REFLECT:** "This is looking solid. Before we wrap it up — what did you notice about how you had to think about this?"
 `,
@@ -564,6 +626,12 @@ interface ClassifierOutput {
     type: ArtifactType;
     currentState: string | null;
     iterationCount: number;
+    fourC: {
+      context: boolean;
+      constraints: boolean;
+      command: boolean;
+      criteria: boolean;
+    };
   };
   remainingPhases: string[];
   engagement: {
@@ -571,6 +639,7 @@ interface ClassifierOutput {
     notes: string | null;
   };
   guidance: string | null;
+  redirectCount: number;
 }
 
 /**
@@ -578,14 +647,19 @@ interface ClassifierOutput {
  * This adds zero latency to the user experience.
  */
 export async function updateLedgerFromExchange(
-  ledger: ConversationLedger,
+  ledgerInput: ConversationLedger,
   userMessage: string,
-  assistantResponse: string
+  assistantResponse: string,
+  conversationHistory?: { role: string; content: string }[]
 ): Promise<ConversationLedger> {
+  // Re-fetch ledger to avoid stale state when multiple exchanges overlap
+  const ledger = await getOrCreateLedger(ledgerInput.userId, ledgerInput.weekNumber);
+
   logLedger('CLASSIFY_START', {
     ledgerId: ledger.id.slice(-8),
     currentPhase: ledger.currentPhase,
     exchangeCount: ledger.exchangeCount,
+    historyLength: conversationHistory?.length || 0,
     userMessagePreview: userMessage.slice(0, 100) + (userMessage.length > 100 ? '...' : ''),
     assistantPreview: assistantResponse.slice(0, 100) + (assistantResponse.length > 100 ? '...' : '')
   });
@@ -596,15 +670,16 @@ export async function updateLedgerFromExchange(
     ledger,
     progressionText,
     userMessage,
-    assistantResponse
+    assistantResponse,
+    conversationHistory
   );
 
   logLedger('CLASSIFY_PROMPT_BUILT', { promptLength: classifierPrompt.length });
 
   try {
     const response = await anthropic.messages.create({
-      model: "claude-3-haiku-20240307",
-      max_tokens: 1500,
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 2500,
       messages: [{ role: "user", content: classifierPrompt }],
     });
 
@@ -644,22 +719,29 @@ export async function updateLedgerFromExchange(
     // Check if we've transitioned to SAVE phase with an artifact - trigger extraction
     const previousPhase = ledger.currentPhase;
     const newPhase = parsed.currentPhase;
+    const fourCData = parsed.artifact.fourC || { context: false, constraints: false, command: false, criteria: false };
+    const allFourCComplete = (fourCData.context || ledger.artifact.fourC.context)
+      && (fourCData.constraints || ledger.artifact.fourC.constraints)
+      && (fourCData.command || ledger.artifact.fourC.command)
+      && (fourCData.criteria || ledger.artifact.fourC.criteria);
 
-    if (
-      newPhase === "SAVE" &&
-      previousPhase !== "SAVE" &&
-      parsed.artifact.inProgress &&
-      parsed.artifact.currentState
-    ) {
+    // Trigger artifact extraction on SAVE transition OR when all 4C complete with artifact state
+    const shouldExtract = (
+      (newPhase === "SAVE" && previousPhase !== "SAVE") ||
+      (allFourCComplete && !ledger.artifact.fourC.context) // First time all 4C detected
+    ) && parsed.artifact.currentState;
+
+    if (shouldExtract && parsed.artifact.currentState) {
       logLedger('ARTIFACT_EXTRACTION_TRIGGERED', {
         type: parsed.artifact.type,
-        stateLength: parsed.artifact.currentState?.length
+        stateLength: parsed.artifact.currentState.length,
+        trigger: newPhase === "SAVE" ? "SAVE_phase" : "4C_complete"
       });
       // Extract the artifact (fire and forget - don't block ledger update)
       extractArtifact(
         ledger.userId,
         ledger.weekNumber,
-        parsed.artifact.type || "other",
+        parsed.artifact.type || "prompt_template",
         parsed.artifact.currentState,
         parsed.sessionSummary
       ).catch((err) => console.error("[LEDGER] Artifact extraction failed:", err));
@@ -679,9 +761,15 @@ export async function updateLedgerFromExchange(
         diagnosticMisconceptions: parsed.diagnostic.misconceptions || [],
         sessionSummary: parsed.sessionSummary,
         artifactInProgress: parsed.artifact.inProgress,
-        artifactType: parsed.artifact.type,
-        artifactState: parsed.artifact.currentState,
-        artifactIterations: parsed.artifact.iterationCount,
+        artifactType: parsed.artifact.type || ledger.artifact.type,
+        // Never overwrite a populated artifactState with null/empty
+        artifactState: parsed.artifact.currentState || ledger.artifact.currentState,
+        artifactIterations: Math.max(parsed.artifact.iterationCount, ledger.artifact.iterationCount),
+        fourCContext: fourCData.context || ledger.artifact.fourC.context,
+        fourCConstraints: fourCData.constraints || ledger.artifact.fourC.constraints,
+        fourCCommand: fourCData.command || ledger.artifact.fourC.command,
+        fourCCriteria: fourCData.criteria || ledger.artifact.fourC.criteria,
+        redirectCount: parsed.redirectCount ?? ledger.redirectCount,
         engagementEnergy: parsed.engagement.energy,
         engagementNotes: parsed.engagement.notes,
         guidance: parsed.guidance,
@@ -731,21 +819,47 @@ function buildClassifierPrompt(
   ledger: ConversationLedger,
   progressionText: string,
   userMessage: string,
-  assistantResponse: string
+  assistantResponse: string,
+  conversationHistory?: { role: string; content: string }[]
 ): string {
+  const fourCState = ledger.weekNumber === 2 ? `
+- 4C Status: Context=${ledger.artifact.fourC.context}, Constraints=${ledger.artifact.fourC.constraints}, Command=${ledger.artifact.fourC.command}, Criteria=${ledger.artifact.fourC.criteria}` : '';
+
+  // Build conversation context — include recent history for better phase/level/artifact detection
+  let conversationSection: string;
+  if (conversationHistory && conversationHistory.length > 0) {
+    // Include last 10 messages for context + the new exchange
+    const recentHistory = conversationHistory.slice(-10);
+    const historyText = recentHistory
+      .map(m => `${m.role.toUpperCase()}: ${m.content}`)
+      .join('\n\n');
+    conversationSection = `## Conversation History (recent)
+
+${historyText}
+
+## Latest Exchange (just happened)
+
+USER: ${userMessage}
+
+SKIPPY: ${assistantResponse}`;
+  } else {
+    conversationSection = `## Latest Exchange
+
+USER: ${userMessage}
+
+SKIPPY: ${assistantResponse}`;
+  }
+
   return `You are analyzing a tutoring conversation to update the conversation state. Be precise and evidence-based.
 
 ## Current State
 - Phase: ${ledger.currentPhase}
 - Diagnosed level: ${ledger.diagnostic.level || 'not yet assessed'}
 - Exchange count: ${ledger.exchangeCount}
-- Session summary: ${ledger.sessionSummary || 'Session just started'}
+- Redirect count: ${ledger.redirectCount}
+- Session summary: ${ledger.sessionSummary || 'Session just started'}${fourCState}
 
-## Latest Exchange
-
-USER: ${userMessage}
-
-SKIPPY: ${assistantResponse}
+${conversationSection}
 
 ## Week ${ledger.weekNumber} Developmental Progression
 
@@ -776,7 +890,13 @@ Analyze this exchange and output a JSON object. Be SPECIFIC in your guidance —
     "inProgress": true|false,
     "type": "prompt_template|workflow|draft_feedback|lesson_outline|email_template|communication_template|reflection|other|null",
     "currentState": "The artifact as it currently exists (full text if possible), or null",
-    "iterationCount": ${ledger.artifact.iterationCount}
+    "iterationCount": ${ledger.artifact.iterationCount},
+    "fourC": {
+      "context": true|false,
+      "constraints": true|false,
+      "command": true|false,
+      "criteria": true|false
+    }
   },
 
   "remainingPhases": ["array of phases not yet completed"],
@@ -786,7 +906,8 @@ Analyze this exchange and output a JSON object. Be SPECIFIC in your guidance —
     "notes": "Brief observation about teacher's engagement"
   },
 
-  "guidance": "SPECIFIC next move — not an objective, but an ACTION. e.g., 'Ask how they would adapt this for ELL students' or 'Present the artifact and ask what would break if we removed the constraints section'"
+  "guidance": "SPECIFIC next move",
+  "redirectCount": ${ledger.redirectCount}
 }
 
 ## Assessment Guidelines
@@ -795,24 +916,58 @@ Analyze this exchange and output a JSON object. Be SPECIFIC in your guidance —
 
 - **pre-structural**: Confused, no framework. "I just type stuff and hope." No mental model of how AI works.
 - **unistructural**: Gets ONE thing. "You need to be specific." But applies it mechanically without nuance.
-- **multistructural**: Knows multiple components. "Context, constraints, examples..." Lists them but doesn't explain WHY.
-- **relational**: Sees connections and adapts. "It depends on..." Explains tradeoffs. Uses analogies that show deep understanding.
+- **multistructural**: Knows multiple components. "Context, constraints, examples..." Lists them but doesn't explain WHY each matters.
+- **relational**: Sees connections, adapts, and EXPLAINS WHY. "It depends on..." Catches mistakes. Makes meta-observations.
 - **extended-abstract**: Could teach this. Generates novel applications. Questions the framework itself.
 
-**Key signals to look for:**
-- Analogies and metaphors (relational+)
-- "It depends on..." reasoning (relational+)
-- Asking "why" questions (multistructural+)
-- Mechanical application without understanding (unistructural)
-- Confusion or "I don't know where to start" (pre-structural)
+**RELATIONAL indicators — upgrade from multistructural when you see ANY of these:**
+- User asks "why does X matter?" or "why is X important?" (not just accepting the framework)
+- User catches Skippy's mistakes or inconsistencies
+- User makes meta-observations about the framework ("criteria is like tone", "constraints and commands overlap")
+- User refines or challenges distinctions between components
+- User explains connections between components unprompted
+- User articulates trade-offs ("for brainstorming I'd loosen constraints, for feedback I'd tighten criteria")
+- User adapts the framework to their own context with reasoning
 
-**For phase transitions — be aggressive about advancing:**
+If the teacher is doing ANY of the above, they are RELATIONAL, not multistructural. Multistructural = lists components. Relational = explains WHY they matter and HOW they connect.
+
+**For engagement energy:**
+- **high**: Asks "why" questions, catches AI mistakes, tests externally and reports results, articulates understanding in own words, makes meta-observations, challenges distinctions
+- **medium**: Responds substantively but doesn't push back or ask deeper questions
+- **low**: One-word answers, disengaged, "sure", "I guess"
+
+**For phase transitions — be AGGRESSIVE about advancing:**
 
 - DISCOVER → BUILD: Level assessed AND they're ready to create something
-- BUILD → REFINE: Skippy presents a structured artifact with labeled sections (CONTEXT/CONSTRAINTS/COMMAND/CRITERIA)
+- BUILD → REFINE: All 4C components exist in the conversation (even if not formally presented as artifact)
+- BUILD → SAVE: If all 4C components exist AND user has already reflected or tested → skip REFINE
 - REFINE → REFLECT: User indicates satisfaction ("looks good", "that works", "I like it")
 - REFLECT → SAVE: User gives ANY substantive reflection about what they learned
 - SAVE → BRIDGE: Artifact captured
+
+**CRITICAL: Exchange count forces phase advancement:**
+- If exchangeCount > 12 and still in BUILD with artifact components present → advance to REFINE or SAVE
+- If exchangeCount > 15 and artifact is complete → advance to SAVE immediately
+- If user has tested prompt externally and reported results → this IS reflection, advance to SAVE
+- If user states plan for using the prompt → this IS bridge, advance to BRIDGE
+
+**CRITICAL: 4C Component Tracking (Week 2)**
+
+Scan the FULL conversation (not just this exchange) for 4C components the teacher has provided:
+
+- **Context provided**: Teacher described WHO this is for, the situation, grade level, student needs
+- **Constraints provided**: Teacher specified what to AVOID, limits, boundaries, tone requirements
+- **Command provided**: Teacher articulated what AI should DO — the specific task
+- **Criteria provided**: Teacher defined what GOOD output looks like — success measures
+
+Set each fourC boolean to true when that component has been provided ANYWHERE in the conversation.
+Once true, it stays true — never reset to false.
+
+**When ALL FOUR are true:**
+- Set artifact.inProgress to true
+- Set artifact.type to "prompt_template"
+- Assemble the artifact.currentState from all 4 components
+- Do NOT show "Artifact: None" — the template IS the artifact
 
 **CRITICAL: Completion signals override everything**
 
@@ -826,16 +981,21 @@ When completion detected:
 - Set currentPhase to "SAVE" or "BRIDGE"
 - Set guidance to "User has signaled completion. Present artifact and end gracefully. Do NOT ask more questions."
 
-**CRITICAL: Frustration detection**
+**CRITICAL: Redirect and Frustration Detection**
 
-If user says ANY of these, set frustration_detected in engagement.notes:
-- "I already said..." / "I already did..." / "We already..."
-- "Within this context window..." (user explaining conversation mechanics)
+INCREMENT redirectCount (current: ${ledger.redirectCount}) when user says ANY of:
+- "I already did this" / "I already said that" / "We already covered that"
+- "I'm confused about what we're doing" / "What are we trying to do?"
+- "Why are we back at the start?" / "How does this relate to..."
 - User corrects Skippy about what happened in the conversation
+- "Within this context window..." (explaining conversation mechanics)
 
-When frustration detected:
+If redirectCount >= 2:
+- Set guidance to "User has redirected multiple times. STOP current approach. Summarize what's been accomplished, ask what THEY want to focus on."
+
+When frustration detected (redirectCount >= 3 OR explicit frustration):
 - Set engagement.energy to "low"
-- Set engagement.notes to "FRUSTRATION: User corrected repetition"
+- Set engagement.notes to "FRUSTRATION: User has redirected ${ledger.redirectCount + 1} times"
 - Set guidance to "STOP asking questions. Apologize briefly, present artifact, end session."
 
 **For guidance — be SPECIFIC:**
@@ -852,18 +1012,34 @@ GOOD: "Ask: 'If a colleague asked you why being specific matters, what would you
 **Artifact-based phase detection:**
 
 If Skippy's response contains a formatted artifact with CONTEXT/CONSTRAINTS/COMMAND/CRITERIA:
-- This means BUILD is complete → advance to REFINE
+- BUILD is complete → advance to REFINE
 - If user already expressed satisfaction → advance to REFLECT or SAVE
 
-If Skippy asked a reflection question ("what did you notice", "what made the difference", "how would you explain"):
-AND user responded with insight about their learning process:
+If user tested the prompt externally (in ChatGPT/Gemini) and reported results:
+- This counts as BOTH refine AND reflect → advance to SAVE
+
+If user stated a plan for using the prompt:
+- This is BRIDGE behavior → advance to BRIDGE
+
+If Skippy asked a reflection question AND user responded with insight:
 - REFLECT is complete → advance to SAVE
+
+**Artifact completion detection:**
+
+The artifact is COMPLETE (not "in progress") when:
+- All 4 fourC booleans are true, OR
+- A formatted CONTEXT/CONSTRAINTS/COMMAND/CRITERIA template exists in conversation, OR
+- User has tested the prompt and discussed results
+
+When artifact is complete, set artifact.inProgress to true AND assemble the full template in artifact.currentState. Never show "Artifact: None" when 4C components are present.
 
 **Special cases:**
 - If user says "looks good" after artifact is presented: Move to SAVE, don't push for more reflection
 - If user gives genuine reflection (explains WHY something worked, mentions transfer): REFLECT is complete
-- If >8 exchanges in BUILD, suggest transition: "Look for natural moment to ask what they'd refine."
+- If >8 exchanges in BUILD, guidance must be: "Artifact components are present. Advance to REFINE or SAVE now."
+- If >15 exchanges total: "Session is long. Wrap up: present artifact, save, bridge."
 - If user corrects Skippy twice: guidance must be "End session gracefully. No more questions."
+- If user asks about saving/finding artifact: guidance must be "Tell user the artifact will be saved to their dashboard."
 
 Output only valid JSON, no other text.`;
 }

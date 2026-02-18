@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
 
   // Get all ledgers for this user
   const ledgers = await prisma.conversationLedger.findMany({
+
     where: {
       userId: session.user.id,
       ...(weekNumber ? { weekNumber: parseInt(weekNumber) } : {})

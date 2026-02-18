@@ -13,6 +13,7 @@ import {
 } from "@/lib/ledger";
 import { getDiagnosticProbe } from "@/lib/progressions";
 import { extractArtifact } from "@/lib/artifacts";
+import { prisma } from "@/lib/prisma";
 
 // Validate API key at startup
 if (!process.env.ANTHROPIC_API_KEY) {
@@ -50,8 +51,8 @@ function logTiming(label: string, timing: Partial<TimingLog>) {
 }
 
 // Model configuration for speed
-const SKIPPY_MODEL = "claude-3-haiku-20240307"; // Fast model for tutoring
-const SKIPPY_MAX_TOKENS = 300; // Short responses for conversation
+const SKIPPY_MODEL = "claude-sonnet-4-20250514"; // Capable model for tutoring
+const SKIPPY_MAX_TOKENS = 1500; // Substantive responses (~300-400 words)
 const SKIPPY_TEMPERATURE = 0.7;
 const MAX_HISTORY_MESSAGES = 10; // Only send last N messages
 
@@ -253,7 +254,7 @@ async function handleSaveMessage(
           assistantPreview: content.slice(0, 100)
         });
         // ASYNC: Update ledger (fire and forget - zero latency impact)
-        updateLedgerFromExchange(ledger, lastUserMessage, content).catch((err) =>
+        updateLedgerFromExchange(ledger, lastUserMessage, content, context.history).catch((err) =>
           console.error("Failed to update ledger from save_message:", err)
         );
       } else {
@@ -338,14 +339,15 @@ async function handleUserMessage(
       .map((block) => (block as { type: "text"; text: string }).text)
       .join("");
 
-    // Save assistant response (don't await - fire and forget for speed)
-    saveMessage(userId, week, "assistant", assistantMessage).catch((err) =>
-      console.error("Failed to save assistant message:", err)
-    );
+    // Save assistant response — MUST complete before classifier runs,
+    // otherwise artifact extraction won't find this message in DB
+    await saveMessage(userId, week, "assistant", assistantMessage);
     timing.t5_messageSaved = Date.now();
 
     // ASYNC: Update ledger from this exchange (fire and forget - zero latency impact)
-    updateLedgerFromExchange(ledger, message, assistantMessage).catch((err) =>
+    // Pass conversation history (including the just-saved assistant message)
+    const fullHistory = [...context.history, { role: "assistant", content: assistantMessage }];
+    updateLedgerFromExchange(ledger, message, assistantMessage, fullHistory).catch((err) =>
       console.error("Failed to update ledger:", err)
     );
 
@@ -375,21 +377,23 @@ async function handleEndWeek(userId: string, week: number) {
     // Get ledger to check for unsaved artifact
     const ledger = await getOrCreateLedger(userId, week);
 
-    // Extract artifact if one exists and hasn't been saved yet (backup for early exit)
-    if (
-      ledger.artifact.inProgress &&
-      ledger.artifact.currentState &&
-      ledger.currentPhase !== "SAVE" // Only if we haven't already extracted in SAVE
-    ) {
+    // Check if artifact already saved for this week
+    const existingArtifact = await prisma.artifact.findFirst({
+      where: { userId, weekNumber: week },
+      select: { id: true },
+    });
+
+    // Extract artifact from conversation if not already saved
+    if (!existingArtifact && ledger.exchangeCount > 2) {
       try {
         await extractArtifact(
           userId,
           week,
-          ledger.artifact.type || "other",
-          ledger.artifact.currentState,
+          ledger.artifact.type || "prompt_template",
+          ledger.artifact.currentState || "",
           ledger.sessionSummary
         );
-        console.log("[SKIPPY] Artifact extracted on early exit");
+        console.log("[SKIPPY] Artifact extracted on session end");
       } catch (err) {
         console.error("[SKIPPY] Artifact extraction on complete failed:", err);
       }
