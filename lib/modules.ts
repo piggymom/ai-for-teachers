@@ -10,6 +10,10 @@ import { getProgression, type WeekProgression } from "./progressions";
 import { WEEK_0_SYSTEM_PROMPT, WEEK_0_OPENING_MESSAGE } from "./prompts/week-0";
 import { WEEK_1_SYSTEM_PROMPT, WEEK_1_OPENING_MESSAGE } from "./prompts/week-1";
 import { WEEK_2_SYSTEM_PROMPT, WEEK_2_OPENING_MESSAGE } from "./prompts/week-2";
+import { WEEK_3_SYSTEM_PROMPT, WEEK_3_OPENING_MESSAGE } from "./prompts/week-3";
+import { WEEK_4_SYSTEM_PROMPT, WEEK_4_OPENING_MESSAGE } from "./prompts/week-4";
+import { WEEK_5_SYSTEM_PROMPT, WEEK_5_OPENING_MESSAGE } from "./prompts/week-5";
+import { WEEK_6_SYSTEM_PROMPT, WEEK_6_OPENING_MESSAGE } from "./prompts/week-6";
 
 export type ModulePrompt = {
   week: number;
@@ -43,78 +47,29 @@ export const modulePrompts: Record<number, ModulePrompt> = {
   3: {
     week: 3,
     title: "Lesson Planning with AI",
-    prompt: `This is Week 3: Lesson Planning with AI.
-Focus on using AI as a thought partner for lesson design.
-Key topics:
-- AI as a brainstorming partner, not a replacement
-- Generating multiple approaches quickly
-- Creating differentiated materials (scaffolds, extensions)
-- Building in student voice and choice
-- Quality control: what to accept, edit, or reject
-Help them apply: Building out a lesson with AI support while maintaining pedagogical ownership.`,
-    openingMessage: `Hey {{name}}! Now we're getting practical—using AI to speed up lesson planning while you stay in the driver's seat.
-
-The goal isn't AI-written lessons. It's AI as a brainstorming partner that helps you explore more ideas, faster.
-
-Think about how you typically plan lessons. Where in that process do you think AI could actually help — and where do you think it probably can't?`,
+    prompt: WEEK_3_SYSTEM_PROMPT,
+    openingMessage: WEEK_3_OPENING_MESSAGE,
   },
 
   4: {
     week: 4,
     title: "Feedback & Assessment",
-    prompt: `This is Week 4: Feedback & Assessment.
-Focus on using AI to support (not replace) meaningful feedback.
-Key topics:
-- Generating feedback drafts to edit and personalize
-- Creating rubric-aligned comments efficiently
-- Building practice questions and answer keys
-- Self and peer assessment tools
-- When AI feedback helps vs. when it harms relationships
-Help them practice: Taking real student work and drafting feedback with AI assistance.`,
-    openingMessage: `Hey {{name}}! Feedback takes forever—but it matters. This week, we'll make AI help you give better feedback, not just faster feedback.
-
-The key: AI drafts, you finalize. Your voice and relationship with students still matters.
-
-When it comes to giving students feedback, what's the hardest part for you? And what would 'good enough' AI help with feedback actually look like?`,
+    prompt: WEEK_4_SYSTEM_PROMPT,
+    openingMessage: WEEK_4_OPENING_MESSAGE,
   },
 
   5: {
     week: 5,
-    title: "Communication & Admin",
-    prompt: `This is Week 5: Communication & Admin.
-Focus on using AI to handle the communications and administrative tasks that eat up planning time.
-Key topics:
-- Drafting parent communications with appropriate tone
-- Translating educational jargon into parent-friendly language
-- Creating newsletters, permission slips, announcements
-- Handling sensitive communications (with human review)
-- Email templates and response drafting
-Help them try: Drafting a challenging parent communication with AI support.`,
-    openingMessage: `Hey {{name}}! Emails, newsletters, forms—the admin side of teaching can eat hours. This week, AI becomes your communication assistant.
-
-Good news: these are lower-stakes than instruction, so you can let AI do more of the heavy lifting.
-
-What's a communication task — emails, newsletters, parent updates — that you'd love to spend less time on? What makes it tedious?`,
+    title: "Differentiation with AI",
+    prompt: WEEK_5_SYSTEM_PROMPT,
+    openingMessage: WEEK_5_OPENING_MESSAGE,
   },
 
   6: {
     week: 6,
-    title: "Building Your Practice",
-    prompt: `This is Week 6: Building Your Practice.
-Focus on sustainability and developing their personal AI workflow.
-Key topics:
-- Creating a personal prompt library
-- Building sustainable routines (not trying everything at once)
-- Knowing when AI helps vs. when it's overhead
-- Staying current as tools evolve
-- Teaching students about AI responsibly
-- Connecting with other educators using AI
-Help them plan: Identifying 2-3 sustainable ways to integrate AI into their practice.`,
-    openingMessage: `Hey {{name}}! Final week—you've learned the tools, now let's make them stick.
-
-The teachers who get the most from AI aren't using it for everything. They've found 2-3 specific workflows where it consistently saves time.
-
-Looking back at the past five weeks, what's actually stuck? What are you realistically going to keep doing?`,
+    title: "Integration & Ethics",
+    prompt: WEEK_6_SYSTEM_PROMPT,
+    openingMessage: WEEK_6_OPENING_MESSAGE,
   },
 };
 
@@ -132,10 +87,10 @@ export const weekConfigs: Record<number, WeekConfig> = {
   0: { maxExchanges: 5, trackFourC: false, artifactType: null },
   1: { maxExchanges: 15, trackFourC: false, artifactType: "mental_model" },
   2: { maxExchanges: 18, trackFourC: true, artifactType: "prompt_template" },
-  3: { maxExchanges: 18, trackFourC: false, artifactType: "lesson_plan" },
-  4: { maxExchanges: 18, trackFourC: false, artifactType: "feedback_workflow" },
-  5: { maxExchanges: 15, trackFourC: false, artifactType: "communication_template" },
-  6: { maxExchanges: 15, trackFourC: false, artifactType: "practice_plan" },
+  3: { maxExchanges: 18, trackFourC: true, artifactType: "lesson_planning_template" },
+  4: { maxExchanges: 18, trackFourC: true, artifactType: "feedback_template" },
+  5: { maxExchanges: 18, trackFourC: true, artifactType: "differentiation_template" },
+  6: { maxExchanges: 18, trackFourC: false, artifactType: "personal_policy" },
 };
 
 const DEFAULT_WEEK_CONFIG: WeekConfig = {
