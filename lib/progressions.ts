@@ -33,27 +33,27 @@ export const progressions: WeekProgression[] = [
       {
         level: "pre-structural",
         description:
-          "Can articulate interest in learning about AI; brings initial questions or concerns",
+          "Expresses vague interest or external motivation (e.g., 'my principal told me'); cannot identify specific AI applications for their teaching",
       },
       {
         level: "unistructural",
         description:
-          "Can identify a specific area where AI might help their teaching practice",
+          "Can identify ONE specific area where AI might help their teaching",
       },
       {
         level: "multistructural",
         description:
-          "Can describe multiple potential applications and articulate specific goals for the course",
+          "Can name multiple potential AI applications and articulate specific course goals",
       },
       {
         level: "relational",
         description:
-          "Can connect AI learning goals to broader professional development; sees course as part of larger growth trajectory",
+          "Connects AI learning to broader professional trajectory; sees course as part of larger growth vision",
       },
       {
         level: "extended-abstract",
         description:
-          "Can articulate a vision for how AI literacy will transform their practice; ready to mentor others",
+          "Articulates a vision for AI integration that includes helping colleagues or shaping school/department practice",
       },
     ],
   },
@@ -76,12 +76,12 @@ export const progressions: WeekProgression[] = [
       {
         level: "multistructural",
         description:
-          "Can explain that AI learns from patterns in data; recognizes that training matters",
+          "Can list multiple components of how AI works (training data, prediction, not retrieval) but describes WHAT without explaining WHY they interact or WHEN different approaches apply",
       },
       {
         level: "relational",
         description:
-          "Can reason about why AI outputs vary in quality; applies judgment about when to trust outputs",
+          "Can explain WHY AI works for some tasks and not others; articulates WHEN to trust outputs and WHEN to verify; sees relationships between input specificity and output quality",
       },
       {
         level: "extended-abstract",
@@ -109,7 +109,7 @@ export const progressions: WeekProgression[] = [
       {
         level: "multistructural",
         description:
-          "Can identify components of effective prompts (context, constraints, etc.); applies frameworks",
+          "Can apply the 4C components to a real task with minimal scaffolding; includes appropriate content in each C but doesn't yet evaluate which components matter most for a given task type. May list all 4C mechanically without adapting emphasis to task.",
       },
       {
         level: "relational",

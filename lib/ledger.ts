@@ -836,6 +836,14 @@ function buildClassifierPrompt(
   const fourCState = weekConfig.trackFourC ? `
 - 4C Status: Context=${ledger.artifact.fourC.context}, Constraints=${ledger.artifact.fourC.constraints}, Command=${ledger.artifact.fourC.command}, Criteria=${ledger.artifact.fourC.criteria}` : '';
 
+  // Week 0 classifier guidance: goal clarity ≠ AI understanding
+  const week0Note = ledger.weekNumber === 0 ? `
+- WEEK 0 NOTE: Goal clarity ≠ AI understanding level. A teacher with precise teaching goals may still be pre-structural in AI understanding. Diagnose based on their AI experience and theorizing, not their teaching expertise.` : '';
+
+  // Week 1 classifier guidance: diagnose fresh, independent of Week 0
+  const week1Note = ledger.weekNumber === 1 ? `
+- WEEK 1 NOTE: Week 1 measures AI UNDERSTANDING, independent of Week 0's PROFESSIONAL VISION level. A teacher can be relational in Week 0 (clear vision) and pre-structural in Week 1 (no AI understanding), or vice versa. Do NOT anchor on Week 0 level. Diagnose fresh based on: how they explain AI's mechanism, whether they theorize about WHY outputs vary, whether they apply concepts to their context.` : '';
+
   // Week 6 uses policy section tracking instead of 4C
   const week6State = ledger.weekNumber === 6 ? `
 - Policy Sections: Track which sections of the Personal AI Policy have been addressed in conversation.
@@ -874,7 +882,7 @@ SKIPPY: ${assistantResponse}`;
 - Diagnosed level: ${ledger.diagnostic.level || 'not yet assessed'}
 - Exchange count: ${ledger.exchangeCount}
 - Redirect count: ${ledger.redirectCount}
-- Session summary: ${ledger.sessionSummary || 'Session just started'}${fourCState}${week6State}
+- Session summary: ${ledger.sessionSummary || 'Session just started'}${fourCState}${week6State}${week0Note}${week1Note}
 
 ${conversationSection}
 
