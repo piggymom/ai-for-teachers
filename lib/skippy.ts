@@ -1,5 +1,5 @@
 import { prisma } from "./prisma";
-import { getProfileContextForUser, getUserProfile, buildProfileContext } from "./profile";
+import { getUserProfile, buildProfileContext } from "./profile";
 import { getModulePrompt, type ModulePrompt } from "./modules";
 
 /**
@@ -31,7 +31,7 @@ function interpolateProfile(template: string, profile: Record<string, any> | nul
   const timeDrains = profile?.biggestTimeDrains?.length
     ? profile.biggestTimeDrains.join(", ")
     : "tasks that take too long";
-  const goalDetails = profile?.goalDetails || "";
+  const goalDetails = profile?.goalDetails || "their specific goals";
 
   return template
     .replace(/\{\{name\}\}/g, name)
