@@ -1,6 +1,49 @@
 import { prisma } from "./prisma";
-import { getProfileContextForUser } from "./profile";
+import { getProfileContextForUser, getUserProfile, buildProfileContext } from "./profile";
 import { getModulePrompt, type ModulePrompt } from "./modules";
+
+/**
+ * Interpolate profile fields into a template string with graceful fallbacks.
+ * Used for opening messages and any text with {{variable}} placeholders.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function interpolateProfile(template: string, profile: Record<string, any> | null, userName?: string): string {
+  const name = userName || profile?.name || "there";
+  const role = profile?.roleOther || profile?.role || "teacher";
+  const gradeLevels = profile?.gradeLevels?.length
+    ? profile.gradeLevels.join(", ")
+    : "your students";
+  const subjects = profile?.subjects?.length
+    ? profile.subjects.join(", ")
+    : "your subject area";
+
+  const goalMap: Record<string, string> = {
+    save_time: "saving time on repetitive tasks",
+    better_materials: "creating better differentiated materials",
+    faster_feedback: "giving faster, more useful feedback",
+    handle_admin: "handling admin and communication more efficiently",
+    build_confidence: "building confidence using AI tools",
+  };
+  const primaryGoal = profile?.primaryGoal
+    ? goalMap[profile.primaryGoal] || profile.primaryGoal
+    : "making AI work for your teaching";
+  const concerns = profile?.constraints || "using AI responsibly";
+  const timeDrains = profile?.biggestTimeDrains?.length
+    ? profile.biggestTimeDrains.join(", ")
+    : "tasks that take too long";
+  const goalDetails = profile?.goalDetails || "";
+
+  return template
+    .replace(/\{\{name\}\}/g, name)
+    .replace(/\{\{teacher_name\}\}/g, name)
+    .replace(/\{\{role\}\}/g, role)
+    .replace(/\{\{grade_levels\}\}/g, gradeLevels)
+    .replace(/\{\{subjects\}\}/g, subjects)
+    .replace(/\{\{primary_goal\}\}/g, primaryGoal)
+    .replace(/\{\{concerns\}\}/g, concerns)
+    .replace(/\{\{time_drains\}\}/g, timeDrains)
+    .replace(/\{\{goal_details\}\}/g, goalDetails);
+}
 
 /**
  * Global Skippy system prompt - defines personality and behavior
@@ -249,16 +292,17 @@ Keep it warm but concise. Then follow their lead—guiding toward ONE concrete w
 export function buildSkippySystemPrompt(
   modulePrompt: ModulePrompt,
   profileContext: string | null,
-  userName?: string
+  userName?: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  profileData?: Record<string, any> | null
 ): string {
   const parts = [SKIPPY_SYSTEM_PROMPT];
 
   // Add module-specific context
   parts.push(`\n## This week's focus\n${modulePrompt.prompt}`);
 
-  // Add the opening message template (personalized with name if available)
-  const name = userName || "there";
-  const openingTemplate = modulePrompt.openingMessage.replace(/\{\{name\}\}/g, name);
+  // Add the opening message template (personalized with profile data)
+  const openingTemplate = interpolateProfile(modulePrompt.openingMessage, profileData || null, userName);
   parts.push(`\n## Your opening message for this week\nWhen starting a new conversation, say exactly this (it's been personalized for the teacher):\n\n"${openingTemplate}"`);
 
   // Add user profile context if available
@@ -314,12 +358,13 @@ export async function getSkippyContext(userId: string, week: number, userName?: 
     throw new Error(`No module found for week ${week}`);
   }
 
-  const [profileContext, history] = await Promise.all([
-    getProfileContextForUser(userId),
+  const [profile, history] = await Promise.all([
+    getUserProfile(userId),
     getConversationHistory(userId, week),
   ]);
 
-  const systemPrompt = buildSkippySystemPrompt(modulePrompt, profileContext, userName);
+  const profileContext = profile ? buildProfileContext(profile) : null;
+  const systemPrompt = buildSkippySystemPrompt(modulePrompt, profileContext, userName, profile);
 
   return {
     systemPrompt,

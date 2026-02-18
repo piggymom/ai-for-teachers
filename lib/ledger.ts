@@ -49,7 +49,13 @@ export type ConversationPhase =
 export type EngagementEnergy = "high" | "medium" | "low";
 
 export type ArtifactType =
+  | "profile"
+  | "understanding"
   | "prompt_template"
+  | "lesson_template"
+  | "feedback_template"
+  | "differentiation_template"
+  | "policy"
   | "workflow"
   | "draft_feedback"
   | "lesson_outline"
@@ -826,8 +832,15 @@ function buildClassifierPrompt(
   assistantResponse: string,
   conversationHistory?: { role: string; content: string }[]
 ): string {
-  const fourCState = ledger.weekNumber === 2 ? `
+  const weekConfig = getWeekConfig(ledger.weekNumber);
+  const fourCState = weekConfig.trackFourC ? `
 - 4C Status: Context=${ledger.artifact.fourC.context}, Constraints=${ledger.artifact.fourC.constraints}, Command=${ledger.artifact.fourC.command}, Criteria=${ledger.artifact.fourC.criteria}` : '';
+
+  // Week 6 uses policy section tracking instead of 4C
+  const week6State = ledger.weekNumber === 6 ? `
+- Policy Sections: Track which sections of the Personal AI Policy have been addressed in conversation.
+  Listen for: Workflow (where they use AI), Boundaries (where they don't), Verification (how they check), Transparency (when they disclose), Ethics (student data, bias), Students (what students need to know).
+  Artifact is complete when 4+ sections are addressed.` : '';
 
   // Build conversation context — include recent history for better phase/level/artifact detection
   let conversationSection: string;
@@ -861,7 +874,7 @@ SKIPPY: ${assistantResponse}`;
 - Diagnosed level: ${ledger.diagnostic.level || 'not yet assessed'}
 - Exchange count: ${ledger.exchangeCount}
 - Redirect count: ${ledger.redirectCount}
-- Session summary: ${ledger.sessionSummary || 'Session just started'}${fourCState}
+- Session summary: ${ledger.sessionSummary || 'Session just started'}${fourCState}${week6State}
 
 ${conversationSection}
 

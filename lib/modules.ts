@@ -83,14 +83,33 @@ export type WeekConfig = {
   artifactType: string | null;
 };
 
+/**
+ * Artifact metadata for the library display.
+ */
+export type ArtifactMeta = {
+  type: string;
+  displayName: string;
+  tags: string[];
+};
+
+export const weekArtifactMeta: Record<number, ArtifactMeta> = {
+  0: { type: "profile", displayName: "My Teaching Profile", tags: ["goals", "context", "setup"] },
+  1: { type: "understanding", displayName: "My AI Understanding Card", tags: ["foundations", "mental model", "what is AI"] },
+  2: { type: "prompt_template", displayName: "My First Prompt Template", tags: ["4C", "prompting", "general"] },
+  3: { type: "lesson_template", displayName: "Lesson Planning Template", tags: ["4C", "planning", "iteration"] },
+  4: { type: "feedback_template", displayName: "Feedback Template", tags: ["4C", "assessment", "calibration"] },
+  5: { type: "differentiation_template", displayName: "Differentiation Template", tags: ["4C", "differentiation", "variation"] },
+  6: { type: "policy", displayName: "My Personal AI Policy", tags: ["ethics", "integration", "policy"] },
+};
+
 export const weekConfigs: Record<number, WeekConfig> = {
-  0: { maxExchanges: 5, trackFourC: false, artifactType: null },
-  1: { maxExchanges: 15, trackFourC: false, artifactType: "mental_model" },
+  0: { maxExchanges: 5, trackFourC: false, artifactType: "profile" },
+  1: { maxExchanges: 15, trackFourC: false, artifactType: "understanding" },
   2: { maxExchanges: 18, trackFourC: true, artifactType: "prompt_template" },
-  3: { maxExchanges: 18, trackFourC: true, artifactType: "lesson_planning_template" },
+  3: { maxExchanges: 18, trackFourC: true, artifactType: "lesson_template" },
   4: { maxExchanges: 18, trackFourC: true, artifactType: "feedback_template" },
   5: { maxExchanges: 18, trackFourC: true, artifactType: "differentiation_template" },
-  6: { maxExchanges: 18, trackFourC: false, artifactType: "personal_policy" },
+  6: { maxExchanges: 18, trackFourC: false, artifactType: "policy" },
 };
 
 const DEFAULT_WEEK_CONFIG: WeekConfig = {
