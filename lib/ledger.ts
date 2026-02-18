@@ -13,6 +13,7 @@ import { prisma } from "./prisma";
 import Anthropic from "@anthropic-ai/sdk";
 import { formatProgressionForClassifier } from "./progressions";
 import { extractArtifact } from "./artifacts";
+import { getWeekConfig } from "./modules";
 import {
   getWeek2Example,
   formatInsightsForInjection,
@@ -294,11 +295,14 @@ If you notice these beliefs surfacing, gently reframe without derailing the conv
     }
   }
 
-  // 4C component tracking for Week 2
+  // Week-specific config
+  const weekConfig = getWeekConfig(ledger.weekNumber);
+
+  // 4C component tracking (only for weeks that use it)
   const fourC = ledger.artifact.fourC;
   const fourCComplete = fourC.context && fourC.constraints && fourC.command && fourC.criteria;
   let fourCSection = '';
-  if (ledger.weekNumber === 2) {
+  if (weekConfig.trackFourC) {
     const components = [
       `Context: ${fourC.context ? 'PROVIDED' : 'NEEDED'}`,
       `Constraints: ${fourC.constraints ? 'PROVIDED' : 'NEEDED'}`,
@@ -383,9 +387,9 @@ Do NOT ask another question.
 ${urgentWarning}${redirectWarning}
 ## Where They Are
 - Phase: ${ledger.currentPhase}
-- Exchange count: ${ledger.exchangeCount}
+- Exchange count: ${ledger.exchangeCount} / ${weekConfig.maxExchanges} max
 - Diagnosed level: ${ledger.diagnostic.level || 'not yet assessed'}
-- Redirect count: ${ledger.redirectCount}
+- Redirect count: ${ledger.redirectCount}${ledger.exchangeCount >= weekConfig.maxExchanges - 2 ? '\n- ⚠️ APPROACHING MAX EXCHANGES — wrap up soon' : ''}
 
 ## What You Know About This Teacher
 ${ledger.sessionSummary || 'Session just started.'}

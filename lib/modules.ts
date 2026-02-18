@@ -7,6 +7,8 @@
  */
 
 import { getProgression, type WeekProgression } from "./progressions";
+import { WEEK_0_SYSTEM_PROMPT, WEEK_0_OPENING_MESSAGE } from "./prompts/week-0";
+import { WEEK_1_SYSTEM_PROMPT, WEEK_1_OPENING_MESSAGE } from "./prompts/week-1";
 import { WEEK_2_SYSTEM_PROMPT, WEEK_2_OPENING_MESSAGE } from "./prompts/week-2";
 
 export type ModulePrompt = {
@@ -20,37 +22,15 @@ export const modulePrompts: Record<number, ModulePrompt> = {
   0: {
     week: 0,
     title: "Getting Started",
-    prompt: `This is Week 0: Getting Started with the course.
-Focus on helping the teacher understand what this course offers and how to get the most out of it.
-Key topics:
-- Course overview and structure
-- What they'll learn each week
-- How to use Skippy effectively
-- Setting expectations for AI as a teaching assistant
-Keep it welcoming and orient them to the journey ahead.`,
-    openingMessage: `Hey {{name}}! I'm Skippy, and I'll be your guide through this 6-week course.
-
-We're going to build practical AI skills you can use in your classroom—no hype, just real tools. By the end, you'll have prompts, templates, and workflows you actually use.
-
-What made you decide to take this course? I'm curious what you're hoping AI might help you with — or what concerns brought you here.`,
+    prompt: WEEK_0_SYSTEM_PROMPT,
+    openingMessage: WEEK_0_OPENING_MESSAGE,
   },
 
   1: {
     week: 1,
     title: "Understanding AI in Teaching",
-    prompt: `This is Week 1: Understanding AI in Teaching.
-Focus on foundational understanding of generative AI and practical classroom applications.
-Key topics:
-- What AI is (and isn't) - pattern matching, not understanding
-- Classroom-safe use cases: drafting communications, lesson variations, practice questions, feedback
-- Limitations and guardrails: hallucinations, bias, privacy concerns
-- The "fast assistant, not source of truth" mental model
-Help them try: Creating three variations of a lesson (scaffolds, rigor, different hook).`,
-    openingMessage: `Hey {{name}}! This week we're building your foundation—understanding what AI actually is, and what it's good for in the classroom.
-
-The key insight: AI predicts patterns, it doesn't understand meaning. That makes it a fast assistant, not a source of truth.
-
-Here's a question I find interesting: if a colleague asked you 'how does ChatGPT actually work?', how would you explain it to them?`,
+    prompt: WEEK_1_SYSTEM_PROMPT,
+    openingMessage: WEEK_1_OPENING_MESSAGE,
   },
 
   2: {
@@ -137,6 +117,36 @@ The teachers who get the most from AI aren't using it for everything. They've fo
 Looking back at the past five weeks, what's actually stuck? What are you realistically going to keep doing?`,
   },
 };
+
+/**
+ * Week-specific configuration for ledger behavior.
+ * Controls exchange limits, tracking features, and artifact types per week.
+ */
+export type WeekConfig = {
+  maxExchanges: number;
+  trackFourC: boolean;
+  artifactType: string | null;
+};
+
+export const weekConfigs: Record<number, WeekConfig> = {
+  0: { maxExchanges: 5, trackFourC: false, artifactType: null },
+  1: { maxExchanges: 15, trackFourC: false, artifactType: "mental_model" },
+  2: { maxExchanges: 18, trackFourC: true, artifactType: "prompt_template" },
+  3: { maxExchanges: 18, trackFourC: false, artifactType: "lesson_plan" },
+  4: { maxExchanges: 18, trackFourC: false, artifactType: "feedback_workflow" },
+  5: { maxExchanges: 15, trackFourC: false, artifactType: "communication_template" },
+  6: { maxExchanges: 15, trackFourC: false, artifactType: "practice_plan" },
+};
+
+const DEFAULT_WEEK_CONFIG: WeekConfig = {
+  maxExchanges: 18,
+  trackFourC: false,
+  artifactType: null,
+};
+
+export function getWeekConfig(week: number): WeekConfig {
+  return weekConfigs[week] || DEFAULT_WEEK_CONFIG;
+}
 
 export function getModulePrompt(week: number): ModulePrompt | null {
   return modulePrompts[week] || null;
