@@ -19,6 +19,10 @@ import {
   formatInsightsForInjection,
   formatMisconceptionForInjection,
 } from "./prompts/week-2";
+import { getWeek3Example } from "./prompts/week-3";
+import { getWeek4Example } from "./prompts/week-4";
+import { getWeek5Example } from "./prompts/week-5";
+import { getWeek6Example } from "./prompts/week-6";
 
 const anthropic = new Anthropic();
 
@@ -257,6 +261,20 @@ function transformFromDb(record: any): ConversationLedger {
 // =============================================================================
 
 /**
+ * Get the appropriate worked example dialogue for any week based on diagnosed level.
+ */
+function getWeekExample(weekNumber: number, level: string): string {
+  switch (weekNumber) {
+    case 2: return getWeek2Example(level);
+    case 3: return getWeek3Example(level);
+    case 4: return getWeek4Example(level);
+    case 5: return getWeek5Example(level);
+    case 6: return getWeek6Example(level);
+    default: return '';
+  }
+}
+
+/**
  * Format ledger for injection into Skippy's system prompt.
  * Now includes level-specific behavioral guidance, phase-specific moves,
  * and week-specific example dialogues.
@@ -265,9 +283,9 @@ export function formatLedgerForPrompt(ledger: ConversationLedger): string {
   const levelBehaviors = getLevelBehaviors(ledger.diagnostic.level);
   const phaseGuidance = getPhaseGuidance(ledger.currentPhase, ledger.exchangeCount);
 
-  // Get week-specific example dialogue based on level (only for Week 2 for now)
-  const exampleDialogue = ledger.weekNumber === 2 && ledger.diagnostic.level
-    ? getWeek2Example(ledger.diagnostic.level)
+  // Get week-specific example dialogue based on diagnosed level
+  const exampleDialogue = ledger.diagnostic.level
+    ? getWeekExample(ledger.weekNumber, ledger.diagnostic.level)
     : '';
 
   // Format misconceptions for Week 2 with specific handling
