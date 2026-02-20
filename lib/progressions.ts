@@ -191,34 +191,34 @@ export const progressions: WeekProgression[] = [
   },
   {
     weekNumber: 5,
-    topic: "Communication & Admin",
+    topic: "Differentiation with AI",
     diagnosticProbe:
-      "What's a communication task — emails, newsletters, parent updates — that you'd love to spend less time on? What makes it tedious?",
+      "When you've differentiated materials for diverse learners, what made it effective or ineffective?",
     levels: [
       {
         level: "pre-structural",
         description:
-          "Can identify communication tasks that consume time; open to templates",
+          "Knows differentiation matters but creates one version for all; unsure how to vary systematically",
       },
       {
         level: "unistructural",
         description:
-          "Can use AI to draft emails, newsletters, or parent communications",
+          "Can identify ONE dimension to vary (e.g., reading level) but applies mechanically without checking rigor",
       },
       {
         level: "multistructural",
         description:
-          "Can customize tone, reading level, and format for different audiences",
+          "Can vary multiple dimensions and map students to groups; applies variation systematically across groups",
       },
       {
         level: "relational",
         description:
-          "Can maintain authentic voice while using AI-generated drafts; adapts for sensitive contexts",
+          "Understands access vs. rigor distinction; specifies what must NOT change; catches when AI simplifies thinking",
       },
       {
         level: "extended-abstract",
         description:
-          "Can build reusable communication templates; systematizes routine correspondence",
+          "Designs differentiation systems using UDL principles; helps colleagues build sustainable variation workflows",
       },
     ],
   },
