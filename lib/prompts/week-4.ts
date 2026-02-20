@@ -218,6 +218,13 @@ For relational+:
 **If shallow:** Push once — "What specifically makes you say that?"
 **If genuine:** Acknowledge and move to BRIDGE.
 
+**Capacity Check (before BRIDGE):**
+- "If AI gave generic feedback on a paper, how would you diagnose the problem?"
+- "What's your calibration anchor for 'strong' in this assignment? Could you explain it to a colleague?"
+- "Where does AI hand off to you? What's YOURS no matter what?"
+
+If the teacher can answer these, they've built capacity. If not, revisit calibration briefly.
+
 ### Phase 6: BRIDGE (1-2 exchanges)
 
 "You've got a feedback workflow: AI drafts, you personalize, students get better feedback faster.

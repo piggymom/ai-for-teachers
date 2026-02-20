@@ -125,34 +125,34 @@ export const progressions: WeekProgression[] = [
   },
   {
     weekNumber: 3,
-    topic: "Lesson Planning",
+    topic: "Lesson Planning with AI",
     diagnosticProbe:
-      "Think about how you typically plan lessons. Where in that process do you think AI could actually help — and where do you think it probably can't?",
+      "Walk me through how you currently plan a lesson. What's your process, and where does it feel inefficient?",
     levels: [
       {
         level: "pre-structural",
         description:
-          "Can describe their lesson planning challenges; open to exploring AI assistance",
+          "Plans lessons from scratch each time; hasn't considered AI as planning tool; or tried AI once and gave up",
       },
       {
         level: "unistructural",
         description:
-          "Can use AI to generate lesson ideas or activity suggestions",
+          "Can use AI for ONE planning task (e.g., generate activities) but treats it as one-shot — no iteration",
       },
       {
         level: "multistructural",
         description:
-          "Can provide context (standards, student needs) to get more relevant lesson outputs",
+          "Uses AI for multiple planning tasks; iterates when output isn't right but through trial-and-error, not systematic refinement",
       },
       {
         level: "relational",
         description:
-          "Can evaluate AI-generated lessons against pedagogical criteria; edits and adapts outputs",
+          "Understands prompting as conversation; can diagnose WHY output failed and write targeted follow-ups; maintains pedagogical control intentionally",
       },
       {
         level: "extended-abstract",
         description:
-          "Can design reusable lesson planning workflows; integrates AI into existing planning routines",
+          "Designs planning workflows; helps colleagues integrate AI; reasons about what stays human in lesson design",
       },
     ],
   },
@@ -160,32 +160,32 @@ export const progressions: WeekProgression[] = [
     weekNumber: 4,
     topic: "Feedback & Assessment",
     diagnosticProbe:
-      "When it comes to giving students feedback, what's the hardest part for you? And what would 'good enough' AI help with feedback actually look like?",
+      "When you give feedback on student work, what makes it effective? What's hardest about maintaining quality across many students?",
     levels: [
       {
         level: "pre-structural",
         description:
-          "Can articulate feedback and assessment pain points; interested in efficiency gains",
+          "Gives feedback but quality degrades with volume; student 1 gets attention, student 25 gets 'good job'",
       },
       {
         level: "unistructural",
         description:
-          "Can use AI to draft feedback comments or assessment items",
+          "Can identify ONE technique for consistent feedback (e.g., rubric) but applies mechanically",
       },
       {
         level: "multistructural",
         description:
-          "Can provide rubrics, exemplars, or criteria to improve AI-generated feedback quality",
+          "Uses multiple techniques (rubrics, templates, batch strategies) but doesn't see how they connect",
       },
       {
         level: "relational",
         description:
-          "Can evaluate AI feedback for accuracy, tone, and developmental appropriateness; revises systematically",
+          "Understands calibration as quality control; can explain WHY anchor examples create consistency; sees personalization as distinct from drafting",
       },
       {
         level: "extended-abstract",
         description:
-          "Can design feedback workflows that preserve teacher voice while leveraging AI for scale",
+          "Designs feedback systems; reasons about the human/AI handoff; considers ethics of AI feedback to students",
       },
     ],
   },
