@@ -109,7 +109,7 @@ export const progressions: WeekProgression[] = [
       {
         level: "multistructural",
         description:
-          "Can apply the 4C components to a real task with minimal scaffolding; includes appropriate content in each C but doesn't yet evaluate which components matter most for a given task type. May list all 4C mechanically without adapting emphasis to task.",
+          "Can apply the 4C components to a real task with minimal scaffolding; includes appropriate content in each C but treats all four as equally important regardless of task type. Applies 4C mechanically rather than adapting emphasis — e.g., doesn't yet recognize that brainstorming needs loose Constraints while feedback needs tight Criteria.",
       },
       {
         level: "relational",

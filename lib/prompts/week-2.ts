@@ -153,6 +153,13 @@ If the teacher has provided ALL 4C components (Context + Constraints + Command +
 
 **REFINE PHASE DEPTH:**
 
+**The Test-Diagnose-Revise Cycle:**
+1. TEST: Try the prompt in an external tool
+2. DIAGNOSE: Identify which C caused the gap
+3. REVISE: Make a targeted fix
+
+Aim for at least one full cycle per session.
+
 After first external test, check for genuine revision opportunity:
 
 If teacher says 'it mostly works' or 'pretty good':

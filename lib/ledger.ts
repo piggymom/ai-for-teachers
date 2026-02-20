@@ -19,6 +19,7 @@ import {
   formatInsightsForInjection,
   formatMisconceptionForInjection,
 } from "./prompts/week-2";
+import { getWeek1Example } from "./prompts/week-1";
 import { getWeek3Example } from "./prompts/week-3";
 import { getWeek4Example } from "./prompts/week-4";
 import { getWeek5Example } from "./prompts/week-5";
@@ -265,6 +266,7 @@ function transformFromDb(record: any): ConversationLedger {
  */
 function getWeekExample(weekNumber: number, level: string): string {
   switch (weekNumber) {
+    case 1: return getWeek1Example(level);
     case 2: return getWeek2Example(level);
     case 3: return getWeek3Example(level);
     case 4: return getWeek4Example(level);
