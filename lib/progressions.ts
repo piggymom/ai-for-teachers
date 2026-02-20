@@ -224,34 +224,34 @@ export const progressions: WeekProgression[] = [
   },
   {
     weekNumber: 6,
-    topic: "Building Your Practice",
+    topic: "Integration & Ethics",
     diagnosticProbe:
-      "Looking back at the past five weeks, what's actually stuck? What are you realistically going to keep doing?",
+      "As you think about using AI in your teaching going forward, what principles guide your decisions about when to use it and when not to?",
     levels: [
       {
         level: "pre-structural",
         description:
-          "Can reflect on course learnings; has experimented with AI tools",
+          "Wants to use AI but can't articulate guiding principles; decisions feel ad hoc",
       },
       {
         level: "unistructural",
         description:
-          "Can identify 1-2 AI workflows they want to continue using",
+          "Can name ONE principle (e.g., 'always check the output') but applies it mechanically without nuance",
       },
       {
         level: "multistructural",
         description:
-          "Can describe when and how they'll use specific AI tools in their practice",
+          "Can list multiple principles and practices; has a mental checklist but doesn't see how they connect",
       },
       {
         level: "relational",
         description:
-          "Can anticipate obstacles and plan adaptations; connects AI use to professional goals",
+          "Articulates how principles interact; can reason through tradeoffs; sees policy as a coherent system",
       },
       {
         level: "extended-abstract",
         description:
-          "Can mentor colleagues on AI integration; continuously evaluates and evolves their practice",
+          "Reasons about systemic implications; considers student AI literacy; ready to help colleagues develop their own frameworks",
       },
     ],
   },

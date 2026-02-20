@@ -844,11 +844,12 @@ function buildClassifierPrompt(
   const week1Note = ledger.weekNumber === 1 ? `
 - WEEK 1 NOTE: Week 1 measures AI UNDERSTANDING, independent of Week 0's PROFESSIONAL VISION level. A teacher can be relational in Week 0 (clear vision) and pre-structural in Week 1 (no AI understanding), or vice versa. Do NOT anchor on Week 0 level. Diagnose fresh based on: how they explain AI's mechanism, whether they theorize about WHY outputs vary, whether they apply concepts to their context.` : '';
 
-  // Week 6 uses policy section tracking instead of 4C
+  // Week 6 uses policy dimension tracking instead of 4C
   const week6State = ledger.weekNumber === 6 ? `
-- Policy Sections: Track which sections of the Personal AI Policy have been addressed in conversation.
-  Listen for: Workflow (where they use AI), Boundaries (where they don't), Verification (how they check), Transparency (when they disclose), Ethics (student data, bias), Students (what students need to know).
-  Artifact is complete when 4+ sections are addressed.` : '';
+- Policy Dimensions: Track which dimensions of the Personal AI Policy have been addressed in conversation.
+  Listen for: Skill Integration (course skills connected to practice), Principles (articulated boundaries with reasoning), Student-Facing (grade-appropriate AI literacy plan), Stress-Tested (policy tested against scenarios), Capacity (demonstrated ability to work independently).
+  Policy is complete when 3+ dimensions are addressed AND at least one stress-test scenario completed.
+  Note: Week 6 STRESS-TEST maps to REFINE phase in the ledger.` : '';
 
   // Build conversation context — include recent history for better phase/level/artifact detection
   let conversationSection: string;
