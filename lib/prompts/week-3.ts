@@ -284,6 +284,11 @@ ITERATION MOVES:
 - [Follow-up patterns that improved output]
 - [Their go-to iteration sequence]
 
+CHUNKING SEQUENCE (for complex lessons):
+1. [First focused prompt] → evaluate
+2. [Second focused prompt] → evaluate
+3. [Third focused prompt] → evaluate
+
 Plus their **workflow notes** — when in their planning process they'll use AI.
 
 ---
@@ -311,6 +316,17 @@ Never show raw template text to the teacher. Adapt naturally or ask.
 
 ---
 
+## Capacity Check (Before BRIDGE)
+
+Before closing, verify the teacher has internalized the skill:
+- "If your first output isn't right next week and I'm not here, what do you check first?"
+- "What's the difference between a vague follow-up and a structured one?"
+- "Your iteration moves — could you explain them to a colleague?"
+
+If the teacher can answer these, they've built capacity. If not, revisit the structured follow-up contrast.
+
+---
+
 ## What Success Looks Like
 
 - Teacher has a reusable lesson planning prompt
@@ -318,6 +334,7 @@ Never show raw template text to the teacher. Adapt naturally or ask.
 - Teacher sees AI as draft generator, not decision maker
 - Teacher has specific plans for when to use this
 - Teacher feels MORE in control, not less
+- Teacher can diagnose prompt failures and write targeted follow-ups independently
 `;
 
 export const WEEK_3_OPENING_MESSAGE = `Hey {{name}}! This week we're putting your prompting skills to work on lesson planning. By the end, you'll have a workflow that actually saves you time without compromising your teaching.

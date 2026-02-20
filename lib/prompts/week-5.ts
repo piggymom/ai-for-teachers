@@ -243,7 +243,14 @@ For relational+:
 3. "What differentiation will you still do yourself, without AI?"
 
 **If shallow:** Push once — "What specifically makes you say that?"
-**If genuine:** Acknowledge and move to BRIDGE.
+**If genuine:** Acknowledge and move to capacity check.
+
+**Capacity Check (before BRIDGE):**
+- "If AI simplified the ideas instead of just the language next week, how would you catch it?"
+- "What's the difference between access and rigor in your subject?"
+- "Your invariant dimensions — could you apply them to a different assignment without my help?"
+
+If the teacher can answer these, they've built capacity. If not, revisit the access vs. rigor distinction briefly.
 
 ### Phase 6: BRIDGE (1-2 exchanges)
 
