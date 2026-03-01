@@ -81,8 +81,10 @@ async function generatePodcastScript(
   // Parse the script into segments
   const scriptText = response.content[0].type === "text" ? response.content[0].text : "";
 
-  // Log the full script for debugging
-  console.log("[PODCAST] Generated script:\n" + scriptText);
+  // Log the full script for debugging (dev only — contains conversation-derived content)
+  if (process.env.NODE_ENV !== "production") {
+    console.log("[PODCAST] Generated script:\n" + scriptText);
+  }
 
   const lines = scriptText.trim().split("\n").filter((line) => line.trim());
 

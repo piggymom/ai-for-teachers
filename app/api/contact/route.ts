@@ -15,12 +15,14 @@ export async function POST(request: Request) {
     );
   }
 
-  // Log to console (for development)
-  console.log("=== SUPPORT CONTACT ===");
-  console.log("From:", name, `<${email}>`);
-  console.log("User ID:", session?.user?.id || "Not logged in");
-  console.log("Message:", message);
-  console.log("=======================");
+  // Log contact submissions (dev only — contains PII)
+  if (process.env.NODE_ENV !== "production") {
+    console.log("=== SUPPORT CONTACT ===");
+    console.log("From:", name, `<${email}>`);
+    console.log("User ID:", session?.user?.id || "Not logged in");
+    console.log("Message:", message);
+    console.log("=======================");
+  }
 
   // Send email via Resend if configured
   if (process.env.RESEND_API_KEY) {

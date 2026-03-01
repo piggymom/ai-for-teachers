@@ -25,6 +25,7 @@ model User {
   skippyMessages  SkippyMessage[]
   ledgers         ConversationLedger[]
   artifacts       Artifact[]
+  consents        Consent[]
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
 }
@@ -205,4 +206,20 @@ model Artifact {
 
   @@index([userId])
   @@index([userId, weekNumber])
+}
+
+// User consent records for legal compliance
+// Tracks agreement to Terms of Service, Privacy Policy, AI processing, etc.
+model Consent {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "tos_pp" | "ai_processing" | "audio_features" | "pilot_participation"
+  version   String   // Version of the document agreed to (e.g., "1.0")
+  granted   Boolean  @default(true)
+  timestamp DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
 }

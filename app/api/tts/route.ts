@@ -124,7 +124,9 @@ export async function POST(req: NextRequest) {
     // Check cache first
     const cached = ttsCache.get(cacheKey);
     if (cached) {
-      console.log(`[TTS TIMING] Cache HIT - ${Date.now() - startTime}ms`);
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[TTS TIMING] Cache HIT - ${Date.now() - startTime}ms`);
+      }
       return new NextResponse(cached.audio, {
         status: 200,
         headers: {
@@ -150,7 +152,9 @@ export async function POST(req: NextRequest) {
     cleanupCache();
     ttsCache.set(cacheKey, { audio: audioBuffer, timestamp: Date.now() });
 
-    console.log(`[TTS TIMING] Cache MISS - ${Date.now() - startTime}ms (cached for next time)`);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`[TTS TIMING] Cache MISS - ${Date.now() - startTime}ms (cached for next time)`);
+    }
 
     return new NextResponse(audioBuffer, {
       status: 200,
