@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
 
 /**
  * Next.js middleware for authentication and rate limiting.
@@ -7,6 +6,10 @@ import { getToken } from "next-auth/jwt";
  * - Protects app routes (/home/*, /week/*) by redirecting to /auth/signin
  * - Protects API routes (except /api/auth/*) by returning 401
  * - Applies per-route rate limiting using in-memory counters
+ *
+ * NOTE: This app uses database sessions (not JWT), so we check for the
+ * session cookie directly rather than using getToken() which only works
+ * with JWT sessions.
  */
 
 // =============================================================================
@@ -73,27 +76,27 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Check for database session cookie (works with strategy: "database")
+  const sessionToken =
+    req.cookies.get("__Secure-next-auth.session-token")?.value ||
+    req.cookies.get("next-auth.session-token")?.value;
+
   // For API routes: check auth and rate limits
   if (pathname.startsWith("/api/")) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
-    if (!token) {
+    if (!sessionToken) {
       return NextResponse.json(
         { error: { message: "Unauthorized", code: "UNAUTHORIZED" } },
         { status: 401 }
       );
     }
 
-    // Apply rate limiting
-    const userId = (token.sub as string) || "unknown";
+    // Apply rate limiting (use IP as key since we can't decode database session in edge)
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
     const routeKey = Object.keys(RATE_LIMITS).find((r) => pathname.startsWith(r));
 
     if (routeKey) {
       const config = RATE_LIMITS[routeKey];
-      // Use IP for contact (unauthenticated-friendly), userId for everything else
-      const limitKey = routeKey === "/api/contact"
-        ? `contact:${req.headers.get("x-forwarded-for") || "unknown"}`
-        : `${routeKey}:${userId}`;
+      const limitKey = `${routeKey}:${ip}`;
 
       const result = rateLimit(limitKey, config.limit, config.windowSec);
       if (!result.allowed) {
@@ -110,9 +113,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // For app routes (pages): check auth
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  if (!token) {
+  // For app routes (pages): check auth via session cookie
+  if (!sessionToken) {
     const signInUrl = new URL("/auth/signin", req.url);
     signInUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(signInUrl);

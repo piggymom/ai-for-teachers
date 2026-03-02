@@ -6,26 +6,26 @@ export function AuthButton() {
   const { data: session, status } = useSession();
 
   if (status === "loading") {
-    return <div className="h-5 w-16 animate-pulse rounded bg-white/5" />;
+    return <div className="h-5 w-16 animate-pulse rounded bg-[#f3f4f6]" />;
   }
 
   if (session?.user) {
     return (
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-3">
         {session.user.image && (
           <img
             src={session.user.image}
             alt=""
-            className="h-5 w-5 rounded-full opacity-80"
+            className="h-7 w-7 rounded-full"
           />
         )}
-        <span className="text-[13px] font-light text-white/40">
+        <span className="text-[15px] text-[#6B7280]">
           {session.user.name?.split(" ")[0]}
         </span>
-        <span className="text-white/20">·</span>
+        <span className="text-[#d1d5db]">&middot;</span>
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="text-[13px] font-light text-white/25 transition hover:text-white/50"
+          className="text-[15px] text-[#9ca3af] transition hover:text-[#4b5563]"
         >
           Sign out
         </button>
@@ -36,7 +36,7 @@ export function AuthButton() {
   return (
     <button
       onClick={() => signIn("google", { callbackUrl: "/home" })}
-      className="text-[13px] font-light text-white/40 transition hover:text-white/60"
+      className="text-[15px] text-[#9ca3af] transition hover:text-[#4b5563]"
     >
       Sign in
     </button>

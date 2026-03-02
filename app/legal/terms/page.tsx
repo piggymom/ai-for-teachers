@@ -80,7 +80,7 @@ export default function TermsOfServicePage() {
             <h2 className="text-[17px] font-medium text-[#111827]">7. Privacy</h2>
             <p className="mt-3">
               Your privacy matters. See our{" "}
-              <Link href="/legal/privacy" className="text-[#20B2AA] hover:underline">Privacy Policy</Link>{" "}
+              <Link href="/legal/privacy" className="text-[#111827] underline hover:text-[#3B82F6]">Privacy Policy</Link>{" "}
               for details on data collection, use, and sharing.
             </p>
           </section>

@@ -19,16 +19,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-[#0a0a0a]">
-      {/* Left Sidebar - Fixed */}
+    <div className="flex min-h-screen bg-white">
+      {/* Left Sidebar */}
       <CourseSidebar />
 
-      {/* Main Content - Scrollable */}
+      {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
         {children}
       </main>
 
-      {/* Right Panel - Collapsible */}
+      {/* Support - Collapsible */}
       <SupportPanel
         isOpen={supportPanelOpen}
         onToggle={() => setSupportPanelOpen(!supportPanelOpen)}

@@ -74,14 +74,14 @@ export default function Home() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="p-8 lg:p-12">
+        <div className="p-10 lg:p-16">
           <div className="max-w-3xl mx-auto">
-            <div className="animate-pulse space-y-8">
-              <div className="h-8 bg-[#1a1a1a] rounded w-1/2" />
-              <div className="h-4 bg-[#1a1a1a] rounded w-1/3" />
+            <div className="animate-pulse space-y-10">
+              <div className="h-8 bg-[#f3f4f6] rounded w-1/2" />
+              <div className="h-4 bg-[#f3f4f6] rounded w-1/3" />
               <div className="flex flex-col gap-4">
                 {[1, 2, 3, 4, 5, 6, 7].map(i => (
-                  <div key={i} className="h-32 bg-[#141414] rounded-xl" />
+                  <div key={i} className="h-24 bg-[#f9fafb] rounded-xl" />
                 ))}
               </div>
             </div>
@@ -103,9 +103,8 @@ export default function Home() {
           {/* Personalized Header */}
           <DashboardHeader profile={profile} progress={progress} />
 
-          {/* Week Cards - Vertical */}
+          {/* Week Cards */}
           <section>
-            <h2 className="text-lg font-medium text-[#fafafa] mb-4">Your Modules</h2>
             <WeekCardsGrid
               completedWeeks={progress?.completedWeeks || []}
               currentWeek={progress?.currentWeek || 0}
@@ -114,7 +113,7 @@ export default function Home() {
           </section>
 
           {/* Artifact Gallery */}
-          <section className="pt-8 border-t border-[#262626]">
+          <section className="pt-10 border-t border-[#E5E7EB]">
             <ArtifactGallery />
           </section>
         </div>

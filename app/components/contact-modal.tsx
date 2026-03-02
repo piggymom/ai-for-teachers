@@ -48,34 +48,40 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60"
+        className="absolute inset-0 bg-black/20 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative bg-neutral-900 border border-white/10 rounded-xl p-6 w-full max-w-md mx-4">
+      <div className="relative bg-white border border-[#e5e7eb] rounded-xl p-6 w-full max-w-md mx-4 shadow-sm">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-white/40 hover:text-white"
+          className="absolute top-4 right-4 text-[#d1d5db] hover:text-[#4b5563] transition-colors"
         >
-          ✕
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
 
-        <h2 className="text-xl font-semibold text-white mb-2">Contact Support</h2>
-        <p className="text-sm text-white/50 mb-6">
-          Having technical issues or questions about the course? Send us a message and we'll get back to you.
+        <h2 className="text-[18px] font-medium text-[#111827] mb-2">Contact Support</h2>
+        <p className="text-[13px] text-[#9ca3af] mb-6">
+          Having technical issues or questions about the course? Send us a message and we&apos;ll get back to you.
         </p>
 
         {status === "sent" ? (
-          <div className="text-center py-8">
-            <div className="text-4xl mb-4">✓</div>
-            <p className="text-green-400 font-medium">Message sent!</p>
-            <p className="text-white/50 text-sm">We'll get back to you soon.</p>
+          <div className="text-center py-10">
+            <div className="w-12 h-12 bg-[#10b981]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6 text-[#10b981]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p className="text-[#10b981] font-medium text-[15px]">Message sent!</p>
+            <p className="text-[#9ca3af] text-[13px] mt-1">We&apos;ll get back to you soon.</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-1">
+              <label className="block text-[13px] font-medium text-[#111827] mb-1.5">
                 Name
               </label>
               <input
@@ -83,13 +89,13 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-white border border-[#e5e7eb] rounded-lg text-[14px] text-[#111827] placeholder-[#d1d5db] focus:border-[#d1d5db] focus:outline-none transition"
                 placeholder="Your name"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-1">
+              <label className="block text-[13px] font-medium text-[#111827] mb-1.5">
                 Email
               </label>
               <input
@@ -97,13 +103,13 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-white border border-[#e5e7eb] rounded-lg text-[14px] text-[#111827] placeholder-[#d1d5db] focus:border-[#d1d5db] focus:outline-none transition"
                 placeholder="your@email.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white/70 mb-1">
+              <label className="block text-[13px] font-medium text-[#111827] mb-1.5">
                 Message
               </label>
               <textarea
@@ -111,13 +117,13 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 required
                 rows={4}
-                className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:border-blue-500 focus:outline-none resize-none"
+                className="w-full p-3 bg-white border border-[#e5e7eb] rounded-lg text-[14px] text-[#111827] placeholder-[#d1d5db] focus:border-[#d1d5db] focus:outline-none resize-none transition"
                 placeholder="Describe your issue or question..."
               />
             </div>
 
             {status === "error" && (
-              <p className="text-red-400 text-sm">
+              <p className="text-[#ef4444] text-[13px]">
                 Something went wrong. Please try again or email directly.
               </p>
             )}
@@ -125,7 +131,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
             <button
               type="submit"
               disabled={status === "sending"}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+              className="w-full py-2.5 bg-[#111827] hover:bg-[#374151] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-medium rounded-lg transition-colors"
             >
               {status === "sending" ? "Sending..." : "Send Message"}
             </button>

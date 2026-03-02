@@ -26,32 +26,30 @@ export function ChatPhaseIndicator({ currentPhase, className = "" }: ChatPhaseIn
 
         return (
           <div key={phase.key} className="flex items-center">
-            {/* Phase dot/indicator */}
             <div className="flex flex-col items-center">
               <div
                 className={`
-                  w-2 h-2 rounded-full transition-all
-                  ${isComplete ? 'bg-[#22c55e]' : ''}
-                  ${isCurrent ? 'bg-[#3b82f6] ring-4 ring-blue-500/20' : ''}
-                  ${isFuture ? 'bg-[#333333]' : ''}
+                  w-1.5 h-1.5 rounded-full transition-all
+                  ${isComplete ? 'bg-[#9ca3af]' : ''}
+                  ${isCurrent ? 'bg-[#111827]' : ''}
+                  ${isFuture ? 'bg-[#e5e7eb]' : ''}
                 `}
               />
               <span
                 className={`
                   text-[10px] mt-1 transition-colors whitespace-nowrap
-                  ${isCurrent ? 'text-[#3b82f6] font-medium' : 'text-[#525252]'}
+                  ${isCurrent ? 'text-[#111827] font-medium' : 'text-[#d1d5db]'}
                 `}
               >
                 {phase.label}
               </span>
             </div>
 
-            {/* Connector line */}
             {index < PHASES.length - 1 && (
               <div
                 className={`
-                  w-6 h-0.5 mx-1 mb-4
-                  ${isComplete ? 'bg-[#22c55e]' : 'bg-[#262626]'}
+                  w-6 h-[1px] mx-1 mb-4
+                  ${isComplete ? 'bg-[#d1d5db]' : 'bg-[#f3f4f6]'}
                 `}
               />
             )}

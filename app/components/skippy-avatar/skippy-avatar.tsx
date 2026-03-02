@@ -11,10 +11,10 @@ interface SkippyAvatarProps {
 }
 
 const sizeMap = {
-  sm: 48,
-  md: 64,
-  lg: 96,
-  xl: 160,
+  sm: 64,
+  md: 80,
+  lg: 112,
+  xl: 180,
 };
 
 export function SkippyAvatar({
@@ -37,23 +37,24 @@ export function SkippyAvatar({
         className="skippy-svg"
       >
         <defs>
-          {/* Nucleus gradient */}
+          {/* Nucleus gradient — metallic silver */}
           <linearGradient id="skippy-nucleus-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FF6B6B" />
-            <stop offset="100%" stopColor="#FFB347" />
+            <stop offset="0%" stopColor="#C0C7D0" />
+            <stop offset="50%" stopColor="#E2E8F0" />
+            <stop offset="100%" stopColor="#94A3B8" />
           </linearGradient>
 
           {/* Glow gradient */}
           <radialGradient id="skippy-glow-gradient" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(255, 179, 71, 0.4)" />
-            <stop offset="70%" stopColor="rgba(255, 179, 71, 0.1)" />
-            <stop offset="100%" stopColor="rgba(255, 179, 71, 0)" />
+            <stop offset="0%" stopColor="rgba(148, 163, 184, 0.35)" />
+            <stop offset="70%" stopColor="rgba(148, 163, 184, 0.1)" />
+            <stop offset="100%" stopColor="rgba(148, 163, 184, 0)" />
           </radialGradient>
 
-          {/* Orbital gradient */}
+          {/* Orbital gradient — metallic */}
           <linearGradient id="skippy-orbital-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FFD93D" />
-            <stop offset="100%" stopColor="#FFB347" />
+            <stop offset="0%" stopColor="#E2E8F0" />
+            <stop offset="100%" stopColor="#CBD5E1" />
           </linearGradient>
 
           {/* Blur filter for glow */}
@@ -117,7 +118,7 @@ export function SkippyAvatar({
           cx="45"
           cy="45"
           r="6"
-          fill="rgba(255, 255, 255, 0.3)"
+          fill="rgba(255, 255, 255, 0.45)"
         />
       </svg>
     </div>

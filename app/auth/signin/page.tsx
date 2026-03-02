@@ -25,15 +25,15 @@ export default function SignInPage() {
             type="checkbox"
             checked={agreed}
             onChange={(e) => setAgreed(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-[#d1d5db] text-[#20B2AA] focus:ring-[#20B2AA]/25 cursor-pointer"
+            className="mt-0.5 h-4 w-4 rounded border-[#d1d5db] text-[#111827] focus:ring-[#d1d5db] cursor-pointer"
           />
           <span className="text-[13px] leading-relaxed text-[#4b5563]">
             I have read and agree to the{" "}
-            <Link href="/legal/terms" className="text-[#20B2AA] hover:underline" target="_blank">
+            <Link href="/legal/terms" className="text-[#111827] underline hover:text-[#3B82F6]" target="_blank">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link href="/legal/privacy" className="text-[#20B2AA] hover:underline" target="_blank">
+            <Link href="/legal/privacy" className="text-[#111827] underline hover:text-[#3B82F6]" target="_blank">
               Privacy Policy
             </Link>
           </span>
@@ -46,7 +46,7 @@ export default function SignInPage() {
             }
           }}
           disabled={!agreed}
-          className="inline-flex items-center justify-center gap-3 rounded-lg border border-[#e5e7eb] bg-white px-6 py-3 text-[15px] font-medium text-[#111827] transition-all hover:bg-[#f9fafb] hover:border-[#d1d5db] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#20B2AA]/25 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-[#e5e7eb]"
+          className="inline-flex items-center justify-center gap-3 rounded-lg border border-[#e5e7eb] bg-white px-6 py-3 text-[15px] font-medium text-[#111827] transition-all hover:bg-[#f9fafb] hover:border-[#d1d5db] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d5db] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-[#e5e7eb]"
         >
           <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />

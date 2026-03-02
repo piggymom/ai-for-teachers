@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { WeekCard } from "./week-card";
 
 interface WeekData {
@@ -62,14 +62,14 @@ interface WeekCardsGridProps {
 }
 
 export function WeekCardsGrid({ completedWeeks, currentWeek, scrollToWeek }: WeekCardsGridProps) {
+  const [showAll, setShowAll] = useState(scrollToWeek !== undefined);
   const weekRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
-  // Auto-scroll to specified week on mount
   useEffect(() => {
     if (scrollToWeek !== undefined) {
+      setShowAll(true);
       const element = weekRefs.current.get(scrollToWeek);
       if (element) {
-        // Small delay to ensure layout is complete
         setTimeout(() => {
           element.scrollIntoView({ behavior: "smooth", block: "center" });
         }, 100);
@@ -88,8 +88,19 @@ export function WeekCardsGrid({ completedWeeks, currentWeek, scrollToWeek }: Wee
     return !completedWeeks.includes(weekNumber - 1);
   };
 
+  if (!showAll) {
+    return (
+      <button
+        onClick={() => setShowAll(true)}
+        className="text-[13px] text-[#9ca3af] hover:text-[#111827] transition-colors"
+      >
+        View all weeks &rarr;
+      </button>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       {WEEKS.map((week) => (
         <div
           key={week.weekNumber}
@@ -108,6 +119,13 @@ export function WeekCardsGrid({ completedWeeks, currentWeek, scrollToWeek }: Wee
           />
         </div>
       ))}
+
+      <button
+        onClick={() => setShowAll(false)}
+        className="mt-6 text-[13px] text-[#9ca3af] hover:text-[#111827] transition-colors"
+      >
+        Show less
+      </button>
     </div>
   );
 }

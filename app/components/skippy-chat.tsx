@@ -347,11 +347,11 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
             </p>
             <p className="text-[13px] text-[#9ca3af]">
               Learn more:{" "}
-              <Link href="/legal/ai-disclosure" className="text-[#20B2AA] hover:underline" target="_blank">
+              <Link href="/legal/ai-disclosure" className="text-[#111827] underline hover:text-[#3B82F6]" target="_blank">
                 AI Disclosure
               </Link>
               {" "}&middot;{" "}
-              <Link href="/legal/privacy" className="text-[#20B2AA] hover:underline" target="_blank">
+              <Link href="/legal/privacy" className="text-[#111827] underline hover:text-[#3B82F6]" target="_blank">
                 Privacy Policy
               </Link>
             </p>
@@ -360,14 +360,14 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
                 type="checkbox"
                 checked={aiConsentChecked}
                 onChange={(e) => setAiConsentChecked(e.target.checked)}
-                className="h-4 w-4 rounded border-[#d1d5db] text-[#20B2AA] focus:ring-[#20B2AA]/25 cursor-pointer"
+                className="h-4 w-4 rounded border-[#d1d5db] text-[#111827] focus:ring-[#d1d5db] cursor-pointer"
               />
               <span className="text-[13px] text-[#4b5563]">I understand and want to continue</span>
             </label>
             <button
               onClick={handleAcceptAiConsent}
               disabled={!aiConsentChecked}
-              className="rounded-lg bg-[#20B2AA] px-5 py-2.5 text-[14px] font-medium text-white hover:bg-[#1a9b94] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="rounded-lg border border-[#e5e7eb] bg-white px-5 py-2.5 text-[14px] font-medium text-[#111827] hover:bg-[#f9fafb] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Start Conversation
             </button>
@@ -436,14 +436,14 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
             placeholder={isSending ? "Skippy is thinking..." : "Type your message..."}
             disabled={isLoading || isSending}
             rows={1}
-            className="flex-1 resize-none rounded-xl border border-[#e5e7eb] bg-[#f9fafb] px-4 py-3 text-[15px] text-[#111827] placeholder-[#d1d5db] focus:outline-none focus:border-[#20B2AA] focus:ring-2 focus:ring-[#20B2AA]/10 disabled:opacity-50 transition-all"
+            className="flex-1 resize-none rounded-xl border border-[#e5e7eb] bg-white px-4 py-3 text-[15px] text-[#111827] placeholder-[#d1d5db] focus:outline-none focus:border-[#d1d5db] disabled:opacity-50 transition-all"
           />
           <button
             type="submit"
             disabled={!input.trim() || !canSend}
             className={`rounded-xl px-4 py-3 transition-colors ${
               input.trim() && canSend
-                ? "bg-[#20B2AA] hover:bg-[#1a9b94]"
+                ? "bg-[#111827] hover:bg-[#374151]"
                 : "bg-[#f3f4f6] disabled:opacity-30"
             }`}
           >
@@ -481,7 +481,7 @@ function MessageBubble({
   if (role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[80%] rounded-2xl rounded-br-md bg-[#20B2AA] px-4 py-3 text-white">
+        <div className="max-w-[80%] rounded-2xl rounded-br-md bg-[#f3f4f6] px-4 py-3 text-[#111827]">
           {text.split('\n\n').map((paragraph, pIndex) => (
             <p key={pIndex} className={`text-[15px] ${pIndex > 0 ? 'mt-3' : ''}`}>
               {paragraph}

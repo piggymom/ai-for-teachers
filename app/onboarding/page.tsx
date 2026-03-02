@@ -79,6 +79,7 @@ export default function OnboardingPage() {
   const [subjectInput, setSubjectInput] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const totalSteps = 3;
 
@@ -171,6 +172,7 @@ export default function OnboardingPage() {
     if (!validateStep(step)) return;
 
     setIsSubmitting(true);
+    setSubmitError(null);
     try {
       await saveOnboardingProfile({
         role: formData.role,
@@ -184,40 +186,41 @@ export default function OnboardingPage() {
         goalDetails: formData.goalDetails,
       });
     } catch {
+      setSubmitError("Something went wrong. Please try again.");
       setIsSubmitting(false);
     }
   };
 
   return (
-    <main className="min-h-screen bg-neutral-900 text-white">
-      <div className="mx-auto flex max-w-lg flex-col px-6 py-12 sm:py-16">
+    <main className="min-h-screen bg-white">
+      <div className="mx-auto flex max-w-lg flex-col px-6 py-16 sm:py-20">
         {/* Header */}
-        <header className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+        <header className="mb-10 text-center">
+          <h1 className="text-[28px] font-semibold tracking-tight text-[#111827]" style={{ letterSpacing: '-0.025em' }}>
             Tell us about yourself
           </h1>
-          <p className="mt-2 text-sm text-white/60">
+          <p className="mt-3 text-[15px] text-[#9ca3af]">
             This helps Skippy give you relevant, practical suggestions.
           </p>
         </header>
 
         {/* Progress */}
-        <div className="mb-8 flex items-center justify-center gap-2">
+        <div className="mb-10 flex items-center justify-center gap-2">
           {Array.from({ length: totalSteps }, (_, i) => (
             <div
               key={i}
-              className={`h-1.5 w-8 rounded-full transition-colors ${
-                i + 1 <= step ? "bg-white/70" : "bg-white/20"
+              className={`h-1 w-10 rounded-full transition-colors ${
+                i + 1 <= step ? "bg-[#111827]" : "bg-[#f3f4f6]"
               }`}
             />
           ))}
-          <span className="ml-3 text-xs text-white/40">
+          <span className="ml-3 text-[12px] text-[#d1d5db]">
             Step {step} of {totalSteps}
           </span>
         </div>
 
         {/* Form */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-8">
           {step === 1 && (
             <Step1
               formData={formData}
@@ -247,13 +250,18 @@ export default function OnboardingPage() {
           )}
         </div>
 
+        {/* Error */}
+        {submitError && (
+          <p className="mt-6 text-center text-[13px] text-[#ef4444]">{submitError}</p>
+        )}
+
         {/* Navigation */}
-        <div className="mt-8 flex items-center justify-between">
+        <div className="mt-10 flex items-center justify-between">
           <button
             type="button"
             onClick={handleBack}
             disabled={step === 1}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-white/60 transition hover:text-white disabled:invisible"
+            className="rounded-lg px-4 py-2 text-[13px] font-medium text-[#9ca3af] transition hover:text-[#4b5563] disabled:invisible"
           >
             Back
           </button>
@@ -261,7 +269,7 @@ export default function OnboardingPage() {
             <button
               type="button"
               onClick={handleNext}
-              className="rounded-lg bg-white/10 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-white/20"
+              className="rounded-lg border border-[#e5e7eb] bg-white px-6 py-2.5 text-[14px] font-medium text-[#111827] transition hover:bg-[#f9fafb]"
             >
               Continue
             </button>
@@ -270,7 +278,7 @@ export default function OnboardingPage() {
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-neutral-900 transition hover:bg-white/90 disabled:opacity-50"
+              className="rounded-lg border border-[#e5e7eb] bg-white px-6 py-2.5 text-[14px] font-medium text-[#111827] transition hover:bg-[#f9fafb] disabled:opacity-50"
             >
               {isSubmitting ? "Saving..." : "Save & Start"}
             </button>
@@ -352,13 +360,14 @@ function Step1({
                 addSubject();
               }
             }}
+            onBlur={addSubject}
             placeholder="Type and press Enter"
             className="flex-1"
           />
           <button
             type="button"
             onClick={addSubject}
-            className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white/70 transition hover:bg-white/20"
+            className="rounded-lg border border-[#e5e7eb] px-4 py-2 text-[13px] font-medium text-[#4b5563] transition hover:bg-[#f9fafb]"
           >
             Add
           </button>
@@ -368,15 +377,15 @@ function Step1({
             {formData.subjects.map((subject) => (
               <span
                 key={subject}
-                className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-sm text-white/80"
+                className="inline-flex items-center gap-1 rounded-full bg-[#f9fafb] px-3 py-1 text-[13px] text-[#4b5563]"
               >
                 {subject}
                 <button
                   type="button"
                   onClick={() => removeSubject(subject)}
-                  className="ml-1 text-white/40 hover:text-white/70"
+                  className="ml-1 text-[#d1d5db] hover:text-[#9ca3af]"
                 >
-                  ×
+                  &times;
                 </button>
               </span>
             ))}
@@ -490,10 +499,10 @@ function FieldGroup({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium text-white/80">{label}</label>
+    <div className="flex flex-col gap-2.5">
+      <label className="text-[14px] font-medium text-[#111827]">{label}</label>
       {children}
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-[12px] text-[#ef4444]">{error}</p>}
     </div>
   );
 }
@@ -511,10 +520,10 @@ function ChipButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-3 py-1.5 text-sm transition ${
+      className={`rounded-full border px-3.5 py-1.5 text-[13px] transition ${
         selected
-          ? "border-white/40 bg-white/15 text-white"
-          : "border-white/15 bg-white/5 text-white/60 hover:border-white/25 hover:text-white/80"
+          ? "border-[#111827] bg-[#111827]/5 text-[#111827]"
+          : "border-[#e5e7eb] text-[#4b5563] hover:border-[#d1d5db] hover:bg-[#f9fafb]"
       }`}
     >
       {children}
@@ -535,18 +544,18 @@ function RadioOption({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm transition ${
+      className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-left text-[14px] transition ${
         selected
-          ? "border-white/30 bg-white/10 text-white"
-          : "border-white/10 bg-white/[0.03] text-white/70 hover:border-white/20"
+          ? "border-[#111827]/20 bg-[#111827]/3 text-[#111827]"
+          : "border-[#f3f4f6] text-[#4b5563] hover:border-[#e5e7eb] hover:bg-[#f9fafb]"
       }`}
     >
       <span
         className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-          selected ? "border-white bg-white" : "border-white/30"
+          selected ? "border-[#111827] bg-[#111827]" : "border-[#d1d5db]"
         }`}
       >
-        {selected && <span className="h-2 w-2 rounded-full bg-neutral-900" />}
+        {selected && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
       </span>
       {children}
     </button>
@@ -560,7 +569,7 @@ function TextInput({
   return (
     <input
       type="text"
-      className={`rounded-lg border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none transition focus:border-white/30 ${className}`}
+      className={`rounded-lg border border-[#e5e7eb] bg-white px-4 py-2.5 text-[14px] text-[#111827] placeholder-[#d1d5db] outline-none transition focus:border-[#d1d5db] ${className}`}
       {...props}
     />
   );
@@ -572,7 +581,7 @@ function TextArea({
 }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
-      className={`rounded-lg border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none transition focus:border-white/30 ${className}`}
+      className={`rounded-lg border border-[#e5e7eb] bg-white px-4 py-2.5 text-[14px] text-[#111827] placeholder-[#d1d5db] outline-none transition focus:border-[#d1d5db] ${className}`}
       {...props}
     />
   );
