@@ -37,8 +37,8 @@ export function DashboardHeader({ profile, progress }: DashboardHeaderProps) {
     "Prompting Fundamentals",
     "Lesson Planning",
     "Feedback & Assessment",
-    "Communication & Admin",
-    "Building Your Practice"
+    "Differentiation with AI",
+    "Integration & Ethics"
   ];
 
   // First visit experience

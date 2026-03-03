@@ -39,8 +39,8 @@ const WEEK_DATA = [
   { title: "Prompting Fundamentals", subtitle: "The 4C framework in action" },
   { title: "Lesson Planning", subtitle: "AI as your brainstorming partner" },
   { title: "Feedback & Assessment", subtitle: "Faster, more useful feedback workflows" },
-  { title: "Communication & Admin", subtitle: "Reclaiming time from admin tasks" },
-  { title: "Building Your Practice", subtitle: "Your sustainable AI toolkit" },
+  { title: "Differentiation with AI", subtitle: "Adapting lessons for every learner" },
+  { title: "Integration & Ethics", subtitle: "Your sustainable AI toolkit & policy" },
 ];
 
 const NEXT_WEEK_PREVIEWS = [
@@ -48,8 +48,8 @@ const NEXT_WEEK_PREVIEWS = [
   "In Week 2, you'll master the 4C framework for writing prompts that actually work.",
   "In Week 3, you'll use AI as a brainstorming partner for lesson design — while keeping pedagogical ownership.",
   "In Week 4, you'll build workflows for faster, rubric-aligned feedback on student work.",
-  "In Week 5, you'll tackle parent communications and admin tasks that eat up your time.",
-  "In Week 6, you'll build your personal prompt library and sustainable AI practice.",
+  "In Week 5, you'll learn to design differentiated materials for diverse learners with AI support.",
+  "In Week 6, you'll develop your personal AI policy and plan for ethical, sustainable integration.",
   "You've completed the course! Your artifacts are ready to use in your classroom.",
 ];
 
@@ -346,33 +346,33 @@ function getKeyConceptsForWeek(weekNumber: number): Array<{ title: string; point
     ],
     5: [
       {
-        title: "Communication Templates",
+        title: "Differentiation Strategies",
         points: [
-          "Parent emails, newsletters, announcements",
-          "Adjust tone for different audiences",
-          "Translate or simplify complex information"
+          "Generate varied materials for different readiness levels",
+          "Adapt content for learning styles, interests, and needs",
+          "Create scaffolded versions of the same activity"
         ]
       },
       {
-        title: "Admin Efficiency",
+        title: "AI-Assisted Adaptation",
         points: [
-          "Meeting agendas and summaries",
-          "Documentation and reports",
-          "Routine communications you personalize"
+          "Use AI to brainstorm modifications quickly",
+          "Build reusable differentiation templates",
+          "Maintain rigor while increasing accessibility"
         ]
       }
     ],
     6: [
       {
-        title: "Your Prompt Library",
+        title: "Your Personal AI Policy",
         points: [
-          "Save and organize prompts that work for you",
-          "Adapt templates across different contexts",
-          "Share effective patterns with colleagues"
+          "Define where AI helps and where it doesn't in your practice",
+          "Set boundaries for ethical use with students",
+          "Create guidelines you can share with colleagues and parents"
         ]
       },
       {
-        title: "Sustainable Practice",
+        title: "Sustainable Integration",
         points: [
           "Start small — one task at a time",
           "Iterate and refine as you learn what works",

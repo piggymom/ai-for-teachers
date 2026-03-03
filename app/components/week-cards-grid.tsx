@@ -43,14 +43,14 @@ const WEEKS: WeekData[] = [
   },
   {
     weekNumber: 5,
-    title: "Communication & Admin",
-    description: "Handle parent communications, newsletters, and administrative tasks that eat up planning time.",
+    title: "Differentiation with AI",
+    description: "Design differentiated materials and adapt lessons for diverse learners using AI support.",
     duration: "30 min"
   },
   {
     weekNumber: 6,
-    title: "Building Your Practice",
-    description: "Create sustainable AI routines and build your personal prompt library for long-term success.",
+    title: "Integration & Ethics",
+    description: "Develop your personal AI policy and plan for ethical, sustainable integration into your practice.",
     duration: "25 min"
   }
 ];

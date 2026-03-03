@@ -4,7 +4,7 @@ import { DashboardLayout } from "../components/layouts/dashboard-layout";
 export default function Week5Page() {
   return (
     <DashboardLayout>
-      <SkippyChat week={5} weekTitle="Communication & Admin" />
+      <SkippyChat week={5} weekTitle="Differentiation with AI" />
     </DashboardLayout>
   );
 }

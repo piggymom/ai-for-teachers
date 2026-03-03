@@ -44,8 +44,8 @@ Week 1: Understanding AI in Teaching - What AI is (and isn't), classroom-safe us
 Week 2: Prompting Fundamentals - The 4C framework (Context, Constraints, Command, Criteria), iterating on prompts
 Week 3: Lesson Planning with AI - Using AI as a brainstorming partner, generating differentiated materials
 Week 4: Feedback & Assessment - Drafting feedback, rubric-aligned comments, practice questions
-Week 5: Communication & Admin - Parent communications, newsletters, administrative tasks
-Week 6: Building Your Practice - Creating sustainable routines, personal prompt library, staying current
+Week 5: Differentiation with AI - Adapting lessons for diverse learners, differentiated materials
+Week 6: Integration & Ethics - Personal AI policy, ethical integration, sustainable practice
 `;
 
 /**
@@ -187,8 +187,8 @@ function generateStandardWeekPrompt(
     1: "Week 2 is all about prompting fundamentals—the 4C framework: Context, Constraints, Command, Criteria. They're going to learn how to get exactly what they need from AI, every time.",
     2: "Week 3 is where it gets really practical—lesson planning with AI. They'll use AI as a brainstorming partner while staying in the driver's seat.",
     3: "Week 4 tackles feedback and assessment—generating feedback drafts, rubric-aligned comments. This is where AI starts saving serious time.",
-    4: "Week 5 is communication and admin—parent emails, newsletters, all that stuff that eats up planning time. This is going to be huge for them.",
-    5: "Week 6 is about building sustainable habits—creating their personal prompt library, figuring out where AI actually helps vs. where it's overhead.",
+    4: "Week 5 is differentiation with AI—designing materials for diverse learners, adapting lessons so every student gets what they need. This is going to be huge for them.",
+    5: "Week 6 is about integration and ethics—developing their personal AI policy and figuring out sustainable, ethical ways to keep AI in their practice.",
     6: "They've completed the course! Now it's about putting it all into practice and building those sustainable routines.",
   };
 
