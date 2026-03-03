@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test:skippy": "npx tsx scripts/test-skippy.ts",
-    "test:skippy:verbose": "npx tsx scripts/test-skippy.ts --verbose"
+    "test:skippy:verbose": "npx tsx scripts/test-skippy.ts --verbose",
+    "sim:agents": "npx tsx scripts/learner-agents.ts",
+    "sim:quick": "npx tsx scripts/learner-agents.ts --persona=maria --week=2"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",

@@ -958,24 +958,52 @@ Analyze this exchange and output a JSON object. Be SPECIFIC in your guidance —
 
 ## Assessment Guidelines
 
+**CRITICAL: Diagnose AI SKILL, not general intelligence.**
+
+Diagnose based on DEMONSTRATED AI PROMPTING SKILL, not general intelligence, communication ability, or teaching experience. A veteran teacher with no AI experience is pre-structural or unistructural, regardless of how articulate they sound.
+
+Examples:
+- "Being specific matters" (from teaching analogy) → unistructural (general insight, not AI skill)
+- "Being specific matters BECAUSE AI predicts based on context window" → multistructural (understands AI mechanism)
+- "For brainstorming I'd loosen constraints, for feedback I'd tighten criteria" (about AI prompting, with reasoning) → relational (adapts AI approach to task type)
+- "I imagine it's like giving clear directions" (analogy, no AI experience) → pre-structural or unistructural
+- "I tried adding examples to my prompt and the output improved" (actual AI usage) → at least unistructural
+
+The KEY question: Is the teacher demonstrating understanding of HOW AI WORKS and how to MANIPULATE IT through prompting, or are they applying general intelligence to guess? Sophisticated guessing based on teaching experience ≠ AI prompting skill.
+
 **For diagnosticLevel — look for these signals:**
 
-- **pre-structural**: Confused, no framework. "I just type stuff and hope." No mental model of how AI works.
-- **unistructural**: Gets ONE thing. "You need to be specific." But applies it mechanically without nuance.
-- **multistructural**: Knows multiple components. "Context, constraints, examples..." Lists them but doesn't explain WHY each matters.
-- **relational**: Sees connections, adapts, and EXPLAINS WHY. "It depends on..." Catches mistakes. Makes meta-observations.
-- **extended-abstract**: Could teach this. Generates novel applications. Questions the framework itself.
+- **pre-structural**: No AI experience. Guesses by analogy. "I imagine you need to be clear?" No demonstrated interaction with AI tools.
+- **unistructural**: Has tried AI OR grasps ONE concrete principle from this session. "You need to be specific." But applies it mechanically without nuance.
+- **multistructural**: Can name and apply multiple AI prompting components (context, constraints, examples). Lists them but doesn't explain WHY each matters or WHEN to emphasize different ones.
+- **relational**: Explains WHY components matter for AI specifically (not just "good communication"). Adapts approach based on task type. Makes connections between prompting choices and output quality FROM EXPERIENCE or demonstrated understanding of AI.
+- **extended-abstract**: Applies principles to new contexts without scaffolding. Designs own success criteria or testing protocols. Identifies limitations and proposes modifications. Could walk a colleague through the approach.
 
-**RELATIONAL indicators — upgrade from multistructural when you see ANY of these:**
-- User asks "why does X matter?" or "why is X important?" (not just accepting the framework)
-- User catches Skippy's mistakes or inconsistencies
-- User makes meta-observations about the framework ("criteria is like tone", "constraints and commands overlap")
-- User refines or challenges distinctions between components
-- User explains connections between components unprompted
-- User articulates trade-offs ("for brainstorming I'd loosen constraints, for feedback I'd tighten criteria")
-- User adapts the framework to their own context with reasoning
+**RELATIONAL indicators — upgrade from multistructural ONLY when you see these about AI SPECIFICALLY:**
+- User explains WHY a prompting component matters for AI output (not just "clarity is good")
+- User catches Skippy's AI-specific mistakes or inconsistencies
+- User makes meta-observations about AI prompting ("criteria is like tone" — in the context of how AI interprets prompts)
+- User adapts the prompting framework to different AI task types with reasoning about HOW AI RESPONDS differently
+- User articulates AI-specific trade-offs ("for brainstorming I'd loosen constraints, for feedback I'd tighten criteria") based on understanding of AI behavior
 
-If the teacher is doing ANY of the above, they are RELATIONAL, not multistructural. Multistructural = lists components. Relational = explains WHY they matter and HOW they connect.
+DO NOT upgrade to relational just because the teacher:
+- Is articulate or gives sophisticated answers (that's teaching skill, not AI skill)
+- Asks probing questions about the framework (could be general curiosity)
+- Pushes back or is skeptical (that's personality, not AI knowledge)
+- Makes analogies to teaching ("it's like giving clear directions to students")
+- Expresses opinions about AI based on what they've heard (not experienced)
+
+Multistructural = lists AI prompting components. Relational = explains WHY they matter FOR AI and HOW they interact, based on demonstrated AI understanding.
+
+**EXTENDED-ABSTRACT — MUST upgrade from relational when you see 2+ of:**
+- User applies a framework to a NEW context without prompting
+- User articulates WHY a principle works, not just THAT it works
+- User designs their own success criteria or testing protocol
+- User identifies limitations of the current approach and proposes modifications
+- User explains how they would teach this to someone else
+
+If relational indicators AND 2+ extended-abstract indicators are present,
+diagnose EXTENDED-ABSTRACT. Do not cap at relational.
 
 **For engagement energy:**
 - **high**: Asks "why" questions, catches AI mistakes, tests externally and reports results, articulates understanding in own words, makes meta-observations, challenges distinctions

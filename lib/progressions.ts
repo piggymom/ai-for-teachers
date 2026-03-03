@@ -152,7 +152,7 @@ export const progressions: WeekProgression[] = [
       {
         level: "extended-abstract",
         description:
-          "Designs planning workflows; helps colleagues integrate AI; reasons about what stays human in lesson design",
+          "Applies iteration principles to new planning contexts without scaffolding. Tests prompts across different lesson types to validate the approach. Articulates when chunking helps vs. when a single prompt works better. Could walk a colleague through the iteration process.",
       },
     ],
   },
@@ -185,7 +185,7 @@ export const progressions: WeekProgression[] = [
       {
         level: "extended-abstract",
         description:
-          "Designs feedback systems; reasons about the human/AI handoff; considers ethics of AI feedback to students",
+          "Applies calibration principles to new assessment contexts independently. Designs own quality anchors without examples. Identifies when AI feedback needs human override vs. when it's trustworthy. Explains the calibration logic to colleagues in own words.",
       },
     ],
   },
@@ -218,7 +218,7 @@ export const progressions: WeekProgression[] = [
       {
         level: "extended-abstract",
         description:
-          "Designs differentiation systems using UDL principles; helps colleagues build sustainable variation workflows",
+          "Applies invariant/variant framework to new content areas without prompting. Tests whether tier definitions hold across different topics. Identifies when differentiation templates break and redesigns them. Explains the access vs. rigor distinction using own examples.",
       },
     ],
   },
@@ -251,7 +251,7 @@ export const progressions: WeekProgression[] = [
       {
         level: "extended-abstract",
         description:
-          "Reasons about systemic implications; considers student AI literacy; ready to help colleagues develop their own frameworks",
+          "Synthesizes all course skills into a coherent personal practice. Tests principles against edge cases independently. Articulates own AI philosophy grounded in specific teaching decisions. Could explain their framework to a skeptical colleague and defend it.",
       },
     ],
   },
