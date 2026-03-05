@@ -1,48 +1,49 @@
 import { prisma } from "./prisma";
-import { getUserProfile, buildProfileContext } from "./profile";
+import { getUserProfile, buildProfileContext, resolveProfile, painPointToLabel } from "./profile";
 import { getModulePrompt, type ModulePrompt } from "./modules";
 
 /**
  * Interpolate profile fields into a template string with graceful fallbacks.
- * Used for opening messages and any text with {{variable}} placeholders.
+ * Works with both new (v2) and legacy (v1) profiles.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function interpolateProfile(template: string, profile: Record<string, any> | null, userName?: string): string {
   const name = userName || profile?.name || "there";
-  const role = profile?.roleOther || profile?.role || "teacher";
-  const gradeLevels = profile?.gradeLevels?.length
-    ? profile.gradeLevels.join(", ")
-    : "your students";
-  const subjects = profile?.subjects?.length
-    ? profile.subjects.join(", ")
-    : "your subject area";
 
-  const goalMap: Record<string, string> = {
-    save_time: "saving time on repetitive tasks",
-    better_materials: "creating better differentiated materials",
-    faster_feedback: "giving faster, more useful feedback",
-    handle_admin: "handling admin and communication more efficiently",
-    build_confidence: "building confidence using AI tools",
-  };
-  const primaryGoal = profile?.primaryGoal
-    ? goalMap[profile.primaryGoal] || profile.primaryGoal
-    : "making AI work for your teaching";
-  const concerns = profile?.constraints || "using AI responsibly";
-  const timeDrains = profile?.biggestTimeDrains?.length
-    ? profile.biggestTimeDrains.join(", ")
-    : "tasks that take too long";
-  const goalDetails = profile?.goalDetails || "their specific goals";
+  if (!profile) {
+    return template
+      .replace(/\{\{name\}\}/g, name)
+      .replace(/\{\{teacher_name\}\}/g, name)
+      .replace(/\{\{role\}\}/g, "teacher")
+      .replace(/\{\{grade_levels\}\}/g, "your students")
+      .replace(/\{\{subjects\}\}/g, "your subject area")
+      .replace(/\{\{teaches_what\}\}/g, "your classes")
+      .replace(/\{\{pain_point\}\}/g, "lesson_planning")
+      .replace(/\{\{pain_point_text\}\}/g, "the tasks eating up your time")
+      .replace(/\{\{ai_experience\}\}/g, "new")
+      .replace(/\{\{primary_goal\}\}/g, "making AI work for your teaching")
+      .replace(/\{\{concerns\}\}/g, "using AI responsibly")
+      .replace(/\{\{time_drains\}\}/g, "tasks that take too long")
+      .replace(/\{\{goal_details\}\}/g, "their specific goals");
+  }
+
+  const r = resolveProfile(profile);
 
   return template
     .replace(/\{\{name\}\}/g, name)
     .replace(/\{\{teacher_name\}\}/g, name)
-    .replace(/\{\{role\}\}/g, role)
-    .replace(/\{\{grade_levels\}\}/g, gradeLevels)
-    .replace(/\{\{subjects\}\}/g, subjects)
-    .replace(/\{\{primary_goal\}\}/g, primaryGoal)
-    .replace(/\{\{concerns\}\}/g, concerns)
-    .replace(/\{\{time_drains\}\}/g, timeDrains)
-    .replace(/\{\{goal_details\}\}/g, goalDetails);
+    .replace(/\{\{teaches_what\}\}/g, r.teachesWhat)
+    .replace(/\{\{grade_levels\}\}/g, r.grades.length ? r.grades.join(", ") : "your students")
+    .replace(/\{\{subjects\}\}/g, r.subjects.length ? r.subjects.join(", ") : "your subject area")
+    .replace(/\{\{pain_point\}\}/g, r.painPoint)
+    .replace(/\{\{pain_point_text\}\}/g, r.painPointLabel.toLowerCase())
+    .replace(/\{\{ai_experience\}\}/g, r.aiExperience)
+    // Legacy variables (still work for old prompts)
+    .replace(/\{\{role\}\}/g, profile.roleOther || profile.role || "teacher")
+    .replace(/\{\{primary_goal\}\}/g, profile.primaryGoal || "making AI work for your teaching")
+    .replace(/\{\{concerns\}\}/g, profile.constraints || "using AI responsibly")
+    .replace(/\{\{time_drains\}\}/g, profile.biggestTimeDrains?.join(", ") || r.painPointLabel)
+    .replace(/\{\{goal_details\}\}/g, profile.goalDetails || "their specific goals");
 }
 
 /**

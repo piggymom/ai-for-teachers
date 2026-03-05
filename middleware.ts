@@ -59,7 +59,7 @@ const RATE_LIMITS: Record<string, { limit: number; windowSec: number }> = {
 // =============================================================================
 
 // Routes that don't need authentication
-const PUBLIC_API_ROUTES = ["/api/auth", "/api/stats"];
+const PUBLIC_API_ROUTES = ["/api/auth", "/api/stats", "/api/health"];
 const PUBLIC_PAGE_ROUTES = ["/", "/auth", "/legal"];
 
 export async function middleware(req: NextRequest) {

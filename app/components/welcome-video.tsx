@@ -1,34 +1,43 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
-type VideoState = "checking" | "generating" | "processing" | "ready" | "playing" | "paused" | "hidden";
+type VideoState = "checking" | "generating" | "processing" | "ready" | "playing" | "paused" | "ended" | "hidden";
 
 export function WelcomeVideo() {
   const [state, setState] = useState<VideoState>("checking");
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoId, setVideoId] = useState<string | null>(null);
+  const [pollCount, setPollCount] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const router = useRouter();
 
-  // Check for existing video on mount
+  const MAX_POLLS = 24; // 2 minutes at 5s intervals
+
   useEffect(() => {
     checkForVideo();
     return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-      }
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
     };
   }, []);
 
-  // Poll for video completion
   useEffect(() => {
     if ((state === "processing" || state === "generating") && videoId) {
-      pollIntervalRef.current = setInterval(checkVideoStatus, 5000);
+      pollIntervalRef.current = setInterval(() => {
+        setPollCount((c) => {
+          if (c >= MAX_POLLS) {
+            if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+            setState("hidden");
+            return c;
+          }
+          checkVideoStatus();
+          return c + 1;
+        });
+      }, 5000);
       return () => {
-        if (pollIntervalRef.current) {
-          clearInterval(pollIntervalRef.current);
-        }
+        if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
       };
     }
   }, [state, videoId]);
@@ -36,13 +45,8 @@ export function WelcomeVideo() {
   async function checkForVideo() {
     try {
       const res = await fetch("/api/welcome-video");
-      if (!res.ok) {
-        setState("hidden");
-        return;
-      }
-
+      if (!res.ok) { setState("hidden"); return; }
       const data = await res.json();
-
       if (data.videoUrl) {
         setVideoUrl(data.videoUrl);
         setState("ready");
@@ -61,14 +65,13 @@ export function WelcomeVideo() {
     try {
       const res = await fetch("/api/welcome-video", { method: "POST" });
       const data = await res.json();
-
       if (data.videoUrl) {
         setVideoUrl(data.videoUrl);
         setState("ready");
       } else if (data.videoId) {
         setVideoId(data.videoId);
         setState("processing");
-      } else if (data.error) {
+      } else {
         setState("hidden");
       }
     } catch {
@@ -78,22 +81,16 @@ export function WelcomeVideo() {
 
   async function checkVideoStatus() {
     if (!videoId) return;
-
     try {
       const res = await fetch(`/api/welcome-video?videoId=${videoId}`);
       const data = await res.json();
-
       if (data.status === "completed" && data.videoUrl) {
         setVideoUrl(data.videoUrl);
         setState("ready");
-        if (pollIntervalRef.current) {
-          clearInterval(pollIntervalRef.current);
-        }
+        if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
       } else if (data.status === "failed") {
         setState("hidden");
-        if (pollIntervalRef.current) {
-          clearInterval(pollIntervalRef.current);
-        }
+        if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
       }
     } catch {
       // Keep polling on transient errors
@@ -112,13 +109,10 @@ export function WelcomeVideo() {
   }
 
   function handleEnded() {
-    setState("ready");
+    setState("ended");
   }
 
-  // Don't render anything if hidden
-  if (state === "hidden") {
-    return null;
-  }
+  if (state === "hidden") return null;
 
   // Loading/generating
   if (state === "checking" || state === "generating" || state === "processing") {
@@ -137,11 +131,10 @@ export function WelcomeVideo() {
     );
   }
 
-  // Video ready
-  if ((state === "ready" || state === "playing" || state === "paused") && videoUrl) {
+  // Video ready / playing / paused / ended
+  if (videoUrl) {
     return (
-      <div className="overflow-hidden rounded-xl border border-[#f3f4f6]">
-        {/* Video area */}
+      <div className="mb-8 overflow-hidden rounded-xl border border-[#f3f4f6]">
         <div className="relative aspect-video bg-[#111827]">
           <video
             ref={videoRef}
@@ -154,7 +147,7 @@ export function WelcomeVideo() {
           />
 
           {/* Play button overlay */}
-          {state === "ready" && (
+          {(state === "ready" || state === "ended") && (
             <button
               onClick={handlePlay}
               className="absolute inset-0 flex items-center justify-center bg-black/20 transition hover:bg-black/10"
@@ -168,10 +161,21 @@ export function WelcomeVideo() {
           )}
         </div>
 
-        {/* Caption */}
-        <div className="px-4 py-3">
-          <p className="text-[14px] font-medium text-[#111827]">Your personalized welcome</p>
-          <p className="text-[13px] text-[#9ca3af]">A message from Asher, your course creator</p>
+        {/* Caption + CTA */}
+        <div className="flex items-center justify-between px-4 py-3">
+          <div>
+            <p className="text-[14px] font-medium text-[#111827]">Your personalized welcome</p>
+            <p className="text-[13px] text-[#9ca3af]">A message from Asher, your course creator</p>
+          </div>
+
+          {state === "ended" && (
+            <button
+              onClick={() => router.push("/week-0")}
+              className="rounded-lg bg-[#111827] px-5 py-2 text-[13px] font-medium text-white transition hover:bg-[#374151]"
+            >
+              Continue to Week 0 &rarr;
+            </button>
+          )}
         </div>
       </div>
     );

@@ -101,20 +101,25 @@ model UserProfile {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  // Step 1: Who You Are
-  role               String
+  // New simplified onboarding (v2)
+  teachesWhat        String?  // Free text: "7th grade Math", "High school Chemistry"
+  painPoint          String?  // "lesson_planning" | "feedback" | "differentiation" | "admin"
+
+  // Shared field (both v1 and v2)
+  aiExperienceLevel  String   // "new" | "some" | "advanced"
+
+  // Legacy v1 fields (kept for backward compatibility)
+  role               String   @default("")
   roleOther          String?
   gradeLevels        String[] // ["PreK", "K", "1-2", etc.]
   subjects           String[] // User-entered tags
-
-  // Step 2: Your Situation
-  aiExperienceLevel  String   // "new" | "some" | "advanced"
   constraints        String?
-
-  // Step 3: What You Want
   biggestTimeDrains  String[] // ["Lesson planning", "Differentiation", etc.]
-  primaryGoal        String   // save_time | better_materials | faster_feedback | handle_admin | build_confidence
-  goalDetails        String   // Renamed from 'goals' - Skippy-depth free-text
+  primaryGoal        String   @default("")
+  goalDetails        String   @default("")
+
+  // HeyGen welcome video
+  welcomeVideoUrl    String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

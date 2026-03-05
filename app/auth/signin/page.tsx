@@ -1,15 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function SignInPage() {
   const [agreed, setAgreed] = useState(false);
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // If already authenticated, redirect immediately
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace(searchParams.get("callbackUrl") || "/home");
+    }
+  }, [status, router, searchParams]);
+
+  if (status === "authenticated") {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-white">
+        <div className="text-[15px] text-[#9ca3af]">Redirecting…</div>
+      </main>
+    );
+  }
+
+  const error = searchParams.get("error");
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-white">
       <div className="mx-auto flex max-w-md flex-col gap-10 px-6 py-14 text-center">
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700">
+            Sign-in failed — please try again. If this keeps happening, the database may be
+            temporarily unavailable.
+          </div>
+        )}
+
         <div className="space-y-3">
           <h1 className="text-[28px] font-semibold tracking-tight text-[#111827]">
             Sign in to AI for Teachers
@@ -42,7 +70,7 @@ export default function SignInPage() {
         <button
           onClick={() => {
             if (agreed) {
-              signIn("google", { callbackUrl: "/home" });
+              signIn("google", { callbackUrl: searchParams.get("callbackUrl") || "/home" });
             }
           }}
           disabled={!agreed}

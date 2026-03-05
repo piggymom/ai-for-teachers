@@ -6,6 +6,7 @@ import { DashboardLayout } from "@/app/components/layouts/dashboard-layout";
 import { DashboardHeader } from "@/app/components/dashboard-header";
 import { WeekCardsGrid } from "@/app/components/week-cards-grid";
 import { ArtifactGallery } from "@/app/components/artifact-gallery";
+import { WelcomeVideo } from "@/app/components/welcome-video";
 import { AuthButton } from "../components/auth-button";
 
 interface UserProfile {
@@ -100,6 +101,9 @@ export default function Home() {
 
       <div className="p-8 lg:p-12">
         <div className="max-w-3xl mx-auto space-y-10">
+          {/* Welcome Video (shows once, hides after first visit) */}
+          {progress?.isFirstVisit && <WelcomeVideo />}
+
           {/* Personalized Header */}
           <DashboardHeader profile={profile} progress={progress} />
 
