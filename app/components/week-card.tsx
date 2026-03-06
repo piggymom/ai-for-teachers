@@ -25,17 +25,47 @@ export function WeekCard({
   const router = useRouter();
   const [podcastState, setPodcastState] = useState<"idle" | "loading" | "playing" | "paused" | "error">("idle");
   const [podcastReady, setPodcastReady] = useState(false);
+  const [podcastCached, setPodcastCached] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Check if podcast exists for completed weeks
+  // Check if podcast exists for completed weeks, poll if generating
   useEffect(() => {
     if (status !== "completed") return;
-    fetch(`/api/podcast?week=${weekNumber}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.hasConversation) setPodcastReady(true);
-      })
-      .catch(() => {});
+
+    let cancelled = false;
+
+    function checkPodcast() {
+      fetch(`/api/podcast?week=${weekNumber}`)
+        .then(res => res.json())
+        .then(data => {
+          if (cancelled) return;
+          if (data.hasConversation) setPodcastReady(true);
+          if (data.isCached) {
+            setPodcastCached(true);
+            // Stop polling once cached
+            if (pollRef.current) {
+              clearInterval(pollRef.current);
+              pollRef.current = null;
+            }
+          } else if (data.hasConversation && !pollRef.current) {
+            // Podcast not cached yet but conversation exists — poll every 5s
+            // (it's probably being auto-generated right now)
+            pollRef.current = setInterval(checkPodcast, 5000);
+          }
+        })
+        .catch(() => {});
+    }
+
+    checkPodcast();
+
+    return () => {
+      cancelled = true;
+      if (pollRef.current) {
+        clearInterval(pollRef.current);
+        pollRef.current = null;
+      }
+    };
   }, [status, weekNumber]);
 
   const handleClick = (e: React.MouseEvent) => {
@@ -167,47 +197,54 @@ export function WeekCard({
 
           {/* Inline podcast player for completed weeks */}
           {status === "completed" && podcastReady && (
-            <button
-              type="button"
-              onClick={handlePodcast}
-              className={`mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium transition-colors ${
-                podcastState === "playing"
-                  ? "bg-[#111827] text-white"
-                  : podcastState === "loading"
-                  ? "bg-[#f3f4f6] text-[#9ca3af] cursor-wait"
-                  : podcastState === "error"
-                  ? "bg-red-50 text-red-600 hover:bg-red-100"
-                  : "bg-[#f3f4f6] text-[#4b5563] hover:bg-[#e5e7eb]"
-              }`}
-            >
-              {podcastState === "loading" ? (
-                <>
-                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#d1d5db] border-t-[#9ca3af]" />
-                  Generating recap...
-                </>
-              ) : podcastState === "playing" ? (
-                <>
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
-                  Pause
-                </>
-              ) : podcastState === "paused" ? (
-                <>
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  Resume
-                </>
-              ) : podcastState === "error" ? (
-                <>
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                  Failed — tap to retry
-                </>
-              ) : (
-                <>
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  Listen to Takeaways
-                  <span className="text-[#9ca3af]">~90 sec</span>
-                </>
-              )}
-            </button>
+            podcastCached || podcastState !== "idle" ? (
+              <button
+                type="button"
+                onClick={handlePodcast}
+                className={`mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium transition-colors ${
+                  podcastState === "playing"
+                    ? "bg-[#111827] text-white"
+                    : podcastState === "loading"
+                    ? "bg-[#f3f4f6] text-[#9ca3af] cursor-wait"
+                    : podcastState === "error"
+                    ? "bg-red-50 text-red-600 hover:bg-red-100"
+                    : "bg-[#f3f4f6] text-[#4b5563] hover:bg-[#e5e7eb]"
+                }`}
+              >
+                {podcastState === "loading" ? (
+                  <>
+                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#d1d5db] border-t-[#9ca3af]" />
+                    Loading...
+                  </>
+                ) : podcastState === "playing" ? (
+                  <>
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+                    Pause
+                  </>
+                ) : podcastState === "paused" ? (
+                  <>
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    Resume
+                  </>
+                ) : podcastState === "error" ? (
+                  <>
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                    Failed — tap to retry
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    Listen to Takeaways
+                    <span className="text-[#9ca3af]">~90 sec</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <div className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium bg-[#f3f4f6] text-[#9ca3af]">
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#d1d5db] border-t-[#9ca3af]" />
+                Generating recap...
+              </div>
+            )
           )}
         </div>
 

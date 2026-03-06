@@ -13,6 +13,7 @@ import {
 } from "@/lib/ledger";
 import { getDiagnosticProbe } from "@/lib/progressions";
 import { extractArtifact } from "@/lib/artifacts";
+import { generatePodcast } from "@/lib/podcast";
 import { prisma } from "@/lib/prisma";
 
 // Validate API key at startup
@@ -118,7 +119,7 @@ export async function POST(req: NextRequest) {
         return handleUserMessage(userId, week, message, timing);
 
       case "end_week":
-        return handleEndWeek(userId, week, req.headers.get("cookie") || "");
+        return handleEndWeek(userId, week);
 
       case "save_message":
         // Used by Realtime API client to persist messages after conversation
@@ -376,7 +377,7 @@ async function handleUserMessage(
   }
 }
 
-async function handleEndWeek(userId: string, week: number, cookieHeader: string) {
+async function handleEndWeek(userId: string, week: number) {
   try {
     // Get ledger to check for unsaved artifact
     const ledger = await getOrCreateLedger(userId, week);
@@ -407,17 +408,10 @@ async function handleEndWeek(userId: string, week: number, cookieHeader: string)
     // Mark week as completed
     await markWeekCompleted(userId, week);
 
-    // Pre-generate podcast in the background (fire and forget)
-    // This way it's ready when the user sees "Listen to Takeaways" on the dashboard
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    fetch(`${baseUrl}/api/podcast`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        cookie: cookieHeader,
-      },
-      body: JSON.stringify({ week }),
-    }).catch((err) => console.error("[SKIPPY] Podcast pre-generation failed:", err));
+    // Auto-generate podcast in the background (fire and forget — no HTTP needed)
+    generatePodcast(userId, week).catch((err) =>
+      console.error("[SKIPPY] Podcast auto-generation failed:", err)
+    );
 
     return NextResponse.json({
       event: "end_week",
