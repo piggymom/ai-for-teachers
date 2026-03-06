@@ -1,144 +1,106 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 
-export function useSpeechToText() {
+interface UseSpeechToTextReturn {
+  isListening: boolean;
+  transcript: string;
+  startListening: () => void;
+  stopListening: () => void;
+  clearTranscript: () => void;
+  isSupported: boolean;
+  error: string | null;
+}
+
+export function useSpeechToText(): UseSpeechToTextReturn {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
-  const [isSupported, setIsSupported] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recognitionRef = useRef<any>(null);
-  const fatalRef = useRef(false);
+  const recognitionRef = useRef<ReturnType<typeof createRecognition> | null>(null);
+  const wantListeningRef = useRef(false);
 
-  // Check support after mount (SSR-safe)
-  useEffect(() => {
+  const isSupported =
+    typeof window !== "undefined" &&
+    ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+
+  function createRecognition() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = window as any;
-    const supported = !!(w.SpeechRecognition || w.webkitSpeechRecognition);
-    console.log("[MIC] Browser support check:", supported);
-    setIsSupported(supported);
-  }, []);
+    const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const r: any = new Ctor();
+
+    r.continuous = true;
+    r.interimResults = false; // Only final, committed results — no flicker
+    r.lang = "en-US";
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    r.onresult = (event: any) => {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          const text = event.results[i][0].transcript;
+          setTranscript((prev) => (prev ? prev + " " + text : text));
+        }
+      }
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    r.onerror = (event: any) => {
+      // Ignore benign errors — keep listening
+      if (event.error === "aborted" || event.error === "no-speech") return;
+      if (event.error === "not-allowed") {
+        setError("Microphone access denied");
+        wantListeningRef.current = false;
+        setIsListening(false);
+      }
+    };
+
+    r.onend = () => {
+      // Browser killed recognition (timeout, pause, etc.) — auto-restart if user still wants mic on
+      if (wantListeningRef.current) {
+        try {
+          r.start();
+          return; // Stay listening from user's perspective
+        } catch {
+          // Failed to restart — actually stop
+        }
+      }
+      setIsListening(false);
+    };
+
+    return r;
+  }
 
   const startListening = useCallback(() => {
-    // Check support at call time, not via stale closure
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const w = window as any;
-    const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
-    if (!SR) {
-      console.log("[MIC] SpeechRecognition not available");
-      return;
-    }
+    if (!isSupported || wantListeningRef.current) return;
 
-    console.log("[MIC] startListening called");
-
-    // Clean up any existing instance
+    // Create a fresh instance each time to avoid stale state
     if (recognitionRef.current) {
-      const old = recognitionRef.current;
-      recognitionRef.current = null;
-      old.onend = null;
-      old.onerror = null;
-      old.onresult = null;
-      try { old.abort(); } catch { /* ignore */ }
+      try { recognitionRef.current.abort(); } catch { /* ignore */ }
     }
 
-    fatalRef.current = false;
-    const recognition = new SR();
-
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = "en-US";
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recognition.onresult = (event: any) => {
-      let finalText = "";
-      let interimText = "";
-      for (let i = 0; i < event.results.length; i++) {
-        const result = event.results[i];
-        if (result.isFinal) {
-          finalText += result[0].transcript + " ";
-        } else {
-          interimText += result[0].transcript;
-        }
-      }
-      // Build full transcript from all final results
-      const full = finalText.trim();
-      if (full) {
-        setTranscript(full);
-      } else if (interimText) {
-        // Show interim results so user knows mic is working
-        setTranscript(interimText);
-      }
-    };
-
-    recognition.onend = () => {
-      console.log("[MIC] onend fired, fatal:", fatalRef.current, "ref match:", recognitionRef.current === recognition);
-      if (fatalRef.current) return;
-      if (recognitionRef.current === recognition) {
-        try {
-          recognition.start();
-          console.log("[MIC] Auto-restarted after browser timeout");
-        } catch (e) {
-          console.log("[MIC] Auto-restart failed:", e);
-          recognitionRef.current = null;
-          setIsListening(false);
-        }
-      }
-    };
-
-    recognition.onaudiostart = () => {
-      console.log("[MIC] Audio stream started (mic is active)");
-    };
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recognition.onerror = (event: any) => {
-      console.log("[MIC] onerror:", event.error, "message:", event.message);
-
-      if (event.error === "not-allowed") {
-        fatalRef.current = true;
-        recognitionRef.current = null;
-        setIsListening(false);
-        setError("Microphone access denied");
-        return;
-      }
-
-      if (event.error === "service-not-allowed") {
-        fatalRef.current = true;
-        recognitionRef.current = null;
-        setIsListening(false);
-        setError("Speech service not available — try Chrome");
-        return;
-      }
-
-      // no-speech and aborted are benign
-      if (event.error !== "no-speech" && event.error !== "aborted") {
-        console.error("[MIC] Unexpected error:", event.error);
-      }
-    };
+    const r = createRecognition();
+    recognitionRef.current = r;
 
     setTranscript("");
     setError(null);
+    wantListeningRef.current = true;
+    setIsListening(true);
 
     try {
-      recognition.start();
-      recognitionRef.current = recognition;
-      setIsListening(true);
-      console.log("[MIC] recognition.start() succeeded");
-    } catch (e) {
-      console.error("[MIC] recognition.start() threw:", e);
-      setError("Failed to start microphone — " + (e instanceof Error ? e.message : String(e)));
+      r.start();
+    } catch {
+      wantListeningRef.current = false;
       setIsListening(false);
     }
-  }, []);
+  }, [isSupported]);
 
   const stopListening = useCallback(() => {
-    console.log("[MIC] stopListening called");
-    const recognition = recognitionRef.current;
-    recognitionRef.current = null;
-    fatalRef.current = true; // Prevent any restart
+    wantListeningRef.current = false;
     setIsListening(false);
-    if (recognition) {
-      try { recognition.stop(); } catch { /* ignore */ }
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch { /* ignore */ }
+      recognitionRef.current = null;
     }
   }, []);
 
