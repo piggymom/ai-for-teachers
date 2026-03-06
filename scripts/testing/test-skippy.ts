@@ -2,11 +2,11 @@ import { config } from "dotenv";
 config({ path: ".env.local" });
 
 import Anthropic from "@anthropic-ai/sdk";
-import { SKIPPY_SYSTEM_PROMPT } from "../lib/skippy";
-import { WEEK_2_SYSTEM_PROMPT, WEEK_2_OPENING_MESSAGE } from "../lib/prompts/week-2";
-import { formatLedgerForPrompt, type ConversationLedger, type ConversationPhase, type EngagementEnergy, type ArtifactType } from "../lib/ledger";
-import { buildProfileContext, type LegacyProfileData } from "../lib/profile";
-import { getModulePrompt } from "../lib/modules";
+import { SKIPPY_SYSTEM_PROMPT } from "../../lib/skippy";
+import { WEEK_2_SYSTEM_PROMPT, WEEK_2_OPENING_MESSAGE } from "../../lib/prompts/week-2";
+import { formatLedgerForPrompt, type ConversationLedger, type ConversationPhase, type EngagementEnergy, type ArtifactType } from "../../lib/ledger";
+import { buildProfileContext, type LegacyProfileData } from "../../lib/profile";
+import { getModulePrompt } from "../../lib/modules";
 
 const anthropic = new Anthropic();
 

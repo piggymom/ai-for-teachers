@@ -4,7 +4,7 @@
  * Run with: npx tsx scripts/qa-validate.ts
  */
 
-import { modulePrompts, weekConfigs, weekArtifactMeta, getWeekConfig, getModulePrompt, getWeekTitle } from "../lib/modules";
+import { modulePrompts, weekConfigs, weekArtifactMeta, getWeekConfig, getModulePrompt, getWeekTitle } from "../../lib/modules";
 
 // ============================================================
 // Test Utilities

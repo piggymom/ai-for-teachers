@@ -29,9 +29,18 @@ You have permission to:
 ## Current Project Context
 
 This is AI for Teachers (Skippy). Key directories:
-- `app/` — Next.js pages and routes
-- `lib/` — Core logic (prompts, ledger, profile)
-- `scripts/` — Simulation and testing scripts
-- `components/` — React components
+- `app/` — Next.js App Router (pages, API routes, components)
+- `lib/` — Server-side logic (prompts, ledger, profile, auth, prisma)
+- `hooks/` — All React hooks (client-side)
+- `scripts/data/` — Data management scripts (clear, migrate, fetch)
+- `scripts/testing/` — QA validation and simulation scripts
+- `scripts/debug/` — Debug loop tooling
+- `scripts/presentation/` — Pitch deck builders
+- `docs/` — Documentation organized by topic (architecture, product, design, ux, content, week-specs, grants, legal, pitch)
+- `prisma/` — Database schema and migrations
+- `reports/` — Simulation and QA reports (timestamped)
+- `types/` — TypeScript type declarations
+
+See `AGENTS.md` for the full canonical directory structure and organizer agent instructions.
 
 When in doubt, check existing patterns in the codebase before inventing new ones.

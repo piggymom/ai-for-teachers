@@ -5,12 +5,12 @@
  */
 import { config } from "dotenv";
 import { resolve } from "path";
-config({ path: resolve(__dirname, "..", ".env.local") });
+config({ path: resolve(__dirname, "../..", ".env.local") });
 
 async function main() {
   const { PrismaClient } = require("@prisma/client");
   const prisma = new PrismaClient();
-  const { generatePodcast } = await import("../lib/podcast");
+  const { generatePodcast } = await import("../../lib/podcast");
 
   const user = await prisma.user.findFirst({ select: { id: true, name: true } });
   if (!user) {

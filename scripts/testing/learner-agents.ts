@@ -19,11 +19,11 @@ config({ path: ".env.local" });
 import Anthropic from "@anthropic-ai/sdk";
 import * as fs from "fs";
 import * as path from "path";
-import { SKIPPY_SYSTEM_PROMPT } from "../lib/skippy";
-import { getModulePrompt, getWeekConfig, weekConfigs } from "../lib/modules";
-import { formatLedgerForPrompt, type ConversationLedger, type ConversationPhase, type EngagementEnergy, type ArtifactType } from "../lib/ledger";
-import { buildProfileContext, type LegacyProfileData } from "../lib/profile";
-import { formatProgressionForClassifier, getDiagnosticProbe } from "../lib/progressions";
+import { SKIPPY_SYSTEM_PROMPT } from "../../lib/skippy";
+import { getModulePrompt, getWeekConfig, weekConfigs } from "../../lib/modules";
+import { formatLedgerForPrompt, type ConversationLedger, type ConversationPhase, type EngagementEnergy, type ArtifactType } from "../../lib/ledger";
+import { buildProfileContext, type LegacyProfileData } from "../../lib/profile";
+import { formatProgressionForClassifier, getDiagnosticProbe } from "../../lib/progressions";
 
 const anthropic = new Anthropic();
 

@@ -7,6 +7,7 @@ import { getConversationHistory } from "@/lib/skippy";
 import { getModulePrompt } from "@/lib/modules";
 import { getProfileContextForUser } from "@/lib/profile";
 import { prisma } from "@/lib/prisma";
+import { reviewPodcastScript } from "@/lib/podcast-reviewer";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 
@@ -47,7 +48,8 @@ async function generatePodcastScript(
   weekTitle: string,
   weekNumber: number,
   moduleContext: string,
-  profileContext: string | null
+  profileContext: string | null,
+  revisionFeedback?: string
 ): Promise<PodcastSegment[]> {
   const conversationText = conversationHistory
     .map((msg) => `${msg.role === "user" ? "TEACHER" : "SKIPPY"}: ${msg.content}`)
@@ -56,9 +58,13 @@ async function generatePodcastScript(
   const teacherQuotes = extractKeyMoments(conversationHistory);
   const isIntroWeek = weekNumber === 0;
 
-  const prompt = isIntroWeek
+  let prompt = isIntroWeek
     ? generateIntroWeekPrompt(conversationText, teacherQuotes, profileContext)
     : generateStandardWeekPrompt(conversationText, teacherQuotes, profileContext, weekNumber, weekTitle, moduleContext);
+
+  if (revisionFeedback) {
+    prompt += `\n\n## REVISION REQUIRED\nThe previous version of this script was reviewed and failed quality checks. Here is the specific feedback — address ALL of these issues in your new version:\n${revisionFeedback}`;
+  }
 
   const response = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
@@ -77,7 +83,7 @@ async function generatePodcastScript(
       segments.push({ speaker: match[1] as "A" | "B", text: match[2].trim() });
     }
   }
-  return segments.slice(0, 10);
+  return segments.slice(0, 12);
 }
 
 function generateIntroWeekPrompt(
@@ -105,12 +111,12 @@ ${conversationText.slice(-3000)}
 
 ## ARC (8-10 exchanges, 200-250 words)
 
-1. CALLBACK (A): Start with their NAME and something SPECIFIC they said. Quote or closely paraphrase.
-2. DIAGNOSIS (B): Name the real problem beneath the surface. Not "you're busy" — what's the structural issue? Use a concept like "planning debt" or "workflow architecture."
-3. REFRAME (A): Explain WHY this matters using a principle. "That's not a discipline problem, it's a systems problem."
-4. EVIDENCE (B): Connect to their specific situation. What did they reveal that confirms this diagnosis?
+1. WELCOME (A): Open like a real podcast! "Welcome to the Week 0 wrap-up!" Then immediately ground the listener: who is this teacher BY NAME, what do they teach, what grade, what kind of school — pull from the profile. Make us picture them. End with a teaser of what stood out in their onboarding conversation.
+2. SETUP (B): Build on the welcome with energy. Pick up a specific detail from the conversation — something they said about their struggles, their students, their goals — and set up why it matters. "And the thing that really jumped out to me was when [name] said..."
+3. DIAGNOSIS (A): Name the real problem beneath the surface. Not "you're busy" — what's the structural issue? Use a concept like "planning debt" or "workflow architecture."
+4. EVIDENCE (B): Connect to their specific situation. What did they reveal that confirms this diagnosis? Reference their grade level, subject, specific students they mentioned.
 5. COURSE CONNECTION (A): Name ONE specific week that addresses their core issue and explain WHY (not just "Week 3 covers lesson planning" but what they'll actually learn to do differently).
-6. SECOND CONNECTION (B): Name one more week, same depth.
+6. SECOND CONNECTION (B): Name one more week, same depth. Tie it back to something specific they said.
 7. THE TENSION (A): Acknowledge their stated concern about AI honestly — don't dismiss it, reframe it.
 8. SIGN-OFF (B): Brief, warm, forward-looking. No cheerleading.
 
@@ -119,12 +125,15 @@ A: [line]
 B: [line]
 
 STRICT RULES:
-- Use their ACTUAL NAME from the profile. Never "this teacher" or "our teacher."
+- Use their ACTUAL NAME from the profile repeatedly (at least 3 times). Never "this teacher" or "our teacher."
 - 8-10 exchanges, 200-250 words
+- MUST open with a proper podcast welcome — energetic, sets the scene, names the teacher and their context
 - Each line 1-3 sentences. Vary length — some short, some longer.
+- Reference their personal context throughout: grade level, subject, specific students/challenges they mentioned, their school situation
 - NEVER say "great job", "you're doing amazing", "you're not alone"
 - NEVER use generic validation. Every sentence must add intellectual substance.
 - Reference at least ONE concept from the intellectual concepts list
+- The tone is two hosts who are genuinely excited to talk about THIS specific teacher's journey
 - Do NOT include preamble, notes, or commentary — ONLY the A:/B: lines`;
 }
 
@@ -166,29 +175,34 @@ ${WEEK_CONCEPTS[weekNumber] || ""}
 ## NEXT WEEK TEASE
 ${nextWeekTeases[weekNumber] || "More to come."}
 
-## ARC (8-10 exchanges, 200-250 words)
+## ARC (10-12 exchanges, 250-300 words)
 
-1. CALLBACK (A): Start with their NAME and something SPECIFIC they said or built. Quote them briefly.
-2. THE SHIFT (B): Name what actually changed in their thinking. Not "you learned X" — what do they understand NOW that they didn't before? Be specific.
-3. THE PRINCIPLE (A): Explain WHY this matters using a real concept from the intellectual concepts list. Don't dumb it down — teachers are professionals.
-4. THE EVIDENCE (B): Point to something specific from their conversation that demonstrates understanding. "When you said [X], that showed you get [principle]."
-5. THE APPLICATION (A): One specific thing they can do THIS WEEK. Not vague ("try it out") — specific ("Next time you're writing a prompt and it feels too long, ask yourself: am I being specific or being redundant?").
-6. THE TEASE (B): Preview next week with intellectual substance. What's the specific problem they'll tackle, and what do most people get wrong about it?
-7. THE FRAME (A): One sentence that captures the meta-skill they're building. Connect this week to the larger arc.
-8. SIGN-OFF (B): Brief, warm. Not cheerleader.
+1. WELCOME (A): Open like a real podcast! "Welcome back to the Week ${weekNumber} wrap-up!" Then immediately ground the listener: who is this teacher BY NAME, what they teach, their grade level — pull from the profile. Build excitement: "This week [NAME] dove into [TOPIC], and honestly, the conversation went somewhere I didn't expect."
+2. SETUP (B): Match that energy. Preview what we're about to unpack with a specific hook from the conversation. "Yeah, because [NAME] came in thinking [X] but by the end they were saying [Y] — and that shift is everything." Reference their specific teaching context.
+3. THE CALLBACK (A): Quote or closely paraphrase something specific they said early in the conversation. Set up the "before" picture.
+4. THE SHIFT (B): Name what actually changed in their thinking. Not "you learned X" — what do they understand NOW that they didn't before? Connect it to their specific classroom, their specific students.
+5. THE PRINCIPLE (A): Explain WHY this shift matters using a real concept from the intellectual concepts list. Don't dumb it down — teachers are professionals.
+6. THE EVIDENCE (B): Point to something specific from their conversation that demonstrates understanding. "When you said [X] about your [specific students/class], that showed you get [principle]."
+7. THE APPLICATION (A): One specific thing they can do THIS WEEK in their actual classroom. Reference their subject, grade, specific challenges they mentioned. Not vague — concrete.
+8. THE TEASE (B): Preview next week with intellectual substance and excitement. What's the specific problem they'll tackle, and what do most people get wrong about it? Make them curious.
+9. THE FRAME (A): One sentence that captures the meta-skill they're building. Connect this week to the larger arc of the course.
+10. SIGN-OFF (B): Brief, warm, forward-looking. Not cheerleader — more like "Can't wait to see what you do with this."
 
 ## OUTPUT — ONLY this format:
 A: [line]
 B: [line]
 
 STRICT RULES:
-- Use their ACTUAL NAME from the profile. Never "this teacher."
-- 8-10 exchanges, 200-250 words
+- Use their ACTUAL NAME from the profile repeatedly (at least 3 times). Never "this teacher."
+- 10-12 exchanges, 250-300 words
+- MUST open with a proper podcast welcome — energetic, sets the scene, names the teacher and their context
 - Each line 1-3 sentences. Vary length naturally.
+- Reference their personal context throughout: grade level, subject, specific students/challenges they mentioned, their school situation
 - NEVER say "great job", "you're doing amazing", "that's real progress"
 - NEVER use generic validation. Every sentence must teach something or add substance.
 - Reference at least ONE concept from the intellectual concepts list by name
-- The tone is two smart colleagues who find this genuinely interesting
+- The tone is two hosts who are genuinely excited about THIS specific teacher's breakthroughs
+- Do NOT include preamble, notes, or commentary — ONLY the A:/B: lines
 - Do NOT include preamble, notes, or commentary — ONLY the A:/B: lines`;
 }
 
@@ -249,13 +263,46 @@ export async function generatePodcast(userId: string, week: number): Promise<boo
 
     console.log(`[PODCAST] Generating script for week ${week} (${history.length} messages)...`);
 
-    const segments = await generatePodcastScript(history, weekTitle, week, moduleContext, profileContext);
+    const MAX_ATTEMPTS = 3;
+    let segments: PodcastSegment[] = [];
+    let transcriptText = "";
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      const revisionNote = attempt > 1 ? transcriptText : undefined;
+      segments = await generatePodcastScript(history, weekTitle, week, moduleContext, profileContext, revisionNote);
+
+      if (segments.length === 0) {
+        console.error(`[PODCAST] Attempt ${attempt}: failed to generate script`);
+        continue;
+      }
+
+      transcriptText = segments
+        .map((s) => `${s.speaker === "A" ? "Sam" : "Alex"}: ${s.text}`)
+        .join("\n");
+
+      const review = await reviewPodcastScript(transcriptText, week);
+
+      if (review.passed) {
+        console.log(`[PODCAST] Script passed review on attempt ${attempt}`);
+        break;
+      }
+
+      if (attempt < MAX_ATTEMPTS) {
+        console.log(`[PODCAST] Script failed review, regenerating with feedback...`);
+        // Store feedback as the "revision note" for next attempt
+        transcriptText = review.feedback;
+      } else {
+        console.log(`[PODCAST] Script failed review on final attempt, using best effort`);
+      }
+    }
+
     if (segments.length === 0) {
-      console.error("[PODCAST] Failed to generate script");
+      console.error("[PODCAST] Failed to generate script after all attempts");
       return false;
     }
 
-    const transcriptText = segments
+    // Rebuild final transcript in case last loop iteration changed it
+    transcriptText = segments
       .map((s) => `${s.speaker === "A" ? "Sam" : "Alex"}: ${s.text}`)
       .join("\n");
 

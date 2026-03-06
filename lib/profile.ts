@@ -208,7 +208,12 @@ export function buildProfileContext(profile: Record<string, any>): string {
  * Fetch profile and return context string, or null if no profile exists
  */
 export async function getProfileContextForUser(userId: string): Promise<string | null> {
-  const profile = await getUserProfile(userId);
+  const [profile, user] = await Promise.all([
+    getUserProfile(userId),
+    prisma.user.findUnique({ where: { id: userId }, select: { name: true } }),
+  ]);
   if (!profile) return null;
-  return buildProfileContext(profile);
+  const context = buildProfileContext(profile);
+  const name = user?.name || "Unknown";
+  return `Name: ${name}\n${context}`;
 }
