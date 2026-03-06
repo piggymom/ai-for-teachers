@@ -10,7 +10,10 @@
     "test:skippy": "npx tsx scripts/test-skippy.ts",
     "test:skippy:verbose": "npx tsx scripts/test-skippy.ts --verbose",
     "sim:agents": "npx tsx scripts/learner-agents.ts",
-    "sim:quick": "npx tsx scripts/learner-agents.ts --persona=maria --week=2"
+    "sim:quick": "npx tsx scripts/learner-agents.ts --persona=maria --week=2",
+    "debug": "npx tsx debug-loop/run.ts",
+    "debug:watch": "npx tsx debug-loop/watch.ts",
+    "debug:session": "npx tsx debug-loop/get-session.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
