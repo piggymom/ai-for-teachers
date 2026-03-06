@@ -18,6 +18,7 @@ export function useSpeechToText(): UseSpeechToTextReturn {
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<ReturnType<typeof createRecognition> | null>(null);
   const wantListeningRef = useRef(false);
+  const finalTextRef = useRef(""); // Accumulates final results across restarts
 
   const isSupported =
     typeof window !== "undefined" &&
@@ -31,17 +32,21 @@ export function useSpeechToText(): UseSpeechToTextReturn {
     const r: any = new Ctor();
 
     r.continuous = true;
-    r.interimResults = false; // Only final, committed results — no flicker
+    r.interimResults = true;
     r.lang = "en-US";
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     r.onresult = (event: any) => {
+      let interim = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
-          const text = event.results[i][0].transcript;
-          setTranscript((prev) => (prev ? prev + " " + text : text));
+          finalTextRef.current += event.results[i][0].transcript + " ";
+        } else {
+          interim += event.results[i][0].transcript;
         }
       }
+      // Show accumulated finals + current interim
+      setTranscript((finalTextRef.current + interim).trim());
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -84,6 +89,7 @@ export function useSpeechToText(): UseSpeechToTextReturn {
 
     setTranscript("");
     setError(null);
+    finalTextRef.current = "";
     wantListeningRef.current = true;
     setIsListening(true);
 
