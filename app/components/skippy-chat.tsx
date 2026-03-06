@@ -412,9 +412,11 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e as unknown as FormEvent);
+      if (hasContent && canSend) {
+        submitCurrentInput();
+      }
     }
   }
 
@@ -453,6 +455,7 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
   }
 
   const canSend = isReady && !isSending && voiceStatus === "idle";
+  const hasContent = !!(displayValue.trim() || isListening);
   const isVoiceActive = voiceStatus !== "idle";
 
   // =============================================================================
@@ -700,18 +703,18 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
           />
           <button
             type="submit"
-            disabled={!displayValue.trim() || !canSend}
+            disabled={!hasContent || !canSend}
             className={`flex-shrink-0 rounded-xl px-4 py-3 transition-colors ${
-              displayValue.trim() && canSend ? "bg-[#111827] hover:bg-[#374151]" : "bg-[#f3f4f6] disabled:opacity-30"
+              hasContent && canSend ? "bg-[#111827] hover:bg-[#374151]" : "bg-[#f3f4f6] disabled:opacity-30"
             }`}
           >
-            <SendIcon active={!!(displayValue.trim() && canSend)} />
+            <SendIcon active={hasContent && canSend} />
           </button>
         </form>
         <p className="mt-2 text-[11px] text-[#d1d5db] text-center">
           {voiceMode && speechSupported
             ? "Click mic to speak, or type"
-            : (typeof navigator !== "undefined" && /Mac/i.test(navigator.platform) ? "Cmd" : "Ctrl") + "+Enter to send"}
+            : "Enter to send, Shift+Enter for new line"}
           &middot; Skippy is AI-powered — review responses before classroom use
         </p>
       </div>
