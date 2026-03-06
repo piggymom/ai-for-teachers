@@ -633,10 +633,21 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
       {/* Speech error */}
       {speechError && (
         <div className="border-t border-amber-100 bg-amber-50/50 px-6 py-2">
-          <div className="mx-auto max-w-3xl text-center text-[13px] text-amber-700">
-            {speechError === "Microphone access denied"
-              ? "Microphone blocked — check browser permissions, or type instead"
-              : `Speech error: ${speechError}`}
+          <div className="mx-auto max-w-3xl flex items-center justify-center gap-2 text-[13px] text-amber-700">
+            <span>
+              {speechError === "Microphone access denied"
+                ? "Microphone blocked — check browser permissions, or type instead"
+                : speechError}
+            </span>
+            <button
+              onClick={() => {
+                // Clear error and retry
+                startListening();
+              }}
+              className="underline hover:text-amber-900"
+            >
+              Retry
+            </button>
           </div>
         </div>
       )}
