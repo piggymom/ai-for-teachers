@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 
 type VideoState = "checking" | "generating" | "processing" | "ready" | "playing" | "paused" | "ended" | "hidden";
 
@@ -12,11 +11,20 @@ export function WelcomeVideo() {
   const [pollCount, setPollCount] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const router = useRouter();
+  const initCalledRef = useRef(false);
 
   const MAX_POLLS = 24; // 2 minutes at 5s intervals
 
   useEffect(() => {
+    // Guard against React StrictMode double-mount (prevents duplicate HeyGen calls)
+    if (initCalledRef.current) return;
+    initCalledRef.current = true;
+
+    // If user has already watched and dismissed the video, don't show again
+    if (localStorage.getItem("skippy-welcome-video-dismissed") === "true") {
+      setState("hidden");
+      return;
+    }
     checkForVideo();
     return () => {
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
@@ -48,9 +56,15 @@ export function WelcomeVideo() {
       if (!res.ok) { setState("hidden"); return; }
       const data = await res.json();
       if (data.videoUrl) {
+        // Completed video exists — play it
         setVideoUrl(data.videoUrl);
         setState("ready");
+      } else if (data.videoId) {
+        // Video is in progress — resume polling instead of regenerating
+        setVideoId(data.videoId);
+        setState("processing");
       } else if (data.hasProfile) {
+        // No video at all — generate one
         generateVideo();
       } else {
         setState("hidden");
@@ -161,21 +175,10 @@ export function WelcomeVideo() {
           )}
         </div>
 
-        {/* Caption + CTA */}
-        <div className="flex items-center justify-between px-4 py-3">
-          <div>
-            <p className="text-[14px] font-medium text-[#111827]">Your personalized welcome</p>
-            <p className="text-[13px] text-[#9ca3af]">A message from Asher, your course creator</p>
-          </div>
-
-          {state === "ended" && (
-            <button
-              onClick={() => router.push("/week-0")}
-              className="rounded-lg bg-[#111827] px-5 py-2 text-[13px] font-medium text-white transition hover:bg-[#374151]"
-            >
-              Continue to Week 0 &rarr;
-            </button>
-          )}
+        {/* Caption */}
+        <div className="px-4 py-3">
+          <p className="text-[14px] font-medium text-[#111827]">Your personalized welcome</p>
+          <p className="text-[13px] text-[#9ca3af]">A message from Asher, your course creator</p>
         </div>
       </div>
     );

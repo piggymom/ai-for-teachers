@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
         return handleUserMessage(userId, week, message, timing);
 
       case "end_week":
-        return handleEndWeek(userId, week);
+        return handleEndWeek(userId, week, req.headers.get("cookie") || "");
 
       case "save_message":
         // Used by Realtime API client to persist messages after conversation
@@ -376,7 +376,7 @@ async function handleUserMessage(
   }
 }
 
-async function handleEndWeek(userId: string, week: number) {
+async function handleEndWeek(userId: string, week: number, cookieHeader: string) {
   try {
     // Get ledger to check for unsaved artifact
     const ledger = await getOrCreateLedger(userId, week);
@@ -388,7 +388,8 @@ async function handleEndWeek(userId: string, week: number) {
     });
 
     // Extract artifact from conversation if not already saved
-    if (!existingArtifact && ledger.exchangeCount > 2) {
+    // Week 0 is onboarding intake — no artifact to extract
+    if (!existingArtifact && ledger.exchangeCount > 2 && week > 0) {
       try {
         await extractArtifact(
           userId,
@@ -405,6 +406,18 @@ async function handleEndWeek(userId: string, week: number) {
 
     // Mark week as completed
     await markWeekCompleted(userId, week);
+
+    // Pre-generate podcast in the background (fire and forget)
+    // This way it's ready when the user sees "Listen to Takeaways" on the dashboard
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    fetch(`${baseUrl}/api/podcast`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        cookie: cookieHeader,
+      },
+      body: JSON.stringify({ week }),
+    }).catch((err) => console.error("[SKIPPY] Podcast pre-generation failed:", err));
 
     return NextResponse.json({
       event: "end_week",

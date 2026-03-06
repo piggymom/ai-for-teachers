@@ -24,7 +24,13 @@ export function ArtifactGallery() {
     fetch("/api/artifacts")
       .then(res => res.json())
       .then(data => {
-        setArtifacts(data.artifacts || []);
+        // Filter out garbage/empty artifacts
+        const valid = (data.artifacts || []).filter((a: Artifact) =>
+          a.content &&
+          !a.content.toLowerCase().includes("no artifact") &&
+          !a.content.toLowerCase().includes("there is no")
+        );
+        setArtifacts(valid);
         setLoading(false);
       })
       .catch(() => setLoading(false));

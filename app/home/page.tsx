@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { DashboardLayout } from "@/app/components/layouts/dashboard-layout";
 import { DashboardHeader } from "@/app/components/dashboard-header";
@@ -22,6 +22,32 @@ interface Progress {
 }
 
 export default function Home() {
+  return (
+    <Suspense
+      fallback={
+        <DashboardLayout>
+          <div className="p-10 lg:p-16">
+            <div className="max-w-3xl mx-auto">
+              <div className="animate-pulse space-y-10">
+                <div className="h-8 bg-[#f3f4f6] rounded w-1/2" />
+                <div className="h-4 bg-[#f3f4f6] rounded w-1/3" />
+                <div className="flex flex-col gap-4">
+                  {[1, 2, 3, 4, 5, 6, 7].map(i => (
+                    <div key={i} className="h-24 bg-[#f9fafb] rounded-xl" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </DashboardLayout>
+      }
+    >
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeContent() {
   const searchParams = useSearchParams();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [progress, setProgress] = useState<Progress | null>(null);
@@ -101,8 +127,8 @@ export default function Home() {
 
       <div className="p-8 lg:p-12">
         <div className="max-w-3xl mx-auto space-y-10">
-          {/* Welcome Video (shows once, hides after first visit) */}
-          {progress?.isFirstVisit && <WelcomeVideo />}
+          {/* Welcome Video — component self-manages visibility via DB state */}
+          <WelcomeVideo />
 
           {/* Personalized Header */}
           <DashboardHeader profile={profile} progress={progress} />

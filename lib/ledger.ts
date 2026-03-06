@@ -12,7 +12,7 @@
 import { prisma } from "./prisma";
 import Anthropic from "@anthropic-ai/sdk";
 import { formatProgressionForClassifier } from "./progressions";
-import { extractArtifact } from "./artifacts";
+
 import { getWeekConfig } from "./modules";
 import {
   getWeek2Example,
@@ -746,36 +746,13 @@ export async function updateLedgerFromExchange(
       return incrementExchangeCount(ledger);
     }
 
-    // Check if we've transitioned to SAVE phase with an artifact - trigger extraction
+    // NOTE: Artifact extraction was removed from the classifier.
+    // Artifacts are now ONLY extracted when the user clicks "Finish Session"
+    // (handleEndWeek in app/api/skippy/route.ts). This prevents premature
+    // extraction of incomplete artifacts mid-conversation.
+
     const previousPhase = ledger.currentPhase;
-    const newPhase = parsed.currentPhase;
     const fourCData = parsed.artifact.fourC || { context: false, constraints: false, command: false, criteria: false };
-    const allFourCComplete = (fourCData.context || ledger.artifact.fourC.context)
-      && (fourCData.constraints || ledger.artifact.fourC.constraints)
-      && (fourCData.command || ledger.artifact.fourC.command)
-      && (fourCData.criteria || ledger.artifact.fourC.criteria);
-
-    // Trigger artifact extraction on SAVE transition OR when all 4C complete with artifact state
-    const shouldExtract = (
-      (newPhase === "SAVE" && previousPhase !== "SAVE") ||
-      (allFourCComplete && !ledger.artifact.fourC.context) // First time all 4C detected
-    ) && parsed.artifact.currentState;
-
-    if (shouldExtract && parsed.artifact.currentState) {
-      logLedger('ARTIFACT_EXTRACTION_TRIGGERED', {
-        type: parsed.artifact.type,
-        stateLength: parsed.artifact.currentState.length,
-        trigger: newPhase === "SAVE" ? "SAVE_phase" : "4C_complete"
-      });
-      // Extract the artifact (fire and forget - don't block ledger update)
-      extractArtifact(
-        ledger.userId,
-        ledger.weekNumber,
-        parsed.artifact.type || "prompt_template",
-        parsed.artifact.currentState,
-        parsed.sessionSummary
-      ).catch((err) => console.error("[LEDGER] Artifact extraction failed:", err));
-    }
 
     // Update database
     const updated = await prisma.conversationLedger.update({

@@ -70,12 +70,14 @@ export async function POST(req: NextRequest) {
 
     const userId = session.user.id;
 
-    // Check if video URL already persisted in DB
+    // CHECK 1: Video URL already completed and persisted?
     const existing = await prisma.userProfile.findUnique({
       where: { userId },
-      select: { welcomeVideoUrl: true },
+      select: { welcomeVideoUrl: true, welcomeVideoId: true },
     });
+
     if (existing?.welcomeVideoUrl) {
+      console.log("[HEYGEN] Returning cached video URL");
       return NextResponse.json({
         videoUrl: existing.welcomeVideoUrl,
         status: "completed",
@@ -83,15 +85,24 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Get user profile
+    // CHECK 2: Video already in progress? Resume polling instead of regenerating.
+    if (existing?.welcomeVideoId) {
+      console.log("[HEYGEN] Video already in progress:", existing.welcomeVideoId);
+      return NextResponse.json({
+        videoId: existing.welcomeVideoId,
+        status: "processing",
+        message: "Video is already being generated. Poll GET endpoint for status.",
+      });
+    }
+
+    // CHECK 3: Only now generate a brand-new video
     const profile = await getUserProfile(userId);
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    // Generate personalized script
     const script = generateWelcomeScript(profile, session.user.name);
-    console.log("[HEYGEN] Generating video with script:", script.substring(0, 100) + "...");
+    console.log("[HEYGEN] Generating NEW video with script:", script.substring(0, 100) + "...");
 
     const voiceId = process.env.HEYGEN_VOICE_ID;
 
@@ -134,7 +145,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No video ID returned" }, { status: 500 });
     }
 
-    console.log("[HEYGEN] Video created with ID:", videoId);
+    // IMMEDIATELY persist videoId so refreshes don't re-generate
+    await prisma.userProfile.update({
+      where: { userId },
+      data: { welcomeVideoId: videoId },
+    });
+
+    console.log("[HEYGEN] Video created and ID persisted:", videoId);
 
     return NextResponse.json({
       videoId,
@@ -157,14 +174,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const videoId = req.nextUrl.searchParams.get("videoId");
+    const videoIdParam = req.nextUrl.searchParams.get("videoId");
     const userId = session.user.id;
 
-    // Check DB for persisted video URL first
+    // Check DB for persisted video URL or in-progress videoId
     const profile = await prisma.userProfile.findUnique({
       where: { userId },
-      select: { welcomeVideoUrl: true },
+      select: { welcomeVideoUrl: true, welcomeVideoId: true },
     });
+
     if (profile?.welcomeVideoUrl) {
       return NextResponse.json({
         videoUrl: profile.welcomeVideoUrl,
@@ -173,12 +191,17 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // If no videoId provided, check if user has a profile (eligible for video)
+    // Use param videoId, or fall back to DB-persisted in-progress videoId
+    const videoId = videoIdParam || profile?.welcomeVideoId;
+
+    // If no videoId at all, check if user has a profile (eligible for video)
     if (!videoId) {
       const hasProfile = await getUserProfile(userId);
       return NextResponse.json({
         hasProfile: !!hasProfile,
         hasCachedVideo: false,
+        // Tell the client if there's an in-progress video to resume
+        videoId: profile?.welcomeVideoId || null,
       });
     }
 
@@ -205,16 +228,22 @@ export async function GET(req: NextRequest) {
     console.log("[HEYGEN] Video status:", status);
 
     if (status === "completed" && videoUrl) {
-      // Persist to database so it survives deploys
+      // Persist URL and clear in-progress videoId
       await prisma.userProfile.update({
         where: { userId },
-        data: { welcomeVideoUrl: videoUrl },
+        data: { welcomeVideoUrl: videoUrl, welcomeVideoId: null },
       });
 
       return NextResponse.json({ videoUrl, status: "completed" });
     }
 
     if (status === "failed") {
+      // Clear the failed videoId so a fresh one can be generated
+      await prisma.userProfile.update({
+        where: { userId },
+        data: { welcomeVideoId: null },
+      });
+
       return NextResponse.json({
         status: "failed",
         error: statusData.data?.error || "Video generation failed",

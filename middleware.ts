@@ -49,7 +49,7 @@ function purgeStale() {
 // Rate limit configs per API route
 const RATE_LIMITS: Record<string, { limit: number; windowSec: number }> = {
   "/api/skippy":    { limit: 60,  windowSec: 3600 }, // 60 req/user/hour
-  "/api/podcast":   { limit: 5,   windowSec: 3600 }, // 5 req/user/hour
+  "/api/podcast":   { limit: 30,  windowSec: 3600 }, // 30 req/IP/hour (GET checks + POST generates)
   "/api/tts":       { limit: 30,  windowSec: 3600 }, // 30 req/user/hour
   "/api/contact":   { limit: 5,   windowSec: 3600 }, // 5 req/IP/hour
 };

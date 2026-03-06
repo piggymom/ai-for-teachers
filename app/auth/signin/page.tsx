@@ -1,11 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-white">
+          <div className="text-[15px] text-[#9ca3af]">Loading…</div>
+        </main>
+      }
+    >
+      <SignInContent />
+    </Suspense>
+  );
+}
+
+function SignInContent() {
   const [agreed, setAgreed] = useState(false);
   const { data: session, status } = useSession();
   const router = useRouter();

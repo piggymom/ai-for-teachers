@@ -1,6 +1,7 @@
 import { prisma } from "./prisma";
 import { getUserProfile, buildProfileContext, resolveProfile, painPointToLabel } from "./profile";
 import { getModulePrompt, type ModulePrompt } from "./modules";
+import { SHARED_SESSION_RULES } from "./prompts/shared";
 
 /**
  * Interpolate profile fields into a template string with graceful fallbacks.
@@ -298,6 +299,9 @@ export function buildSkippySystemPrompt(
   profileData?: Record<string, any> | null
 ): string {
   const parts = [SKIPPY_SYSTEM_PROMPT];
+
+  // Add shared session rules (consistent across all weeks)
+  parts.push(SHARED_SESSION_RULES);
 
   // Add module-specific context
   parts.push(`\n## This week's focus\n${modulePrompt.prompt}`);

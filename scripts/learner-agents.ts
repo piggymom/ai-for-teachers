@@ -22,7 +22,7 @@ import * as path from "path";
 import { SKIPPY_SYSTEM_PROMPT } from "../lib/skippy";
 import { getModulePrompt, getWeekConfig, weekConfigs } from "../lib/modules";
 import { formatLedgerForPrompt, type ConversationLedger, type ConversationPhase, type EngagementEnergy, type ArtifactType } from "../lib/ledger";
-import { buildProfileContext, type UserProfileData } from "../lib/profile";
+import { buildProfileContext, type LegacyProfileData } from "../lib/profile";
 import { formatProgressionForClassifier, getDiagnosticProbe } from "../lib/progressions";
 
 const anthropic = new Anthropic();
@@ -291,7 +291,7 @@ function ledgerToConversationLedger(ledger: InMemoryLedger, weekNumber: number):
 // PROMPT BUILDERS
 // =============================================================================
 
-function buildPersonaProfile(persona: Persona): UserProfileData {
+function buildPersonaProfile(persona: Persona): LegacyProfileData {
   return {
     role: "Classroom Teacher",
     gradeLevels: persona.gradeLevels,

@@ -124,3 +124,13 @@ html {
   background: rgba(59, 130, 246, 0.12);
   color: #111827;
 }
+
+/* Voice mode waveform bars */
+@keyframes voice-bar {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+.animate-voice-bar {
+  animation: voice-bar 0.8s ease-in-out infinite;
+}

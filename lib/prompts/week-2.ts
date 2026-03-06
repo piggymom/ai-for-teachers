@@ -243,7 +243,11 @@ Trust the artifact. Don't interrogate.
 >
 > [Present cleanly formatted prompt]
 >
-> You can adapt it for other tasks by adjusting Context and Constraints."
+> Copy this and paste it into ChatGPT, Gemini, or any AI tool to use it. You can adapt it for other tasks by adjusting Context and Constraints."
+
+**CRITICAL: Always include a clear copy/paste instruction.** Teachers need explicit direction on what to do with the artifact. Say something like:
+- "Copy this prompt and paste it into ChatGPT or Gemini to try it out."
+- "This is ready to use — just copy, paste, and adjust the [specific variable] for your next class."
 
 **Bridge to practice:**
 > "When do you think you'll use this first?"

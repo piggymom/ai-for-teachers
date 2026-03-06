@@ -5,7 +5,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { SKIPPY_SYSTEM_PROMPT } from "../lib/skippy";
 import { WEEK_2_SYSTEM_PROMPT, WEEK_2_OPENING_MESSAGE } from "../lib/prompts/week-2";
 import { formatLedgerForPrompt, type ConversationLedger, type ConversationPhase, type EngagementEnergy, type ArtifactType } from "../lib/ledger";
-import { buildProfileContext, type UserProfileData } from "../lib/profile";
+import { buildProfileContext, type LegacyProfileData } from "../lib/profile";
 import { getModulePrompt } from "../lib/modules";
 
 const anthropic = new Anthropic();
@@ -116,7 +116,7 @@ function buildTestLedger(input: TestLedgerInput): ConversationLedger {
 }
 
 function buildTestProfileContext(profile: TestProfile): string {
-  const profileData: UserProfileData = {
+  const profileData: LegacyProfileData = {
     role: "Classroom Teacher",
     gradeLevels: profile.gradeLevels,
     subjects: profile.subjects,

@@ -25,6 +25,7 @@ model User {
   skippyMessages  SkippyMessage[]
   ledgers         ConversationLedger[]
   artifacts       Artifact[]
+  podcasts        Podcast[]
   consents        Consent[]
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
@@ -120,6 +121,7 @@ model UserProfile {
 
   // HeyGen welcome video
   welcomeVideoUrl    String?
+  welcomeVideoId     String?  // HeyGen video_id while processing
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -211,6 +213,21 @@ model Artifact {
 
   @@index([userId])
   @@index([userId, weekNumber])
+}
+
+// Cached podcast audio per week per user
+model Podcast {
+  id         String   @id @default(cuid())
+  userId     String
+  weekNumber Int
+  audioData  Bytes    // MP3 audio stored as binary
+  transcript String?  @db.Text // Full script text for retrieval
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekNumber])
+  @@index([userId])
 }
 
 // User consent records for legal compliance
