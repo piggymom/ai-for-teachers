@@ -9,6 +9,7 @@ export function useSpeechToText() {
   const [error, setError] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
+  const fatalErrorRef = useRef(false); // Prevents restart after permission denial
 
   // Check support after mount (SSR-safe)
   useEffect(() => {
@@ -20,17 +21,17 @@ export function useSpeechToText() {
   const startListening = useCallback(() => {
     if (!isSupported) return;
 
-    // Abort any existing instance first to avoid collisions
+    // Detach old instance (don't abort — can disrupt permissions)
     if (recognitionRef.current) {
-      try {
-        recognitionRef.current.onend = null; // Prevent auto-restart
-        recognitionRef.current.onerror = null;
-        recognitionRef.current.abort();
-      } catch {
-        // Ignore
-      }
+      const old = recognitionRef.current;
       recognitionRef.current = null;
+      old.onend = null;
+      old.onerror = null;
+      old.onresult = null;
+      try { old.abort(); } catch { /* ignore */ }
     }
+
+    fatalErrorRef.current = false;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = window as any;
@@ -49,7 +50,11 @@ export function useSpeechToText() {
     };
 
     recognition.onend = () => {
-      console.log("[MIC] Recognition ended, ref exists:", !!recognitionRef.current);
+      console.log("[MIC] onend — fatal:", fatalErrorRef.current, "ref match:", recognitionRef.current === recognition);
+
+      // NEVER restart after a fatal error (permission denied, etc.)
+      if (fatalErrorRef.current) return;
+
       // Auto-restart if still supposed to be listening
       if (recognitionRef.current === recognition) {
         try {
@@ -65,17 +70,20 @@ export function useSpeechToText() {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onerror = (event: any) => {
-      console.log("[MIC] Error event:", event.error);
+      console.log("[MIC] onerror:", event.error);
 
       if (event.error === "not-allowed") {
-        setError("Microphone access denied");
+        // FATAL: Mark as fatal FIRST so onend won't restart
+        fatalErrorRef.current = true;
         recognitionRef.current = null;
         setIsListening(false);
+        setError("Microphone access denied");
         return;
       }
-      // no-speech and aborted are benign — ignore
+
+      // no-speech and aborted are benign
       if (event.error !== "no-speech" && event.error !== "aborted") {
-        console.error("[MIC] Speech error:", event.error);
+        console.error("[MIC] Unexpected error:", event.error);
       }
     };
 
@@ -88,7 +96,7 @@ export function useSpeechToText() {
       setIsListening(true);
       console.log("[MIC] Started successfully");
     } catch (e) {
-      console.error("[MIC] Failed to start:", e);
+      console.error("[MIC] start() threw:", e);
       setError("Failed to start microphone");
       setIsListening(false);
     }
@@ -100,11 +108,7 @@ export function useSpeechToText() {
     recognitionRef.current = null; // Clear ref FIRST to prevent auto-restart
     setIsListening(false);
     if (recognition) {
-      try {
-        recognition.stop();
-      } catch {
-        // Ignore
-      }
+      try { recognition.stop(); } catch { /* ignore */ }
     }
   }, []);
 
