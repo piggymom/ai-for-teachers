@@ -4,6 +4,8 @@
  */
 
 import { chromium } from "playwright";
+import { existsSync, readFileSync } from "fs";
+import { resolve } from "path";
 
 export interface ConsoleLog {
   type: string;
@@ -18,6 +20,26 @@ export interface TestResult {
   networkErrors: string[];
   screenshot: string; // base64 PNG
   customCheckResult?: string;
+}
+
+/**
+ * Load auth cookie from debug-loop/.session file.
+ * To create it: copy next-auth.session-token value from your browser cookies.
+ *
+ *   echo "your-session-token-value" > debug-loop/.session
+ */
+function loadSessionCookie(): { name: string; value: string; domain: string; path: string } | null {
+  const sessionFile = resolve(__dirname, ".session");
+  if (!existsSync(sessionFile)) return null;
+  const token = readFileSync(sessionFile, "utf-8").trim();
+  if (!token) return null;
+  console.log("  🔑 Loaded session cookie from .session file");
+  return {
+    name: "next-auth.session-token",
+    value: token,
+    domain: "localhost",
+    path: "/",
+  };
 }
 
 /**
@@ -36,10 +58,16 @@ export async function runBrowserTest(
 
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
-    // Grant mic permission so SpeechRecognition doesn't immediately fail
     permissions: ["microphone"],
     viewport: { width: 1280, height: 800 },
   });
+
+  // Inject auth cookie if available
+  const sessionCookie = loadSessionCookie();
+  if (sessionCookie) {
+    await context.addCookies([sessionCookie]);
+  }
+
   const page = await context.newPage();
 
   // Capture console

@@ -1,9 +1,9 @@
 ## Bug Description
-check that the homepage loads without console errors and shows week cards
+verify dashboard shows week cards and completed status for week 0
 
 ## Reproduction
 URL: http://localhost:3000/home
-Steps: load the page, wait 2s
+Steps: load the page, wait 3s
 
 ## Project Structure (Next.js App Router)
 ```
@@ -70,8 +70,8 @@ app/api/debug/ledger/route.ts
 ```
 
 ### Iteration 1
-Fix: app/home/page.tsx
+Fix: 
 Console errors: none
 Result: VERDICT: FAIL
-EXPLANATION: The homepage loads without console errors, but instead of showing week cards, it displays a sign-in page with "Sign in to AI for Teachers" and Google authentication options. This suggests the user is not authenticated or the route is redirecting to a login page.
-NEXT: Check if authentication is required for the homepage or if there's a routing issue redirecting to the sign-in page instead of displaying the expected week cards.
+EXPLANATION: The dashboard does not show week cards or completed status for week 0. Instead, it displays a welcome video and a "Pick up where you left off" button, which appears to be a different view than the expected weekly dashboard layout.
+NEXT: Check if the user needs to navigate past the welcome screen or if there's a specific route/state that shows the weekly dashboard with week cards.

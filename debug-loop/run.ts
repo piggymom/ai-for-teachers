@@ -32,6 +32,7 @@ const url = getFlag("--url") || "http://localhost:3000";
 const steps = getFlag("--steps") || "load the page";
 const maxIterations = parseInt(getFlag("--max") || "5");
 const focusFile = getFlag("--file");
+const readOnly = args.includes("--readonly");
 
 function getFlag(name: string): string | undefined {
   const idx = args.indexOf(name);
@@ -198,7 +199,7 @@ NEXT: (if FAIL, what to try next — 1 sentence)`,
 async function main() {
   if (!bug) {
     console.log("Usage: npx tsx debug-loop/run.ts \"description of the bug\"");
-    console.log("Flags: --url, --steps, --max, --file");
+    console.log("Flags: --url, --steps, --max, --file, --readonly");
     process.exit(1);
   }
 
@@ -208,6 +209,7 @@ async function main() {
   console.log(`   Steps: ${steps}`);
   console.log(`   Max iterations: ${maxIterations}`);
   if (focusFile) console.log(`   Focus file: ${focusFile}`);
+  if (readOnly) console.log(`   Mode: READONLY (diagnose only, no file changes)`);
   console.log("");
 
   const structure = getProjectStructure();
@@ -241,24 +243,29 @@ async function main() {
       }
     }
 
-    // Step 3: Get the fix
-    console.log("\n🤖 Implementer proposing fix...");
-    const fixes = await implementerFix(context + "\n\n## Analysis\n" + analysis, fileContents);
+    // Step 3: Get the fix (skip in readonly mode)
+    let fixes: { filePath: string; content: string }[] = [];
+    if (!readOnly) {
+      console.log("\n🤖 Implementer proposing fix...");
+      fixes = await implementerFix(context + "\n\n## Analysis\n" + analysis, fileContents);
 
-    if (fixes.length === 0) {
-      console.log("  ⚠️  No fix proposed — implementer may need more context");
-      context += `\n### Iteration ${i + 1}\nNo fix proposed.\n`;
-      continue;
+      if (fixes.length === 0) {
+        console.log("  ⚠️  No fix proposed — implementer may need more context");
+        context += `\n### Iteration ${i + 1}\nNo fix proposed.\n`;
+        continue;
+      }
+
+      // Step 4: Apply fixes
+      for (const fix of fixes) {
+        writeProjectFile(fix.filePath, fix.content);
+      }
+
+      // Step 5: Wait for dev server to pick up changes
+      console.log("\n  ⏳ Waiting for dev server to reload (2s)...");
+      await new Promise((r) => setTimeout(r, 2000));
+    } else {
+      console.log("\n  📖 Readonly mode — skipping fix, running browser test only...");
     }
-
-    // Step 4: Apply fixes
-    for (const fix of fixes) {
-      writeProjectFile(fix.filePath, fix.content);
-    }
-
-    // Step 5: Wait for dev server to pick up changes
-    console.log("\n  ⏳ Waiting for dev server to reload (2s)...");
-    await new Promise((r) => setTimeout(r, 2000));
 
     // Step 6: Run browser test
     console.log("\n🌐 Tester running browser check...");
