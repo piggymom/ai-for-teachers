@@ -578,9 +578,19 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
             </div>
           ) : (
             <>
-              {messages.map((msg) => (
-                <MessageBubble key={msg.id} message={msg} onFinishSession={handleEndWeek} />
-              ))}
+              {messages.map((msg, idx) => {
+                // Only show Finish button on the very last assistant message
+                const isLastAssistant =
+                  msg.role === "assistant" &&
+                  idx === messages.findLastIndex((m) => m.role === "assistant");
+                return (
+                  <MessageBubble
+                    key={msg.id}
+                    message={msg}
+                    onFinishSession={isLastAssistant ? handleEndWeek : undefined}
+                  />
+                );
+              })}
 
               {/* Voice mode: show speaking/thinking state */}
               {isVoiceActive && (
