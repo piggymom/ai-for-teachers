@@ -1,107 +1,79 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
-interface UseSpeechToTextReturn {
-  isListening: boolean;
-  transcript: string;
-  startListening: () => void;
-  stopListening: () => void;
-  clearTranscript: () => void;
-  isSupported: boolean;
-  error: string | null;
-}
-
-export function useSpeechToText(): UseSpeechToTextReturn {
+export function useSpeechToText() {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
+  const [isSupported, setIsSupported] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const recognitionRef = useRef<ReturnType<typeof createRecognition> | null>(null);
-  const wantListeningRef = useRef(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null);
 
-  const isSupported =
-    typeof window !== "undefined" &&
-    ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
-
-  function createRecognition() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const w = window as any;
-    const Ctor = w.SpeechRecognition || w.webkitSpeechRecognition;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const r: any = new Ctor();
-
-    r.continuous = true;
-    r.interimResults = false; // Only final, committed results — no flicker
-    r.lang = "en-US";
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    r.onresult = (event: any) => {
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          const text = event.results[i][0].transcript;
-          setTranscript((prev) => (prev ? prev + " " + text : text));
-        }
-      }
-    };
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    r.onerror = (event: any) => {
-      // Ignore benign errors — keep listening
-      if (event.error === "aborted" || event.error === "no-speech") return;
-      if (event.error === "not-allowed") {
-        setError("Microphone access denied");
-        wantListeningRef.current = false;
-        setIsListening(false);
-      }
-    };
-
-    r.onend = () => {
-      // Browser killed recognition (timeout, pause, etc.) — auto-restart if user still wants mic on
-      if (wantListeningRef.current) {
-        try {
-          r.start();
-          return; // Stay listening from user's perspective
-        } catch {
-          // Failed to restart — actually stop
-        }
-      }
-      setIsListening(false);
-    };
-
-    return r;
-  }
+  // Check support after mount (SSR-safe)
+  useEffect(() => {
+    setIsSupported(
+      "SpeechRecognition" in window || "webkitSpeechRecognition" in window
+    );
+  }, []);
 
   const startListening = useCallback(() => {
-    if (!isSupported || wantListeningRef.current) return;
+    if (!isSupported) return;
 
-    // Create a fresh instance each time to avoid stale state
-    if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch { /* ignore */ }
-    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = window as any;
+    const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
+    const recognition = new SR();
 
-    const r = createRecognition();
-    recognitionRef.current = r;
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (event: any) => {
+      const last = event.results.length - 1;
+      const text = event.results[last][0].transcript;
+      setTranscript((prev) => (prev ? prev + " " + text : text));
+    };
+
+    recognition.onend = () => {
+      // Auto-restart if still supposed to be listening
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.start();
+        } catch {
+          // Ignore — already running or can't restart
+        }
+      }
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onerror = (event: any) => {
+      if (event.error === "not-allowed") {
+        setError("Microphone access denied");
+        recognitionRef.current = null;
+        setIsListening(false);
+        return;
+      }
+      // no-speech and aborted are benign — ignore
+      if (event.error !== "no-speech" && event.error !== "aborted") {
+        console.error("[MIC] Speech error:", event.error);
+      }
+    };
+
+    recognitionRef.current = recognition;
     setTranscript("");
     setError(null);
-    wantListeningRef.current = true;
     setIsListening(true);
-
-    try {
-      r.start();
-    } catch {
-      wantListeningRef.current = false;
-      setIsListening(false);
-    }
+    recognition.start();
   }, [isSupported]);
 
   const stopListening = useCallback(() => {
-    wantListeningRef.current = false;
-    setIsListening(false);
     if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch { /* ignore */ }
+      recognitionRef.current.stop();
       recognitionRef.current = null;
     }
+    setIsListening(false);
   }, []);
 
   const clearTranscript = useCallback(() => {
