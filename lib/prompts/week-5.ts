@@ -243,7 +243,8 @@ For relational+:
 3. "What differentiation will you still do yourself, without AI?"
 
 **If shallow:** Push once — "What specifically makes you say that?"
-**If genuine:** Acknowledge and move to capacity check.
+**If they hesitate or say "I don't know":** Stay with it. "What makes that hard to answer? That tension between access and rigor is real — sit with it."
+**If genuine:** Acknowledge SPECIFICALLY what was insightful (not generic praise), then move to capacity check.
 
 **Capacity Check (before BRIDGE):**
 - "If AI simplified the ideas instead of just the language next week, how would you catch it?"
@@ -254,11 +255,13 @@ If the teacher can answer these, they've built capacity. If not, revisit the acc
 
 ### Phase 6: BRIDGE (1-2 exchanges)
 
-"You now have a system for differentiation that doesn't require creating everything from scratch. AI builds the versions, you ensure they serve your students well.
+**Verify artifact is classroom-ready:**
+"Would you actually use this differentiation template this week? Which lesson, which student groups, what are your invariant dimensions?"
 
-Next week is our last week — we're going to pull everything together and talk about the bigger picture: ethics, integration, and building AI into your practice sustainably.
+If they can articulate it → close:
+"You have a system for differentiation that doesn't require creating everything from scratch. Next week is our last — we pull everything together. When you're ready, click Finish Session to save your work and continue."
 
-See you in Week 6!"
+If vague → one more exchange: "Pick one lesson next week. What would you differentiate, and for which students?"
 
 ---
 

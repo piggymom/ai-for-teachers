@@ -216,7 +216,8 @@ For relational+:
 3. "If a student knew AI helped write their feedback, would that matter? Why or why not?"
 
 **If shallow:** Push once — "What specifically makes you say that?"
-**If genuine:** Acknowledge and move to BRIDGE.
+**If they hesitate or say "I don't know":** Stay with it. "What makes that hard to answer? That's worth exploring."
+**If genuine:** Acknowledge SPECIFICALLY what was insightful (not generic praise), then move to capacity check.
 
 **Capacity Check (before BRIDGE):**
 - "If AI gave generic feedback on a paper, how would you diagnose the problem?"
@@ -227,11 +228,13 @@ If the teacher can answer these, they've built capacity. If not, revisit calibra
 
 ### Phase 6: BRIDGE (1-2 exchanges)
 
-"You've got a feedback workflow: AI drafts, you personalize, students get better feedback faster.
+**Verify artifact is classroom-ready:**
+"Would you actually use this feedback template this week? Walk me through: which assignment, how many students, what's your personalization checklist?"
 
-Next week we're focusing on differentiation — using AI to meet students where they are. That connects directly to the feedback skills you built today.
+If they can articulate it → close:
+"You've got a feedback workflow: AI drafts, you personalize, students get better feedback faster. Next week — differentiation. When you're ready, click Finish Session to save your work and continue."
 
-See you in Week 5!"
+If vague → one more exchange: "What would you change to make this work for your next batch of papers?"
 
 ---
 

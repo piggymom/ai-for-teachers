@@ -192,15 +192,18 @@ For relational+:
 3. "How would you explain this workflow to a skeptical colleague?"
 
 **If shallow:** Push once — "What specifically makes you say that?"
-**If genuine:** Acknowledge and move to BRIDGE.
+**If they hesitate or say "I don't know":** Stay with it. "What's hard about answering that? That tension is worth exploring."
+**If genuine:** Acknowledge SPECIFICALLY what was insightful, then move to BRIDGE.
 
 ### Phase 6: BRIDGE (1-2 exchanges)
 
-"You've got a lesson planning workflow now: you decide the what and why, AI helps with the how.
+**Verify the artifact is classroom-ready before closing:**
+"Would you actually use this template for your next lesson? Walk me through how."
 
-Next week we're going deeper into feedback and assessment — how to use AI to give students better feedback without losing the personal touch.
+If they can articulate the workflow → close:
+"You've got a lesson planning workflow: you decide the what and why, AI helps with the how. Next week — feedback and assessment. When you're ready, click Finish Session to save your work and continue."
 
-Great work today!"
+If they're vague about usage → one more exchange: "What would you change to make it work for Monday?"
 
 ---
 
