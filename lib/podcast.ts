@@ -23,15 +23,16 @@ interface PodcastSegment {
   text: string;
 }
 
-// Course overview for Week 0 podcasts
-const COURSE_OVERVIEW = `
-Week 1: Understanding AI in Teaching - What AI is (and isn't), classroom-safe uses, limitations and guardrails
-Week 2: Prompting Fundamentals - The 4C framework (Context, Constraints, Command, Criteria), iterating on prompts
-Week 3: Lesson Planning with AI - Using AI as a brainstorming partner, generating differentiated materials
-Week 4: Feedback & Assessment - Drafting feedback, rubric-aligned comments, practice questions
-Week 5: Differentiation with AI - Adapting lessons for diverse learners, differentiated materials
-Week 6: Integration & Ethics - Personal AI policy, ethical integration, sustainable practice
-`;
+// Intellectual concepts to weave in per week
+const WEEK_CONCEPTS: Record<number, string> = {
+  0: "workflow architecture, planning debt (time spent creating vs iterating), intrinsic motivation theory, the difference between a time problem and a systems problem",
+  1: "pattern matching vs understanding, prediction engines, hallucination as confident confabulation, the 'tool not replacement' mental model, automation bias",
+  2: "4C framework, cognitive load theory (fewer decisions = better output), constraint as creative focus, the difference between specific and redundant, iterative refinement",
+  3: "iteration over perfection, AI as brainstorming partner vs generator, pedagogical ownership, the 'voice' problem (AI averaging vs your specificity)",
+  4: "Hattie's feedback research (effect size 0.7), formative vs summative, draft vs final judgment, calibration, the difference between AI feedback and teacher feedback",
+  5: "Tomlinson's differentiation framework, Universal Design for Learning (UDL), scaffolding vs simplifying, the 'easy version' trap, maintaining rigor while increasing access",
+  6: "sustainable integration, knowing when NOT to use AI, personal policy as professional identity, ethical boundaries, the automation paradox",
+};
 
 function extractKeyMoments(history: { role: string; content: string }[]): string {
   const teacherMessages = history
@@ -61,7 +62,7 @@ async function generatePodcastScript(
 
   const response = await anthropic.messages.create({
     model: "claude-sonnet-4-20250514",
-    max_tokens: 800,
+    max_tokens: 1000,
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -84,41 +85,47 @@ function generateIntroWeekPrompt(
   teacherQuotes: string,
   profileContext: string | null
 ): string {
-  return `Write a SHORT 90-second podcast welcome. Two hosts, 8 exchanges max, 200 words max.
+  return `Write a 90-second podcast for a teacher who just completed onboarding. Two hosts. This is NOT a recap — it's an intellectual reframe that helps them see their situation more clearly.
 
-Hosts: Sam (A) = warm, curious. Alex (B) = grounded, encouraging.
+HOSTS:
+- Sam (A): Learning scientist. References research, explains underlying principles. Warm but substantive.
+- Alex (B): Former teacher turned coach. Makes it practical, validates the struggle without cheerleading.
 
 ## TEACHER PROFILE
 ${profileContext || "No profile available."}
 
-## KEY QUOTES
+## WHAT THEY SAID (use specific details, not generic summaries)
 ${teacherQuotes}
 
-## COURSE OVERVIEW
-${COURSE_OVERVIEW}
+## INTELLECTUAL CONCEPTS TO WEAVE IN
+${WEEK_CONCEPTS[0]}
 
-## STRUCTURE (8 exchanges, 1-2 sentences each)
-1. A: Who this teacher is + what brought them here (specific)
-2. B: Their main challenge (reference one quote)
-3. A: The insight — what's really going on beneath the surface
-4. B: Why that matters + they're not alone in this
-5. A: Connect to 1 specific course week that fits their situation
-6. B: Connect to 1 more course week
-7. A: Encouragement — they're in the right place
-8. B: Quick sign-off
+## CONVERSATION
+${conversationText.slice(-3000)}
+
+## ARC (8-10 exchanges, 200-250 words)
+
+1. CALLBACK (A): Start with their NAME and something SPECIFIC they said. Quote or closely paraphrase.
+2. DIAGNOSIS (B): Name the real problem beneath the surface. Not "you're busy" — what's the structural issue? Use a concept like "planning debt" or "workflow architecture."
+3. REFRAME (A): Explain WHY this matters using a principle. "That's not a discipline problem, it's a systems problem."
+4. EVIDENCE (B): Connect to their specific situation. What did they reveal that confirms this diagnosis?
+5. COURSE CONNECTION (A): Name ONE specific week that addresses their core issue and explain WHY (not just "Week 3 covers lesson planning" but what they'll actually learn to do differently).
+6. SECOND CONNECTION (B): Name one more week, same depth.
+7. THE TENSION (A): Acknowledge their stated concern about AI honestly — don't dismiss it, reframe it.
+8. SIGN-OFF (B): Brief, warm, forward-looking. No cheerleading.
 
 ## OUTPUT — ONLY this format:
 A: [line]
 B: [line]
 
 STRICT RULES:
-- 8 exchanges MAXIMUM
-- Each line is 1-2 sentences, never more
-- 200 words total max
-- Do NOT quote the teacher at length — paraphrase briefly
-- Do NOT recap every topic discussed
-- Do NOT include preamble, notes, or commentary
-- Warm and genuine, not hyped`;
+- Use their ACTUAL NAME from the profile. Never "this teacher" or "our teacher."
+- 8-10 exchanges, 200-250 words
+- Each line 1-3 sentences. Vary length — some short, some longer.
+- NEVER say "great job", "you're doing amazing", "you're not alone"
+- NEVER use generic validation. Every sentence must add intellectual substance.
+- Reference at least ONE concept from the intellectual concepts list
+- Do NOT include preamble, notes, or commentary — ONLY the A:/B: lines`;
 }
 
 function generateStandardWeekPrompt(
@@ -129,53 +136,60 @@ function generateStandardWeekPrompt(
   weekTitle: string,
   moduleContext: string
 ): string {
-  const nextWeekPreview: Record<number, string> = {
-    1: "Week 2 is all about prompting fundamentals—the 4C framework: Context, Constraints, Command, Criteria. They're going to learn how to get exactly what they need from AI, every time.",
-    2: "Week 3 is where it gets really practical—lesson planning with AI. They'll use AI as a brainstorming partner while staying in the driver's seat.",
-    3: "Week 4 tackles feedback and assessment—generating feedback drafts, rubric-aligned comments. This is where AI starts saving serious time.",
-    4: "Week 5 is differentiation with AI—designing materials for diverse learners, adapting lessons so every student gets what they need. This is going to be huge for them.",
-    5: "Week 6 is about integration and ethics—developing their personal AI policy and figuring out sustainable, ethical ways to keep AI in their practice.",
-    6: "They've completed the course! Now it's about putting it all into practice and building those sustainable routines.",
+  const nextWeekTeases: Record<number, string> = {
+    1: "Next week they learn the 4C framework — a structure for telling AI exactly what you need. The key insight: most prompts fail not because they're too short, but because they're ambiguous at the wrong decision points.",
+    2: "Next week they apply this to lesson planning — and here's what most people get wrong: they ask AI to write the whole lesson instead of using it as a brainstorming partner. That's the difference between getting generic output and getting something that sounds like you.",
+    3: "Next week is feedback and assessment — and here's the thing Hattie's research shows: feedback has an effect size of 0.7, but only when it's specific and actionable. AI can draft that specificity at scale, but the teacher has to calibrate it.",
+    4: "Next week is differentiation — and most teachers think it means 'make an easier version.' It doesn't. It means maintaining rigor while changing access. That distinction changes everything about how you prompt.",
+    5: "Next week they build their personal AI policy — which sounds bureaucratic, but it's actually about professional identity. What role does AI play in YOUR practice? That answer is different for every teacher.",
+    6: "They've finished the course. The real question now isn't 'can I use AI?' — it's 'when should I NOT use it?' That judgment is the real skill.",
   };
 
-  return `Write a SHORT 90-second podcast recap for Week ${weekNumber}: ${weekTitle}. Two hosts, 8 exchanges max, 200 words max.
+  return `Write a 90-second podcast for a teacher who just completed Week ${weekNumber}: ${weekTitle}. Two hosts. This is NOT a recap — it's an intellectual reframe that helps them see what they learned in a deeper way.
 
-Hosts: Sam (A) = warm, celebrates wins. Alex (B) = names what they learned, previews what's next.
+HOSTS:
+- Sam (A): Learning scientist. References research, explains underlying principles. Warm but substantive.
+- Alex (B): Former teacher turned coach. Makes it practical, connects to classroom reality.
 
 ## TEACHER PROFILE
 ${profileContext || "No profile available."}
 
-## KEY QUOTES
+## WHAT THEY SAID (use specific details)
 ${teacherQuotes}
 
-## WEEK ${weekNumber} CONCEPTS
-${moduleContext}
+## CONVERSATION
+${conversationText.slice(-3000)}
 
-## NEXT WEEK
-${nextWeekPreview[weekNumber] || "More learning ahead!"}
+## INTELLECTUAL CONCEPTS FOR THIS WEEK
+${WEEK_CONCEPTS[weekNumber] || ""}
 
-## STRUCTURE (8 exchanges, 1-2 sentences each)
-1. A: Personal hook — their role + a specific win from this session
-2. B: The key thing they built or realized this week
-3. A: Name one concept they now understand (from the week's objectives)
-4. B: Name a second concept + tie to their goals
-5. A: What they can DO with this right now
-6. B: Preview next week — one specific thing to look forward to
-7. A: Celebration — they should feel accomplished
-8. B: Quick sign-off with energy
+## NEXT WEEK TEASE
+${nextWeekTeases[weekNumber] || "More to come."}
+
+## ARC (8-10 exchanges, 200-250 words)
+
+1. CALLBACK (A): Start with their NAME and something SPECIFIC they said or built. Quote them briefly.
+2. THE SHIFT (B): Name what actually changed in their thinking. Not "you learned X" — what do they understand NOW that they didn't before? Be specific.
+3. THE PRINCIPLE (A): Explain WHY this matters using a real concept from the intellectual concepts list. Don't dumb it down — teachers are professionals.
+4. THE EVIDENCE (B): Point to something specific from their conversation that demonstrates understanding. "When you said [X], that showed you get [principle]."
+5. THE APPLICATION (A): One specific thing they can do THIS WEEK. Not vague ("try it out") — specific ("Next time you're writing a prompt and it feels too long, ask yourself: am I being specific or being redundant?").
+6. THE TEASE (B): Preview next week with intellectual substance. What's the specific problem they'll tackle, and what do most people get wrong about it?
+7. THE FRAME (A): One sentence that captures the meta-skill they're building. Connect this week to the larger arc.
+8. SIGN-OFF (B): Brief, warm. Not cheerleader.
 
 ## OUTPUT — ONLY this format:
 A: [line]
 B: [line]
 
 STRICT RULES:
-- 8 exchanges MAXIMUM
-- Each line is 1-2 sentences, never more
-- 200 words total max
-- Do NOT quote the teacher at length — paraphrase briefly
-- Do NOT recap every topic — pick the ONE big takeaway
-- Do NOT include preamble, notes, or commentary
-- Energetic and personal, not a dry summary`;
+- Use their ACTUAL NAME from the profile. Never "this teacher."
+- 8-10 exchanges, 200-250 words
+- Each line 1-3 sentences. Vary length naturally.
+- NEVER say "great job", "you're doing amazing", "that's real progress"
+- NEVER use generic validation. Every sentence must teach something or add substance.
+- Reference at least ONE concept from the intellectual concepts list by name
+- The tone is two smart colleagues who find this genuinely interesting
+- Do NOT include preamble, notes, or commentary — ONLY the A:/B: lines`;
 }
 
 async function generateSegmentAudio(text: string, voice: Voice): Promise<ArrayBuffer> {
