@@ -13,7 +13,9 @@
     "sim:quick": "npx tsx scripts/learner-agents.ts --persona=maria --week=2",
     "debug": "npx tsx debug-loop/run.ts",
     "debug:watch": "npx tsx debug-loop/watch.ts",
-    "debug:session": "npx tsx debug-loop/get-session.ts"
+    "debug:session": "npx tsx debug-loop/get-session.ts",
+    "review": "npx tsx debug-loop/review.ts",
+    "review:latest": "npx tsx debug-loop/review.ts --latest"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
