@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
 interface UseSpeechToTextReturn {
   isListening: boolean;
@@ -18,6 +18,7 @@ export function useSpeechToText(): UseSpeechToTextReturn {
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<ReturnType<typeof createRecognition> | null>(null);
   const wantListeningRef = useRef(false);
+  const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isSupported =
     typeof window !== "undefined" &&
@@ -31,8 +32,9 @@ export function useSpeechToText(): UseSpeechToTextReturn {
     const r: any = new Ctor();
 
     r.continuous = true;
-    r.interimResults = false; // Only final, committed results — no flicker
+    r.interimResults = false;
     r.lang = "en-US";
+    r.maxAlternatives = 1;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     r.onresult = (event: any) => {
@@ -46,35 +48,85 @@ export function useSpeechToText(): UseSpeechToTextReturn {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     r.onerror = (event: any) => {
-      // Ignore benign errors — keep listening
-      if (event.error === "aborted" || event.error === "no-speech") return;
+      console.log("[MIC] Recognition error:", event.error);
+
+      // Non-fatal errors — keep listening
+      if (event.error === "no-speech" || event.error === "aborted") return;
+
+      if (event.error === "network") {
+        // Network blip — restart after brief delay
+        if (wantListeningRef.current) {
+          restartTimeoutRef.current = setTimeout(() => {
+            if (wantListeningRef.current) restartRecognition();
+          }, 500);
+        }
+        return;
+      }
+
       if (event.error === "not-allowed") {
         setError("Microphone access denied");
-        wantListeningRef.current = false;
-        setIsListening(false);
       }
+
+      // Fatal error — actually stop
+      wantListeningRef.current = false;
+      setIsListening(false);
     };
 
     r.onend = () => {
-      // Browser killed recognition (timeout, pause, etc.) — auto-restart if user still wants mic on
+      console.log("[MIC] Recognition ended, wantListening:", wantListeningRef.current);
+
+      // Browser killed recognition (timeout, silence, etc.) — auto-restart
       if (wantListeningRef.current) {
-        try {
-          r.start();
-          return; // Stay listening from user's perspective
-        } catch {
-          // Failed to restart — actually stop
-        }
+        // Small delay prevents rapid restart loops
+        restartTimeoutRef.current = setTimeout(() => {
+          if (wantListeningRef.current) restartRecognition();
+        }, 100);
+        return;
       }
+
       setIsListening(false);
     };
 
     return r;
   }
 
+  function restartRecognition() {
+    console.log("[MIC] Restarting recognition...");
+
+    // Try restarting existing instance first
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.start();
+        console.log("[MIC] Restarted existing instance");
+        return;
+      } catch {
+        // Old instance is stuck — create fresh one
+      }
+    }
+
+    // Create a new instance
+    try {
+      const r = createRecognition();
+      recognitionRef.current = r;
+      r.start();
+      console.log("[MIC] Started new instance");
+    } catch {
+      console.error("[MIC] Failed to create new instance");
+      wantListeningRef.current = false;
+      setIsListening(false);
+    }
+  }
+
   const startListening = useCallback(() => {
     if (!isSupported || wantListeningRef.current) return;
 
-    // Create a fresh instance each time to avoid stale state
+    // Clear any pending restart
+    if (restartTimeoutRef.current) {
+      clearTimeout(restartTimeoutRef.current);
+      restartTimeoutRef.current = null;
+    }
+
+    // Abort existing instance
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch { /* ignore */ }
     }
@@ -89,6 +141,7 @@ export function useSpeechToText(): UseSpeechToTextReturn {
 
     try {
       r.start();
+      console.log("[MIC] Recognition started");
     } catch {
       wantListeningRef.current = false;
       setIsListening(false);
@@ -96,16 +149,40 @@ export function useSpeechToText(): UseSpeechToTextReturn {
   }, [isSupported]);
 
   const stopListening = useCallback(() => {
+    console.log("[MIC] Stopping recognition");
+
+    // Clear intent FIRST so onend doesn't restart
     wantListeningRef.current = false;
-    setIsListening(false);
+
+    // Clear any pending restart
+    if (restartTimeoutRef.current) {
+      clearTimeout(restartTimeoutRef.current);
+      restartTimeoutRef.current = null;
+    }
+
     if (recognitionRef.current) {
       try { recognitionRef.current.abort(); } catch { /* ignore */ }
       recognitionRef.current = null;
     }
+
+    setIsListening(false);
   }, []);
 
   const clearTranscript = useCallback(() => {
     setTranscript("");
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      wantListeningRef.current = false;
+      if (restartTimeoutRef.current) {
+        clearTimeout(restartTimeoutRef.current);
+      }
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort(); } catch { /* ignore */ }
+      }
+    };
   }, []);
 
   return {
