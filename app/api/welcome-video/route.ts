@@ -85,7 +85,13 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // CHECK 2: Video already in progress? Resume polling instead of regenerating.
+    // CHECK 2: Video permanently failed (billing etc) — don't retry
+    if (existing?.welcomeVideoId === "FAILED") {
+      console.log("[HEYGEN] Video permanently failed, not retrying");
+      return NextResponse.json({ status: "failed", error: "Video generation unavailable" });
+    }
+
+    // CHECK 3: Video already in progress? Resume polling instead of regenerating.
     if (existing?.welcomeVideoId) {
       console.log("[HEYGEN] Video already in progress:", existing.welcomeVideoId);
       return NextResponse.json({
@@ -194,13 +200,16 @@ export async function GET(req: NextRequest) {
     // Use param videoId, or fall back to DB-persisted in-progress videoId
     const videoId = videoIdParam || profile?.welcomeVideoId;
 
-    // If no videoId at all, check if user has a profile (eligible for video)
-    if (!videoId) {
+    // If no videoId, or permanently failed — don't try HeyGen
+    if (!videoId || videoId === "FAILED") {
+      // If permanently failed, don't tell client to generate
+      if (videoId === "FAILED") {
+        return NextResponse.json({ hasProfile: false, hasCachedVideo: false });
+      }
       const hasProfile = await getUserProfile(userId);
       return NextResponse.json({
         hasProfile: !!hasProfile,
         hasCachedVideo: false,
-        // Tell the client if there's an in-progress video to resume
         videoId: profile?.welcomeVideoId || null,
       });
     }
@@ -238,15 +247,25 @@ export async function GET(req: NextRequest) {
     }
 
     if (status === "failed") {
-      // Clear the failed videoId so a fresh one can be generated
+      const errorDetail = statusData.data?.error;
+      const isPermanentFailure =
+        errorDetail?.code?.includes("INSUFFICIENT_CREDIT") ||
+        errorDetail?.code?.includes("PAYMENT");
+
+      // For permanent failures (billing), mark as failed so we stop retrying
+      // For transient failures, clear videoId so it can be retried
       await prisma.userProfile.update({
         where: { userId },
-        data: { welcomeVideoId: null },
+        data: {
+          welcomeVideoId: isPermanentFailure ? "FAILED" : null,
+        },
       });
+
+      console.error("[HEYGEN] Video failed:", errorDetail?.code, errorDetail?.detail);
 
       return NextResponse.json({
         status: "failed",
-        error: statusData.data?.error || "Video generation failed",
+        error: errorDetail || "Video generation failed",
       });
     }
 
