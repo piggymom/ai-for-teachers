@@ -7,7 +7,7 @@ export function AuthButton() {
   const { data: session, status } = useSession();
 
   if (status === "loading") {
-    return <div className="h-5 w-16 animate-pulse rounded bg-[#f3f4f6]" />;
+    return <div className="h-5 w-16 animate-pulse rounded bg-muted" />;
   }
 
   if (session?.user) {
@@ -22,13 +22,13 @@ export function AuthButton() {
             className="rounded-full"
           />
         )}
-        <span className="text-[15px] text-[#6B7280]">
+        <span className="text-[15px] text-muted-foreground">
           {session.user.name?.split(" ")[0]}
         </span>
-        <span className="text-[#d1d5db]">&middot;</span>
+        <span className="text-border">&middot;</span>
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="text-[15px] text-[#9ca3af] transition hover:text-[#4b5563]"
+          className="text-[15px] text-muted-foreground transition hover:text-foreground"
         >
           Sign out
         </button>
@@ -39,7 +39,7 @@ export function AuthButton() {
   return (
     <button
       onClick={() => signIn("google", { callbackUrl: "/home" })}
-      className="text-[15px] text-[#9ca3af] transition hover:text-[#4b5563]"
+      className="text-[15px] text-muted-foreground transition hover:text-foreground"
     >
       Sign in
     </button>

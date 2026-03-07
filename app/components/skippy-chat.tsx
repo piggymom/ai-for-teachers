@@ -91,7 +91,6 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
   const playTTS = useCallback(async (text: string): Promise<void> => {
     setVoiceStatus("generating");
 
-    // Detect template-heavy messages and use a short spoken summary instead
     const isTemplateMessage =
       (text.includes("CONTEXT:") && text.includes("COMMAND:")) ||
       (text.match(/\*\*/g) || []).length >= 6;
@@ -99,20 +98,16 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
     let cleanText: string;
 
     if (isTemplateMessage) {
-      // Extract just the conversational intro/outro, skip the template body
       const lines = text.split("\n");
       const spokenParts: string[] = [];
       let inTemplate = false;
 
       for (const line of lines) {
         const trimmed = line.trim();
-        // Detect start of template block
         if (/^(\*\*)?CONTEXT(\*\*)?:/i.test(trimmed)) { inTemplate = true; continue; }
-        // Detect end of template block (blank line after CRITERIA section)
         if (inTemplate && /^(\*\*)?CRITERIA(\*\*)?:/i.test(trimmed)) { continue; }
         if (inTemplate && trimmed === "") { inTemplate = false; continue; }
         if (inTemplate) continue;
-        // Keep conversational lines
         if (trimmed) spokenParts.push(trimmed);
       }
 
@@ -123,12 +118,10 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
         .replace(/`([^`]+)`/g, "$1")
         .trim();
 
-      // If we stripped too much, use a generic summary
       if (cleanText.length < 20) {
         cleanText = "Here's your prompt template. Take a look and let me know what you'd change.";
       }
     } else {
-      // Standard markdown stripping for non-template messages
       cleanText = text
         .replace(/\*\*(.*?)\*\*/g, "$1")
         .replace(/\*(.*?)\*/g, "$1")
@@ -140,7 +133,6 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
         .trim();
     }
 
-    // Truncate for TTS — long messages cause slow generation
     const MAX_TTS_CHARS = 800;
     if (cleanText.length > MAX_TTS_CHARS) {
       const truncated = cleanText.slice(0, MAX_TTS_CHARS);
@@ -179,7 +171,6 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
       };
 
       audio.play().catch(() => {
-        // Autoplay blocked — resolve anyway so transcript shows
         currentAudioRef.current = null;
         URL.revokeObjectURL(url);
         resolve();
@@ -194,7 +185,6 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
       currentAudioRef.current = null;
     }
     setVoiceStatus("idle");
-    // Show pending transcript immediately
     if (pendingTranscript) {
       setMessages((prev) => [
         ...prev,
@@ -229,7 +219,6 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
         const assistantText = data.response || "";
 
         if (voiceMode) {
-          // VOICE MODE: play audio first, then show transcript
           setPendingTranscript(assistantText);
           setVoiceStatus("thinking");
           setIsSending(false);
@@ -240,7 +229,6 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
             // TTS failed — fall through to show transcript
           }
 
-          // Audio finished (or failed) — show transcript
           setMessages((prev) => [
             ...prev,
             { id: genId(), role: "assistant", text: assistantText, isStreaming: false, wasSpoken: true },
@@ -248,7 +236,6 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
           setPendingTranscript(null);
           setVoiceStatus("idle");
         } else {
-          // NORMAL TEXT MODE
           setMessages((prev) => [
             ...prev,
             { id: genId(), role: "assistant", text: assistantText, isStreaming: false },
@@ -278,7 +265,6 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
 
     async function init() {
       try {
-        // Check AI processing consent
         const consentRes = await fetch("/api/consent?type=ai_processing");
         if (consentRes.ok) {
           const consentData = await consentRes.json();
@@ -327,7 +313,6 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
     setIsReady(true);
     fetchLedger();
 
-    // If new conversation, get opening message
     if (!data.resumed && data.history?.length === 0) {
       const openRes = await fetch("/api/skippy", {
         method: "POST",
@@ -343,7 +328,6 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
         if (openData.response) {
           const text = openData.response;
 
-          // If voice mode is on, play TTS for the opening message
           if (voiceMode) {
             setVoiceStatus("thinking");
             setPendingTranscript(text);
@@ -389,19 +373,15 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
   }
 
   function submitCurrentInput() {
-    // Stop mic if active
     if (isListening) stopListening();
 
-    // Combine typed input + speech transcript
     const text = (input + (sttTranscript ? " " + sttTranscript : "")).trim();
     if (!text || !isReady || isSending || voiceStatus !== "idle") return;
 
-    // Clear everything
     setInput("");
     clearTranscript();
     setIsSending(true);
 
-    // Add user message
     setMessages((prev) => [...prev, { id: genId(), role: "user", text, isStreaming: false }]);
 
     if (voiceMode) {
@@ -463,14 +443,14 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
   // =============================================================================
 
   return (
-    <main className="flex min-h-screen flex-col bg-white">
+    <main className="flex min-h-screen flex-col bg-background">
       {/* Header */}
-      <header className="border-b border-[#f3f4f6] px-6 py-4">
+      <header className="border-b border-border px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <div className="flex items-center gap-3">
             <a
               href="/home"
-              className="text-[#9ca3af] hover:text-[#4b5563] transition-colors p-1"
+              className="text-muted-foreground hover:text-foreground transition-colors p-1"
               title="Back to Dashboard"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -478,8 +458,8 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
               </svg>
             </a>
             <div>
-              <p className="text-[11px] text-[#9ca3af] uppercase tracking-widest">Week {week}</p>
-              <h1 className="text-[16px] font-medium text-[#111827]">{weekTitle}</h1>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-widest">Week {week}</p>
+              <h1 className="text-[16px] font-medium text-foreground">{weekTitle}</h1>
             </div>
           </div>
 
@@ -496,8 +476,8 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
               }}
               className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[12px] font-medium transition ${
                 voiceMode
-                  ? "border-[#111827] bg-[#111827] text-white"
-                  : "border-[#e5e7eb] text-[#9ca3af] hover:text-[#4b5563] hover:border-[#d1d5db]"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border text-muted-foreground hover:text-foreground hover:border-ring"
               }`}
               title={voiceMode ? "Voice mode on" : "Voice mode off"}
             >
@@ -505,7 +485,7 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
               <span className="hidden sm:inline">{voiceMode ? "Voice On" : "Voice Off"}</span>
             </button>
 
-            {/* Phase indicator - hidden on mobile */}
+            {/* Phase indicator */}
             <div className="hidden md:block">
               <ChatPhaseIndicator currentPhase={currentPhase} />
             </div>
@@ -514,7 +494,7 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
             <button
               onClick={handleEndWeek}
               disabled={isLoading}
-              className="px-4 py-2 text-[#4b5563] hover:text-[#111827] text-[13px] font-medium rounded-lg border border-[#e5e7eb] hover:bg-[#f9fafb] transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-muted-foreground hover:text-foreground text-[13px] font-medium rounded-lg border border-border hover:bg-secondary transition-colors disabled:opacity-50"
             >
               Finish Session
             </button>
@@ -524,28 +504,28 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
 
       {/* AI Consent Banner */}
       {showAiConsent && (
-        <div className="border-b border-[#e5e7eb] bg-[#f9fafb] px-6 py-8">
+        <div className="border-b border-border bg-secondary px-6 py-8 animate-fade-in">
           <div className="mx-auto max-w-2xl space-y-4">
-            <h2 className="text-[16px] font-medium text-[#111827]">Before you start</h2>
-            <p className="text-[14px] leading-relaxed text-[#4b5563]">
+            <h2 className="text-[16px] font-medium text-foreground">Before you start</h2>
+            <p className="text-[14px] leading-relaxed text-muted-foreground">
               Skippy is powered by Claude, an AI from Anthropic. Here&apos;s what to know:
             </p>
-            <ul className="text-[14px] text-[#4b5563] space-y-2 list-disc pl-5">
+            <ul className="text-[14px] text-muted-foreground space-y-2 list-disc pl-5">
               <li>Your messages are processed by AI to generate personalized responses</li>
               <li>Your professional profile helps tailor the experience to you</li>
               <li>Your readiness level is assessed to adjust conversation complexity</li>
               <li>Conversations are stored so you can pick up where you left off</li>
             </ul>
-            <p className="text-[13px] font-medium text-[#b91c1c]">
+            <p className="text-[13px] font-medium text-destructive">
               Please do not share student names or identifiable student information.
             </p>
-            <p className="text-[13px] text-[#9ca3af]">
+            <p className="text-[13px] text-muted-foreground">
               Learn more:{" "}
-              <Link href="/legal/ai-disclosure" className="text-[#111827] underline hover:text-[#3B82F6]" target="_blank">
+              <Link href="/legal/ai-disclosure" className="text-foreground underline hover:text-primary" target="_blank">
                 AI Disclosure
               </Link>
               {" "}&middot;{" "}
-              <Link href="/legal/privacy" className="text-[#111827] underline hover:text-[#3B82F6]" target="_blank">
+              <Link href="/legal/privacy" className="text-foreground underline hover:text-primary" target="_blank">
                 Privacy Policy
               </Link>
             </p>
@@ -554,14 +534,14 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
                 type="checkbox"
                 checked={aiConsentChecked}
                 onChange={(e) => setAiConsentChecked(e.target.checked)}
-                className="h-4 w-4 rounded border-[#d1d5db] text-[#111827] focus:ring-[#d1d5db] cursor-pointer"
+                className="h-4 w-4 rounded border-border text-primary focus:ring-ring cursor-pointer accent-primary"
               />
-              <span className="text-[13px] text-[#4b5563]">I understand and want to continue</span>
+              <span className="text-[13px] text-muted-foreground">I understand and want to continue</span>
             </label>
             <button
               onClick={handleAcceptAiConsent}
               disabled={!aiConsentChecked}
-              className="rounded-lg border border-[#e5e7eb] bg-white px-5 py-2.5 text-[14px] font-medium text-[#111827] hover:bg-[#f9fafb] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="rounded-lg border border-border bg-card px-5 py-2.5 text-[14px] font-medium text-foreground hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Start Conversation
             </button>
@@ -573,13 +553,12 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
       <div className="flex-1 overflow-y-auto px-6 py-8">
         <div className="mx-auto max-w-3xl space-y-6">
           {isLoading && messages.length === 0 ? (
-            <div className="flex justify-center py-16 text-[#9ca3af]">
+            <div className="flex justify-center py-16 text-muted-foreground">
               <LoadingDots /> <span className="ml-3 text-[14px]">Starting...</span>
             </div>
           ) : (
             <>
               {messages.map((msg, idx) => {
-                // Only show Finish button on the very last assistant message
                 const isLastAssistant =
                   msg.role === "assistant" &&
                   idx === messages.findLastIndex((m) => m.role === "assistant");
@@ -603,7 +582,7 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
                   <div className="flex-shrink-0 mt-1">
                     <SkippyAvatar state="thinking" size="sm" />
                   </div>
-                  <div className="rounded-2xl rounded-bl-md bg-[#f9fafb] px-4 py-3 text-[#4b5563]">
+                  <div className="rounded-2xl rounded-bl-md bg-secondary px-4 py-3 text-muted-foreground">
                     <LoadingDots /> <span className="ml-2 text-[14px]">Thinking...</span>
                   </div>
                 </div>
@@ -617,10 +596,10 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
 
       {/* Error */}
       {error && (
-        <div className="border-t border-red-100 bg-red-50 px-6 py-3">
+        <div className="border-t border-destructive/20 bg-destructive/5 px-6 py-3">
           <div className="mx-auto flex max-w-3xl justify-between">
-            <span className="text-[13px] text-red-600">{error}</span>
-            <button onClick={() => setError(null)} className="text-[12px] text-red-400 hover:text-red-600">
+            <span className="text-[13px] text-destructive">{error}</span>
+            <button onClick={() => setError(null)} className="text-[12px] text-destructive/60 hover:text-destructive">
               Dismiss
             </button>
           </div>
@@ -629,21 +608,21 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
 
       {/* Listening indicator */}
       {isListening && (
-        <div className="border-t border-red-100 bg-red-50/50 px-6 py-2">
+        <div className="border-t border-destructive/20 bg-destructive/5 px-6 py-2">
           <div className="mx-auto max-w-3xl flex items-center justify-center gap-2">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive/60 opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-destructive" />
             </span>
-            <span className="text-[13px] text-red-600 font-medium">Listening — click mic when done speaking</span>
+            <span className="text-[13px] text-destructive font-medium">Listening — click mic when done speaking</span>
           </div>
         </div>
       )}
 
       {/* Speech error */}
       {speechError && (
-        <div className="border-t border-amber-100 bg-amber-50/50 px-6 py-2">
-          <div className="mx-auto max-w-3xl flex items-center justify-center gap-2 text-[13px] text-amber-700">
+        <div className="border-t border-warning/20 bg-warning/5 px-6 py-2">
+          <div className="mx-auto max-w-3xl flex items-center justify-center gap-2 text-[13px] text-warning-foreground">
             <span>
               {speechError === "Microphone access denied"
                 ? "Microphone blocked — check browser permissions, or type instead"
@@ -651,10 +630,9 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
             </span>
             <button
               onClick={() => {
-                // Clear error and retry
                 startListening();
               }}
-              className="underline hover:text-amber-900"
+              className="underline hover:opacity-80"
             >
               Retry
             </button>
@@ -663,15 +641,14 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
       )}
 
       {/* Input */}
-      <div className="border-t border-[#f3f4f6] px-6 py-4">
+      <div className="border-t border-border px-6 py-4">
         <form onSubmit={handleSubmit} className="mx-auto max-w-3xl flex gap-2 items-end">
-          {/* Mic button — visible when voice mode ON and browser supports it */}
+          {/* Mic button */}
           {speechSupported && voiceMode && (
             <button
               type="button"
               onClick={() => {
                 if (isListening) {
-                  // Commit speech transcript to typed input, then stop
                   if (sttTranscript) {
                     setInput((prev) => (prev ? prev + " " + sttTranscript : sttTranscript).trim());
                     clearTranscript();
@@ -684,8 +661,8 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
               disabled={isLoading || isSending || isVoiceActive}
               className={`flex-shrink-0 rounded-xl p-3 transition-colors ${
                 isListening
-                  ? "bg-red-500 text-white"
-                  : "bg-[#f3f4f6] text-[#9ca3af] hover:bg-[#e5e7eb] hover:text-[#4b5563]"
+                  ? "bg-destructive text-destructive-foreground animate-pulse-ring"
+                  : "bg-secondary text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               } disabled:opacity-30`}
               aria-label={isListening ? "Stop recording" : "Start recording"}
               title={isListening ? "Stop recording" : "Click to speak"}
@@ -698,7 +675,6 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
             ref={inputRef}
             value={displayValue}
             onChange={(e) => {
-              // Only allow typing when not listening
               if (!isListening) {
                 setInput(e.target.value);
               }
@@ -720,19 +696,19 @@ export function SkippyChat({ week, weekTitle }: { week: number; weekTitle: strin
             disabled={isLoading || isSending || isVoiceActive}
             readOnly={isListening}
             rows={1}
-            className="flex-1 resize-none rounded-xl border border-[#e5e7eb] bg-white px-4 py-3 text-[15px] text-[#111827] placeholder-[#d1d5db] focus:outline-none focus:border-[#d1d5db] disabled:opacity-50 transition-all"
+            className="flex-1 resize-none rounded-xl border border-border bg-card px-4 py-3 text-[15px] text-foreground placeholder-muted-foreground/40 focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:opacity-50 transition-all"
           />
           <button
             type="submit"
             disabled={!hasContent || !canSend}
             className={`flex-shrink-0 rounded-xl px-4 py-3 transition-colors ${
-              hasContent && canSend ? "bg-[#111827] hover:bg-[#374151]" : "bg-[#f3f4f6] disabled:opacity-30"
+              hasContent && canSend ? "bg-primary hover:opacity-90 shadow-sm" : "bg-muted disabled:opacity-30"
             }`}
           >
             <SendIcon active={hasContent && canSend} />
           </button>
         </form>
-        <p className="mt-2 text-[11px] text-[#d1d5db] text-center">
+        <p className="mt-2 text-[11px] text-muted-foreground/40 text-center">
           {voiceMode && speechSupported
             ? "Click mic to speak, or type"
             : "Enter to send, Shift+Enter for new line"}
@@ -756,9 +732,9 @@ function VoiceStatusDisplay({ status, onStop }: { status: VoiceStatus; onStop: (
       <div className="flex-shrink-0 mt-1">
         <SkippyAvatar state={status === "speaking" ? "speaking" : "thinking"} size="sm" />
       </div>
-      <div className="flex items-center gap-3 rounded-2xl rounded-bl-md bg-[#f9fafb] px-4 py-3">
+      <div className="flex items-center gap-3 rounded-2xl rounded-bl-md bg-secondary px-4 py-3">
         <div className="flex flex-col gap-1">
-          <span className="text-[14px] text-[#4b5563]">
+          <span className="text-[14px] text-muted-foreground">
             {status === "thinking" && "Skippy is thinking..."}
             {status === "generating" && "Preparing voice..."}
             {status === "speaking" && "Skippy is speaking..."}
@@ -770,7 +746,7 @@ function VoiceStatusDisplay({ status, onStop }: { status: VoiceStatus; onStop: (
               {[0, 1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="w-[3px] rounded-full bg-[#111827]/30 animate-voice-bar"
+                  className="w-[3px] rounded-full bg-primary/30 animate-voice-bar"
                   style={{ animationDelay: `${i * 0.12}s` }}
                 />
               ))}
@@ -781,7 +757,7 @@ function VoiceStatusDisplay({ status, onStop }: { status: VoiceStatus; onStop: (
         {status === "speaking" && (
           <button
             onClick={onStop}
-            className="ml-2 rounded-lg border border-[#e5e7eb] px-3 py-1 text-[12px] font-medium text-[#4b5563] hover:text-[#111827] hover:border-[#d1d5db] transition"
+            className="ml-2 rounded-lg border border-border px-3 py-1 text-[12px] font-medium text-muted-foreground hover:text-foreground hover:border-ring transition"
           >
             Stop
           </button>
@@ -797,14 +773,12 @@ function VoiceStatusDisplay({ status, onStop }: { status: VoiceStatus; onStop: (
 
 function isWrapUpMessage(content: string): boolean {
   const triggers = [
-    // Direct session-end signals (matches shared rules language)
     "finish session", "click finish session", "click the button below",
     "save our conversation", "save your work and continue",
     "save everything we discussed", "save what we covered", "save what we discussed",
     "saved to your artifacts", "saved this to your artifacts",
     "unlock week", "when you're ready",
     "ready to continue",
-    // Artifact presentation signals (all weeks)
     "here's your prompt template", "here's your prompt",
     "here's your artifact", "here's what we built",
     "here's your completed", "here is your",
@@ -812,16 +786,13 @@ function isWrapUpMessage(content: string): boolean {
     "here's your differentiation", "here's your policy",
     "your template is ready", "your prompt is ready",
     "yours to keep",
-    // Session wrap-up language
     "great work today", "great session", "nice work today",
     "you're all set", "you're ready to go",
     "we're finished", "we're done",
     "try it this week", "try this in chatgpt",
     "copy this and paste", "paste it into chatgpt",
     "capture this so you have it", "let me capture",
-    // Bridge to next week
     "next week we", "see you next week",
-    // Wrap-up indicators
     "wrap up", "wrapping up",
   ];
   const lower = content.toLowerCase();
@@ -834,7 +805,7 @@ function MessageBubble({ message, onFinishSession }: { message: Message; onFinis
   if (role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[80%] rounded-2xl rounded-br-md bg-[#f3f4f6] px-4 py-3 text-[#111827]">
+        <div className="max-w-[80%] rounded-2xl rounded-br-md bg-primary/10 px-4 py-3 text-foreground">
           {text.split("\n\n").map((paragraph, pIndex) => (
             <p key={pIndex} className={`text-[15px] ${pIndex > 0 ? "mt-3" : ""}`}>
               {paragraph}
@@ -853,7 +824,7 @@ function MessageBubble({ message, onFinishSession }: { message: Message; onFinis
         <SkippyAvatar state="idle" size="sm" />
       </div>
       <div className="max-w-[80%]">
-        <div className="rounded-2xl rounded-bl-md bg-[#f9fafb] px-4 py-3 text-[#111827]">
+        <div className="rounded-2xl rounded-bl-md bg-secondary px-4 py-3 text-foreground">
           {text ? (
             <>
               {text.split("\n\n").map((paragraph, pIndex) => (
@@ -861,15 +832,15 @@ function MessageBubble({ message, onFinishSession }: { message: Message; onFinis
                   {paragraph}
                 </p>
               ))}
-              {isStreaming && <span className="animate-pulse text-[#d1d5db]">|</span>}
+              {isStreaming && <span className="animate-pulse text-muted-foreground/30">|</span>}
               {wasSpoken && (
-                <span className="mt-1 inline-block text-[11px] text-[#d1d5db]">
+                <span className="mt-1 inline-block text-[11px] text-muted-foreground/40">
                   <VoiceIcon on={true} size={10} /> spoken
                 </span>
               )}
             </>
           ) : isStreaming ? (
-            <div className="flex items-center gap-2 text-[#9ca3af]">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <LoadingDots />
               <span className="text-[14px]">Skippy is speaking...</span>
             </div>
@@ -880,7 +851,7 @@ function MessageBubble({ message, onFinishSession }: { message: Message; onFinis
         {showFinishButton && (
           <button
             onClick={onFinishSession}
-            className="mt-3 w-full rounded-xl bg-[#111827] px-5 py-3.5 text-[15px] font-semibold text-white transition hover:bg-[#374151]"
+            className="mt-3 w-full rounded-xl bg-primary px-5 py-3.5 text-[15px] font-semibold text-primary-foreground shadow-sm transition hover:opacity-90 hover:shadow-md"
           >
             Finish Session &amp; Continue &rarr;
           </button>
@@ -897,16 +868,16 @@ function MessageBubble({ message, onFinishSession }: { message: Message; onFinis
 function LoadingDots() {
   return (
     <span className="inline-flex gap-1">
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#d1d5db] [animation-delay:-0.3s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#d1d5db] [animation-delay:-0.15s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[#d1d5db]" />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/30 [animation-delay:-0.3s]" />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/30 [animation-delay:-0.15s]" />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/30" />
     </span>
   );
 }
 
 function SendIcon({ active = false }: { active?: boolean }) {
   return (
-    <svg className={`h-5 w-5 ${active ? "text-white" : "text-[#9ca3af]"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg className={`h-5 w-5 ${active ? "text-primary-foreground" : "text-muted-foreground"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
     </svg>
   );
@@ -914,7 +885,6 @@ function SendIcon({ active = false }: { active?: boolean }) {
 
 function MicIcon({ listening }: { listening: boolean }) {
   if (listening) {
-    // Mic off / stop icon
     return (
       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
         <line x1="1" y1="1" x2="23" y2="23" />

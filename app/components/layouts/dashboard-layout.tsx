@@ -11,7 +11,6 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [supportPanelOpen, setSupportPanelOpen] = useState(false);
 
-  // Listen for openSupport event
   useEffect(() => {
     const handler = () => setSupportPanelOpen(true);
     document.addEventListener("openSupport", handler);
@@ -19,7 +18,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-background">
       {/* Left Sidebar */}
       <CourseSidebar />
 

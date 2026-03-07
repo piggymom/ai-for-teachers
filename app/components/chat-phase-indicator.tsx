@@ -30,15 +30,15 @@ export function ChatPhaseIndicator({ currentPhase, className = "" }: ChatPhaseIn
               <div
                 className={`
                   w-1.5 h-1.5 rounded-full transition-all
-                  ${isComplete ? 'bg-[#9ca3af]' : ''}
-                  ${isCurrent ? 'bg-[#111827]' : ''}
-                  ${isFuture ? 'bg-[#e5e7eb]' : ''}
+                  ${isComplete ? 'bg-muted-foreground' : ''}
+                  ${isCurrent ? 'bg-primary' : ''}
+                  ${isFuture ? 'bg-border' : ''}
                 `}
               />
               <span
                 className={`
                   text-[10px] mt-1 transition-colors whitespace-nowrap
-                  ${isCurrent ? 'text-[#111827] font-medium' : 'text-[#d1d5db]'}
+                  ${isCurrent ? 'text-primary font-medium' : 'text-muted-foreground/40'}
                 `}
               >
                 {phase.label}
@@ -49,7 +49,7 @@ export function ChatPhaseIndicator({ currentPhase, className = "" }: ChatPhaseIn
               <div
                 className={`
                   w-6 h-[1px] mx-1 mb-4
-                  ${isComplete ? 'bg-[#d1d5db]' : 'bg-[#f3f4f6]'}
+                  ${isComplete ? 'bg-muted-foreground/30' : 'bg-border'}
                 `}
               />
             )}

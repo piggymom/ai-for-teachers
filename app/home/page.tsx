@@ -29,11 +29,11 @@ export default function Home() {
           <div className="p-10 lg:p-16">
             <div className="max-w-3xl mx-auto">
               <div className="animate-pulse space-y-10">
-                <div className="h-8 bg-[#f3f4f6] rounded w-1/2" />
-                <div className="h-4 bg-[#f3f4f6] rounded w-1/3" />
+                <div className="h-8 bg-muted rounded w-1/2" />
+                <div className="h-4 bg-muted rounded w-1/3" />
                 <div className="flex flex-col gap-4">
                   {[1, 2, 3, 4, 5, 6, 7].map(i => (
-                    <div key={i} className="h-24 bg-[#f9fafb] rounded-xl" />
+                    <div key={i} className="h-24 bg-secondary rounded-xl" />
                   ))}
                 </div>
               </div>
@@ -53,7 +53,6 @@ function HomeContent() {
   const [progress, setProgress] = useState<Progress | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Check if returning from a completed week
   const completedParam = searchParams.get("completed");
   const scrollToWeek = completedParam ? parseInt(completedParam, 10) : undefined;
 
@@ -68,7 +67,6 @@ function HomeContent() {
           .filter((p: { status: string }) => p.status === "completed")
           .map((p: { weekNumber: number }) => p.weekNumber);
 
-        // Find current week
         let currentWeek = 0;
         for (let i = 0; i <= 6; i++) {
           if (!completedWeeks.includes(i)) {
@@ -84,7 +82,6 @@ function HomeContent() {
           isFirstVisit: progressArr.length === 0
         });
 
-        // Set profile from session
         if (sessionData?.user) {
           setProfile({
             name: sessionData.user.name || "",
@@ -104,11 +101,11 @@ function HomeContent() {
         <div className="p-10 lg:p-16">
           <div className="max-w-3xl mx-auto">
             <div className="animate-pulse space-y-10">
-              <div className="h-8 bg-[#f3f4f6] rounded w-1/2" />
-              <div className="h-4 bg-[#f3f4f6] rounded w-1/3" />
+              <div className="h-8 bg-muted rounded w-1/2" />
+              <div className="h-4 bg-muted rounded w-1/3" />
               <div className="flex flex-col gap-4">
                 {[1, 2, 3, 4, 5, 6, 7].map(i => (
-                  <div key={i} className="h-24 bg-[#f9fafb] rounded-xl" />
+                  <div key={i} className="h-24 bg-secondary rounded-xl" />
                 ))}
               </div>
             </div>
@@ -127,7 +124,7 @@ function HomeContent() {
 
       <div className="p-8 lg:p-12">
         <div className="max-w-3xl mx-auto space-y-10">
-          {/* Welcome Video — component self-manages visibility via DB state */}
+          {/* Welcome Video */}
           <WelcomeVideo />
 
           {/* Personalized Header */}
@@ -143,7 +140,7 @@ function HomeContent() {
           </section>
 
           {/* Artifact Gallery */}
-          <section className="pt-10 border-t border-[#E5E7EB]">
+          <section className="pt-10 border-t border-border">
             <ArtifactGallery />
           </section>
         </div>

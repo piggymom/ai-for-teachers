@@ -24,7 +24,6 @@ export function ArtifactGallery() {
     fetch("/api/artifacts")
       .then(res => res.json())
       .then(data => {
-        // Filter out garbage/empty artifacts
         const valid = (data.artifacts || []).filter((a: Artifact) =>
           a.content &&
           !a.content.toLowerCase().includes("no artifact") &&
@@ -54,12 +53,12 @@ export function ArtifactGallery() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-[18px] font-medium text-[#111827]">Your Artifacts</h2>
-          <p className="text-[13px] text-[#9ca3af] mt-1">
+          <h2 className="text-[18px] font-medium text-foreground">Your Artifacts</h2>
+          <p className="text-[13px] text-muted-foreground mt-1">
             Prompts, templates, and workflows you&apos;ve built
           </p>
         </div>
-        <span className="text-[12px] text-[#9ca3af] bg-[#f9fafb] px-3 py-1 rounded-full">
+        <span className="text-[12px] text-muted-foreground bg-secondary px-3 py-1 rounded-full">
           {artifacts.length} saved
         </span>
       </div>
@@ -107,21 +106,21 @@ function ArtifactCard({
   };
 
   return (
-    <div className="border border-[#f3f4f6] rounded-xl p-5 hover:border-[#e5e7eb] transition-colors">
+    <div className="border border-border rounded-xl p-5 hover:border-primary/20 hover:shadow-sm transition-all">
       {/* Header */}
       <div className="flex justify-between items-start mb-2">
         <div>
-          <h3 className="text-[14px] font-medium text-[#111827]">{artifact.title}</h3>
-          <p className="text-[11px] text-[#9ca3af] mt-0.5">Week {artifact.weekNumber}</p>
+          <h3 className="text-[14px] font-medium text-foreground">{artifact.title}</h3>
+          <p className="text-[11px] text-muted-foreground mt-0.5">Week {artifact.weekNumber}</p>
         </div>
-        <span className="text-[11px] bg-[#f9fafb] px-2 py-0.5 rounded-full text-[#9ca3af]">
+        <span className="text-[11px] bg-secondary px-2 py-0.5 rounded-full text-muted-foreground">
           {typeLabels[artifact.type] || artifact.type}
         </span>
       </div>
 
       {/* Description */}
       {artifact.description && (
-        <p className="text-[13px] text-[#4b5563] mb-3 line-clamp-2">{artifact.description}</p>
+        <p className="text-[13px] text-muted-foreground mb-3 line-clamp-2">{artifact.description}</p>
       )}
 
       {/* Tags */}
@@ -130,7 +129,7 @@ function ArtifactCard({
           {artifact.tags.slice(0, 3).map(tag => (
             <span
               key={tag}
-              className="text-[11px] bg-[#f9fafb] px-2 py-0.5 rounded text-[#9ca3af]"
+              className="text-[11px] bg-secondary px-2 py-0.5 rounded text-muted-foreground"
             >
               {tag}
             </span>
@@ -139,16 +138,16 @@ function ArtifactCard({
       )}
 
       {/* Actions */}
-      <div className="flex gap-4 pt-3 border-t border-[#f3f4f6]">
+      <div className="flex gap-4 pt-3 border-t border-border">
         <button
           onClick={onToggleExpand}
-          className="text-[13px] text-[#111827] hover:text-[#3B82F6] transition-colors"
+          className="text-[13px] text-foreground hover:text-primary transition-colors"
         >
           {isExpanded ? "Hide" : "View"}
         </button>
         <button
           onClick={onCopy}
-          className="text-[13px] text-[#111827] hover:text-[#3B82F6] transition-colors"
+          className="text-[13px] text-foreground hover:text-primary transition-colors"
         >
           {isCopied ? "Copied!" : "Copy"}
         </button>
@@ -156,28 +155,12 @@ function ArtifactCard({
 
       {/* Expanded Content */}
       {isExpanded && (
-        <div className="mt-3 pt-3 border-t border-[#f3f4f6]">
-          <pre className="p-4 bg-[#f9fafb] rounded-lg text-[13px] text-[#4b5563] overflow-x-auto whitespace-pre-wrap font-mono">
+        <div className="mt-3 pt-3 border-t border-border">
+          <pre className="p-4 bg-secondary rounded-lg text-[13px] text-muted-foreground overflow-x-auto whitespace-pre-wrap font-mono">
             {artifact.content}
           </pre>
         </div>
       )}
-    </div>
-  );
-}
-
-function EmptyArtifactState() {
-  return (
-    <div className="text-center py-16 px-6">
-      <div className="w-14 h-14 bg-[#f9fafb] rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg className="w-7 h-7 text-[#d1d5db]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-        </svg>
-      </div>
-      <h3 className="text-[15px] font-medium text-[#111827] mb-1">Your artifact library</h3>
-      <p className="text-[13px] text-[#9ca3af] max-w-xs mx-auto">
-        Prompts and workflows you build with Skippy will appear here.
-      </p>
     </div>
   );
 }
@@ -187,18 +170,18 @@ function ArtifactGallerySkeleton() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
-          <div className="h-5 bg-[#f3f4f6] rounded w-32 animate-pulse" />
-          <div className="h-4 bg-[#f3f4f6] rounded w-48 animate-pulse" />
+          <div className="h-5 bg-muted rounded w-32 animate-pulse" />
+          <div className="h-4 bg-muted rounded w-48 animate-pulse" />
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         {[1, 2, 3].map(i => (
-          <div key={i} className="border border-[#f3f4f6] rounded-xl p-5 animate-pulse">
-            <div className="h-4 bg-[#f3f4f6] rounded w-3/4 mb-2" />
-            <div className="h-3 bg-[#f3f4f6] rounded w-1/4 mb-3" />
-            <div className="h-3 bg-[#f3f4f6] rounded w-full mb-2" />
-            <div className="h-3 bg-[#f3f4f6] rounded w-2/3" />
+          <div key={i} className="border border-border rounded-xl p-5 animate-pulse">
+            <div className="h-4 bg-muted rounded w-3/4 mb-2" />
+            <div className="h-3 bg-muted rounded w-1/4 mb-3" />
+            <div className="h-3 bg-muted rounded w-full mb-2" />
+            <div className="h-3 bg-muted rounded w-2/3" />
           </div>
         ))}
       </div>

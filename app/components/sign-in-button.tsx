@@ -6,7 +6,7 @@ export function SignInButton() {
   return (
     <button
       onClick={() => signIn("google", { callbackUrl: "/home" })}
-      className="inline-flex items-center justify-center gap-3 rounded-lg border border-[#e5e7eb] bg-white px-8 py-3.5 text-[15px] font-medium text-[#111827] transition-all hover:bg-[#f9fafb] hover:border-[#d1d5db] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d5db] focus-visible:ring-offset-2"
+      className="inline-flex items-center justify-center gap-3 rounded-lg border border-border bg-card px-8 py-3.5 text-[15px] font-medium text-foreground shadow-sm transition-all hover:bg-secondary hover:border-border hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 animate-scale-in"
     >
       <GoogleIcon />
       Sign in with Google

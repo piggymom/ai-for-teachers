@@ -17,12 +17,10 @@ export function PodcastPlayer({ week }: PodcastPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioUrlRef = useRef<string | null>(null);
 
-  // Check if podcast is available on mount
   useEffect(() => {
     checkPodcastStatus();
   }, [week]);
 
-  // Cleanup audio URL on unmount
   useEffect(() => {
     return () => {
       if (audioUrlRef.current) {
@@ -81,13 +79,11 @@ export function PodcastPlayer({ week }: PodcastPlayerProps) {
 
       const audioUrl = URL.createObjectURL(audioBlob);
 
-      // Clean up previous URL
       if (audioUrlRef.current) {
         URL.revokeObjectURL(audioUrlRef.current);
       }
       audioUrlRef.current = audioUrl;
 
-      // Create audio element
       const audio = new Audio(audioUrl);
       audioRef.current = audio;
 
@@ -146,8 +142,8 @@ export function PodcastPlayer({ week }: PodcastPlayerProps) {
   // No conversation yet
   if (!hasConversation && state !== "checking") {
     return (
-      <div className="rounded-lg bg-[#f9fafb] px-5 py-4">
-        <p className="text-[13px] text-[#9ca3af]">
+      <div className="rounded-lg bg-secondary px-5 py-4">
+        <p className="text-[13px] text-muted-foreground">
           Complete your conversation with Skippy to unlock your personalized audio summary.
         </p>
       </div>
@@ -157,10 +153,10 @@ export function PodcastPlayer({ week }: PodcastPlayerProps) {
   // Checking status
   if (state === "checking") {
     return (
-      <div className="rounded-lg bg-[#f9fafb] px-5 py-4">
+      <div className="rounded-lg bg-secondary px-5 py-4">
         <div className="flex items-center gap-3">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#e5e7eb] border-t-[#111827]" />
-          <span className="text-[13px] text-[#9ca3af]">Checking...</span>
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-foreground" />
+          <span className="text-[13px] text-muted-foreground">Checking...</span>
         </div>
       </div>
     );
@@ -173,7 +169,7 @@ export function PodcastPlayer({ week }: PodcastPlayerProps) {
         {state === "idle" && (
           <button
             onClick={() => generatePodcast(false)}
-            className="flex items-center justify-center gap-2 rounded-lg border border-[#e5e7eb] px-4 py-2.5 text-[13px] text-[#4b5563] transition hover:bg-[#f9fafb]"
+            className="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-[13px] text-muted-foreground transition hover:bg-secondary hover:text-foreground"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 3l14 9-14 9V3z" />
@@ -183,18 +179,18 @@ export function PodcastPlayer({ week }: PodcastPlayerProps) {
         )}
 
         {state === "loading" && (
-          <div className="flex items-center justify-center gap-3 rounded-lg bg-[#f9fafb] px-4 py-2.5">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#e5e7eb] border-t-[#111827]" />
-            <span className="text-[13px] text-[#9ca3af]">Generating your podcast...</span>
+          <div className="flex items-center justify-center gap-3 rounded-lg bg-secondary px-4 py-2.5">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-foreground" />
+            <span className="text-[13px] text-muted-foreground">Generating your podcast...</span>
           </div>
         )}
 
         {state === "error" && (
           <div className="flex flex-col gap-2">
-            <p className="text-[13px] text-[#ef4444]">{error}</p>
+            <p className="text-[13px] text-destructive">{error}</p>
             <button
               onClick={() => generatePodcast(false)}
-              className="text-[12px] text-[#9ca3af] underline hover:text-[#4b5563]"
+              className="text-[12px] text-muted-foreground underline hover:text-foreground"
             >
               Try again
             </button>
@@ -205,15 +201,15 @@ export function PodcastPlayer({ week }: PodcastPlayerProps) {
           <div className="flex flex-col gap-3">
             {/* Progress bar */}
             <div
-              className="group relative h-1 cursor-pointer rounded-full bg-[#f3f4f6]"
+              className="group relative h-1 cursor-pointer rounded-full bg-muted"
               onClick={seek}
             >
               <div
-                className="absolute left-0 top-0 h-full rounded-full bg-[#111827] transition-all"
+                className="absolute left-0 top-0 h-full rounded-full bg-primary transition-all"
                 style={{ width: duration > 0 ? `${(progress / duration) * 100}%` : "0%" }}
               />
               <div
-                className="absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-[#111827] opacity-0 transition group-hover:opacity-100"
+                className="absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-primary opacity-0 transition group-hover:opacity-100"
                 style={{ left: duration > 0 ? `calc(${(progress / duration) * 100}% - 6px)` : "0" }}
               />
             </div>
@@ -223,21 +219,21 @@ export function PodcastPlayer({ week }: PodcastPlayerProps) {
               <div className="flex items-center gap-2">
                 <button
                   onClick={togglePlayPause}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f3f4f6] transition hover:bg-[#e5e7eb]"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-muted transition hover:bg-accent"
                 >
                   {state === "playing" ? (
-                    <svg className="h-4 w-4 text-[#111827]" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-4 w-4 text-foreground" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                     </svg>
                   ) : (
-                    <svg className="h-4 w-4 text-[#111827]" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="h-4 w-4 text-foreground" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8 5v14l11-7z" />
                     </svg>
                   )}
                 </button>
                 <button
                   onClick={() => generatePodcast(true)}
-                  className="flex h-7 items-center gap-1.5 rounded-full bg-[#f9fafb] px-3 text-[11px] text-[#9ca3af] transition hover:bg-[#f3f4f6] hover:text-[#4b5563]"
+                  className="flex h-7 items-center gap-1.5 rounded-full bg-secondary px-3 text-[11px] text-muted-foreground transition hover:bg-muted hover:text-foreground"
                   title="Generate a new version"
                 >
                   <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -247,7 +243,7 @@ export function PodcastPlayer({ week }: PodcastPlayerProps) {
                 </button>
               </div>
 
-              <span className="text-[12px] tabular-nums text-[#9ca3af]">
+              <span className="text-[12px] tabular-nums text-muted-foreground">
                 {formatTime(progress)} / {formatTime(duration)}
               </span>
             </div>

@@ -92,7 +92,7 @@ export function WeekCardsGrid({ completedWeeks, currentWeek, scrollToWeek }: Wee
     return (
       <button
         onClick={() => setShowAll(true)}
-        className="text-[13px] text-[#9ca3af] hover:text-[#111827] transition-colors"
+        className="text-[13px] text-muted-foreground hover:text-foreground transition-colors"
       >
         View all weeks &rarr;
       </button>
@@ -100,7 +100,7 @@ export function WeekCardsGrid({ completedWeeks, currentWeek, scrollToWeek }: Wee
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 stagger-children">
       {WEEKS.map((week) => (
         <div
           key={week.weekNumber}
@@ -122,7 +122,7 @@ export function WeekCardsGrid({ completedWeeks, currentWeek, scrollToWeek }: Wee
 
       <button
         onClick={() => setShowAll(false)}
-        className="mt-6 text-[13px] text-[#9ca3af] hover:text-[#111827] transition-colors"
+        className="mt-6 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
       >
         Show less
       </button>

@@ -1,47 +1,66 @@
 @import "tailwindcss";
 
+/*
+ * Violet Bloom — adapted from tweakcn.com
+ * Teacher-friendly: warm violet primary, generous spacing, high readability
+ */
+
+@layer base {
+  body {
+    letter-spacing: var(--tracking-normal);
+  }
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #111827;
+  /* Violet Bloom palette — light mode only */
+  --background: oklch(0.994 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(0.994 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(0.991 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.539 0.271 286.75);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.954 0.006 255.48);
+  --secondary-foreground: oklch(0.134 0 0);
+  --muted: oklch(0.970 0 0);
+  --muted-foreground: oklch(0.439 0 0);
+  --accent: oklch(0.939 0.029 266.37);
+  --accent-foreground: oklch(0.545 0.190 259.48);
+  --destructive: oklch(0.629 0.190 23.07);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.930 0.009 286.22);
+  --input: oklch(0.940 0 0);
+  --ring: oklch(0.539 0.271 286.75);
 
-  /* Backgrounds */
-  --bg-primary: #ffffff;
-  --bg-surface: #f9fafb;
-  --bg-elevated: #f3f4f6;
-  --bg-hover: #e5e7eb;
+  /* Status colors */
+  --success: oklch(0.723 0.191 149.58);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.795 0.184 86.05);
+  --warning-foreground: oklch(0.145 0 0);
 
-  /* Borders */
-  --border-subtle: #f3f4f6;
-  --border-default: #e5e7eb;
-  --border-focus: #d1d5db;
+  /* Sidebar */
+  --sidebar: oklch(0.978 0.005 247.88);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.145 0 0);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.940 0 0);
+  --sidebar-accent-foreground: oklch(0.145 0 0);
+  --sidebar-border: oklch(0.940 0 0);
+  --sidebar-ring: oklch(0.539 0.271 286.75);
 
-  /* Text */
-  --text-primary: #111827;
-  --text-secondary: #4b5563;
-  --text-tertiary: #9ca3af;
-  --text-muted: #d1d5db;
+  /* Spacing and radius */
+  --radius: 0.75rem;
+  --spacing: 0.27rem;
+  --tracking-normal: -0.025em;
 
-  /* Accent - Near-black */
-  --accent-primary: #111827;
-  --accent-hover: #374151;
-  --accent-subtle: rgba(17, 24, 39, 0.04);
-  --accent-border: rgba(17, 24, 39, 0.1);
+  /* Shadows */
+  --shadow-sm: 0px 1px 2px 0px hsl(0 0% 0% / 0.06);
+  --shadow: 0px 2px 4px 0px hsl(0 0% 0% / 0.08), 0px 1px 2px -1px hsl(0 0% 0% / 0.08);
+  --shadow-md: 0px 4px 8px -2px hsl(0 0% 0% / 0.1), 0px 2px 4px -2px hsl(0 0% 0% / 0.06);
+  --shadow-lg: 0px 12px 24px -4px hsl(0 0% 0% / 0.1), 0px 4px 8px -2px hsl(0 0% 0% / 0.04);
 
-  /* Status - Success */
-  --success-primary: #10b981;
-  --success-subtle: rgba(16, 185, 129, 0.08);
-  --success-border: rgba(16, 185, 129, 0.2);
-
-  /* Status - Warning/In Progress */
-  --warning-primary: #f59e0b;
-  --warning-subtle: rgba(245, 158, 11, 0.08);
-  --warning-border: rgba(245, 158, 11, 0.2);
-
-  /* Status - Error */
-  --error-primary: #ef4444;
-  --error-subtle: rgba(239, 68, 68, 0.08);
-
-  /* Skippy — metallic silver */
+  /* Skippy avatar */
   --skippy-coral: #C0C7D0;
   --skippy-amber: #94A3B8;
   --skippy-glow: rgba(148, 163, 184, 0.2);
@@ -50,15 +69,48 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-display);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: "Plus Jakarta Sans", var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), "IBM Plex Mono", monospace;
+  --font-display: var(--font-display-var), "Lora", serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -73,28 +125,24 @@ html {
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: oklch(0.85 0 0);
   border-radius: 3px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: oklch(0.7 0 0);
 }
 
-/* Line clamp utility */
+/* Line clamp */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -102,27 +150,98 @@ html {
   overflow: hidden;
 }
 
-/* Focus visible for accessibility */
+/* Focus visible */
 :focus-visible {
-  outline: 2px solid #d1d5db;
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
 
-/* Selection color */
+/* Selection */
 ::selection {
-  background: rgba(59, 130, 246, 0.12);
-  color: #111827;
+  background: oklch(0.539 0.271 286.75 / 0.15);
+  color: oklch(0.145 0 0);
+}
+
+/* ─── Animations ─── */
+
+/* Fade in up — used for page sections */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out both;
+}
+
+/* Stagger children */
+.stagger-children > * {
+  animation: fade-in-up 0.4s ease-out both;
+}
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 360ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 420ms; }
+
+/* Fade in — simpler variant */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+/* Scale in — for buttons/cards on mount */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out both;
+}
+
+/* Slide in from left — sidebar */
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.4s ease-out both;
 }
 
 /* Voice mode waveform bars */
@@ -133,4 +252,18 @@ html {
 
 .animate-voice-bar {
   animation: voice-bar 0.8s ease-in-out infinite;
+}
+
+/* Pulse ring — for active/recording states */
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 oklch(0.539 0.271 286.75 / 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 8px oklch(0.539 0.271 286.75 / 0);
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 1.5s ease-out infinite;
 }

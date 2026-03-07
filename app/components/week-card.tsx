@@ -29,7 +29,6 @@ export function WeekCard({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Check if podcast exists for completed weeks, poll if generating
   useEffect(() => {
     if (status !== "completed") return;
 
@@ -43,14 +42,11 @@ export function WeekCard({
           if (data.hasConversation) setPodcastReady(true);
           if (data.isCached) {
             setPodcastCached(true);
-            // Stop polling once cached
             if (pollRef.current) {
               clearInterval(pollRef.current);
               pollRef.current = null;
             }
           } else if (data.hasConversation && !pollRef.current) {
-            // Podcast not cached yet but conversation exists — poll every 5s
-            // (it's probably being auto-generated right now)
             pollRef.current = setInterval(checkPodcast, 5000);
           }
         })
@@ -69,7 +65,6 @@ export function WeekCard({
   }, [status, weekNumber]);
 
   const handleClick = (e: React.MouseEvent) => {
-    // Don't navigate if user clicked a button inside the card
     if ((e.target as HTMLElement).closest("button")) return;
     if (!isLocked) {
       router.push(`/week-${weekNumber}`);
@@ -80,9 +75,7 @@ export function WeekCard({
     e.stopPropagation();
     e.preventDefault();
 
-    console.log("[PODCAST] Button clicked, current state:", podcastState);
-
-    if (podcastState === "loading") return; // Already loading, don't double-fire
+    if (podcastState === "loading") return;
 
     if (podcastState === "playing") {
       audioRef.current?.pause();
@@ -96,14 +89,7 @@ export function WeekCard({
       return;
     }
 
-    // Reset error state on retry
-    if (podcastState === "error") {
-      // Fall through to regenerate
-    }
-
-    // Generate/fetch podcast
     setPodcastState("loading");
-    console.log("[PODCAST] Fetching audio for week", weekNumber);
     try {
       const res = await fetch("/api/podcast", {
         method: "POST",
@@ -111,21 +97,16 @@ export function WeekCard({
         body: JSON.stringify({ week: weekNumber }),
       });
       if (!res.ok) {
-        const errorText = await res.text().catch(() => res.statusText);
-        console.error("[PODCAST] Fetch failed:", res.status, errorText);
         setPodcastState("error");
         return;
       }
       const contentType = res.headers.get("content-type") || "";
       if (!contentType.includes("audio")) {
-        console.error("[PODCAST] Unexpected content type:", contentType);
         setPodcastState("error");
         return;
       }
       const blob = await res.blob();
-      console.log("[PODCAST] Got audio blob:", blob.size, "bytes");
       if (blob.size < 100) {
-        console.error("[PODCAST] Audio blob too small:", blob.size);
         setPodcastState("error");
         return;
       }
@@ -136,33 +117,31 @@ export function WeekCard({
         setPodcastState("idle");
         URL.revokeObjectURL(url);
       };
-      audio.onerror = (err) => {
-        console.error("[PODCAST] Audio playback error:", err);
+      audio.onerror = () => {
         setPodcastState("error");
         URL.revokeObjectURL(url);
       };
       await audio.play();
       setPodcastState("playing");
-    } catch (err) {
-      console.error("[PODCAST] Error:", err);
+    } catch {
       setPodcastState("error");
     }
   };
 
   if (isLocked) {
     return (
-      <div className="p-6 rounded-xl border border-[#f3f4f6] bg-white">
+      <div className="p-6 rounded-xl border border-border/50 bg-card">
         <div className="flex items-center gap-2.5 mb-2.5">
-          <span className="text-[13px] font-semibold text-[#d1d5db] uppercase tracking-wider">
+          <span className="text-[13px] font-semibold text-muted-foreground/40 uppercase tracking-wider">
             Week {weekNumber}
           </span>
-          <span className="text-[12px] text-[#e5e7eb]">&middot;</span>
-          <span className="text-[13px] text-[#e5e7eb]">{duration}</span>
+          <span className="text-[12px] text-border">&middot;</span>
+          <span className="text-[13px] text-muted-foreground/30">{duration}</span>
         </div>
-        <h3 className="text-[17px] font-medium text-[#d1d5db] mb-1.5">
+        <h3 className="text-[17px] font-medium text-muted-foreground/40 mb-1.5">
           {title}
         </h3>
-        <p className="text-[15px] leading-relaxed text-[#e5e7eb]">
+        <p className="text-[15px] leading-relaxed text-muted-foreground/25">
           {description}
         </p>
       </div>
@@ -172,26 +151,26 @@ export function WeekCard({
   return (
     <div
       onClick={handleClick}
-      className="group p-6 rounded-xl border border-[#f3f4f6] bg-white hover:border-[#e5e7eb] hover:shadow-sm cursor-pointer transition-all"
+      className="group p-6 rounded-xl border border-border bg-card hover:border-primary/20 hover:shadow-md cursor-pointer transition-all"
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2.5 mb-2.5">
-            <span className="text-[13px] font-semibold text-[#9ca3af] uppercase tracking-wider">
+            <span className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
               Week {weekNumber}
             </span>
-            <span className="text-[12px] text-[#d1d5db]">&middot;</span>
-            <span className="text-[13px] text-[#d1d5db]">{duration}</span>
+            <span className="text-[12px] text-border">&middot;</span>
+            <span className="text-[13px] text-muted-foreground/60">{duration}</span>
             {status === "completed" && (
-              <span className="text-[13px] font-medium text-[#10b981]">Completed</span>
+              <span className="text-[13px] font-medium text-success">Completed</span>
             )}
           </div>
 
-          <h3 className="text-[17px] font-medium text-[#111827] mb-1.5">
+          <h3 className="text-[17px] font-medium text-foreground mb-1.5">
             {title}
           </h3>
 
-          <p className="text-[15px] leading-relaxed text-[#9ca3af]">
+          <p className="text-[15px] leading-relaxed text-muted-foreground">
             {description}
           </p>
 
@@ -203,17 +182,17 @@ export function WeekCard({
                 onClick={handlePodcast}
                 className={`mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium transition-colors ${
                   podcastState === "playing"
-                    ? "bg-[#111827] text-white"
+                    ? "bg-primary text-primary-foreground"
                     : podcastState === "loading"
-                    ? "bg-[#f3f4f6] text-[#9ca3af] cursor-wait"
+                    ? "bg-muted text-muted-foreground cursor-wait"
                     : podcastState === "error"
-                    ? "bg-red-50 text-red-600 hover:bg-red-100"
-                    : "bg-[#f3f4f6] text-[#4b5563] hover:bg-[#e5e7eb]"
+                    ? "bg-destructive/10 text-destructive hover:bg-destructive/15"
+                    : "bg-secondary text-secondary-foreground hover:bg-accent"
                 }`}
               >
                 {podcastState === "loading" ? (
                   <>
-                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#d1d5db] border-t-[#9ca3af]" />
+                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
                     Loading...
                   </>
                 ) : podcastState === "playing" ? (
@@ -235,13 +214,13 @@ export function WeekCard({
                   <>
                     <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     Listen to Takeaways
-                    <span className="text-[#9ca3af]">~90 sec</span>
+                    <span className="text-muted-foreground">~90 sec</span>
                   </>
                 )}
               </button>
             ) : (
-              <div className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium bg-[#f3f4f6] text-[#9ca3af]">
-                <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#d1d5db] border-t-[#9ca3af]" />
+              <div className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-medium bg-muted text-muted-foreground">
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
                 Generating recap...
               </div>
             )
@@ -256,7 +235,7 @@ export function WeekCard({
                 e.stopPropagation();
                 router.push(`/week-${weekNumber}`);
               }}
-              className="text-[13px] text-[#9ca3af] hover:text-[#111827] transition-colors"
+              className="text-[13px] text-muted-foreground hover:text-foreground transition-colors"
             >
               Review
             </button>
@@ -266,7 +245,7 @@ export function WeekCard({
                 e.stopPropagation();
                 router.push(`/week-${weekNumber}`);
               }}
-              className="text-[14px] text-[#9ca3af] hover:text-[#111827] transition-colors"
+              className="text-[14px] text-muted-foreground hover:text-primary transition-colors"
             >
               Start &rarr;
             </button>
@@ -276,4 +255,3 @@ export function WeekCard({
     </div>
   );
 }
-

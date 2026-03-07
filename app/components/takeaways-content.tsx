@@ -72,50 +72,50 @@ export function TakeawaysContent({
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12">
+    <div className="max-w-3xl mx-auto px-6 py-12 animate-fade-in-up">
       {/* Breadcrumb */}
       <nav className="mb-8">
         <ol className="flex items-center gap-2 text-[13px]">
           <li>
-            <Link href="/home" className="text-[#9ca3af] hover:text-[#4b5563] transition-colors">
+            <Link href="/home" className="text-muted-foreground hover:text-foreground transition-colors">
               Dashboard
             </Link>
           </li>
-          <li className="text-[#d1d5db]">/</li>
+          <li className="text-muted-foreground/30">/</li>
           <li>
             <Link
               href={`/week-${weekNumber}`}
-              className="text-[#9ca3af] hover:text-[#4b5563] transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors"
             >
               Week {weekNumber}
             </Link>
           </li>
-          <li className="text-[#d1d5db]">/</li>
-          <li className="text-[#111827]">Takeaways</li>
+          <li className="text-muted-foreground/30">/</li>
+          <li className="text-foreground">Takeaways</li>
         </ol>
       </nav>
 
       {/* Header */}
       <header className="mb-12">
-        <p className="text-[11px] text-[#9ca3af] uppercase tracking-widest mb-2">
+        <p className="text-[11px] text-muted-foreground uppercase tracking-widest mb-2">
           Week {weekNumber} Takeaways
         </p>
-        <h1 className="text-[30px] font-semibold text-[#111827] mb-2" style={{ letterSpacing: '-0.025em' }}>
+        <h1 className="text-[30px] font-semibold text-foreground font-display mb-2">
           {weekInfo.title}
         </h1>
-        <p className="text-[17px] text-[#4b5563]">
+        <p className="text-[17px] text-muted-foreground">
           {weekInfo.subtitle}
         </p>
       </header>
 
       {/* Podcast Recap */}
       <section className="mb-10">
-        <div className="p-6 bg-[#f9fafb] rounded-xl">
+        <div className="p-6 bg-secondary rounded-xl">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-[15px] font-medium text-[#111827]">Your Learning Recap</h2>
-            <span className="text-[12px] text-[#d1d5db]">~3 min</span>
+            <h2 className="text-[15px] font-medium text-foreground">Your Learning Recap</h2>
+            <span className="text-[12px] text-muted-foreground/40">~3 min</span>
           </div>
-          <p className="text-[13px] text-[#9ca3af] mb-4">
+          <p className="text-[13px] text-muted-foreground mb-4">
             A personalized audio summary based on your conversation with Skippy
           </p>
           <PodcastPlayer week={weekNumber} />
@@ -125,15 +125,14 @@ export function TakeawaysContent({
       {/* Personalized Summary (from ledger) */}
       {ledger?.sessionSummary && (
         <section className="mb-10">
-          <div className="p-6 bg-[#f9fafb] rounded-xl">
-            <h2 className="text-[15px] font-medium text-[#111827] mb-3">Your Session</h2>
-            <p className="text-[14px] text-[#4b5563] leading-relaxed">
+          <div className="p-6 bg-secondary rounded-xl">
+            <h2 className="text-[15px] font-medium text-foreground mb-3">Your Session</h2>
+            <p className="text-[14px] text-muted-foreground leading-relaxed">
               {ledger.sessionSummary}
             </p>
 
-            {/* Personalization echo */}
             {profile?.primaryGoal && (
-              <p className="mt-4 text-[13px] text-[#9ca3af] italic">
+              <p className="mt-4 text-[13px] text-muted-foreground italic">
                 This connects to your goal of {formatGoal(profile.primaryGoal)}.
               </p>
             )}
@@ -144,35 +143,35 @@ export function TakeawaysContent({
       {/* Artifacts */}
       {artifacts.length > 0 && (
         <section className="mb-10">
-          <h2 className="text-[15px] font-medium text-[#111827] mb-5">
+          <h2 className="text-[15px] font-medium text-foreground mb-5">
             What You Built
           </h2>
           <div className="space-y-4">
             {artifacts.map((artifact) => (
               <div
                 key={artifact.id}
-                className="p-5 border border-[#f3f4f6] rounded-xl"
+                className="p-5 border border-border rounded-xl"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="text-[14px] font-medium text-[#111827]">
+                    <h3 className="text-[14px] font-medium text-foreground">
                       {artifact.title}
                     </h3>
                     {artifact.description && (
-                      <p className="text-[13px] text-[#9ca3af] mt-1">
+                      <p className="text-[13px] text-muted-foreground mt-1">
                         {artifact.description}
                       </p>
                     )}
                   </div>
                   <button
                     onClick={() => copyArtifact(artifact.content, artifact.id)}
-                    className="px-3 py-1.5 text-[13px] text-[#111827] hover:bg-[#f9fafb] rounded-lg transition-colors"
+                    className="px-3 py-1.5 text-[13px] text-foreground hover:bg-secondary rounded-lg transition-colors"
                   >
                     {copiedId === artifact.id ? "Copied!" : "Copy"}
                   </button>
                 </div>
 
-                <pre className="text-[13px] text-[#4b5563] bg-[#f9fafb] p-4 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono">
+                <pre className="text-[13px] text-muted-foreground bg-secondary p-4 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono">
                   {artifact.content}
                 </pre>
               </div>
@@ -183,19 +182,19 @@ export function TakeawaysContent({
 
       {/* Key Concepts */}
       <section className="mb-10">
-        <h2 className="text-[15px] font-medium text-[#111827] mb-5">
+        <h2 className="text-[15px] font-medium text-foreground mb-5">
           Key Concepts
         </h2>
         <div className="space-y-5">
           {getKeyConceptsForWeek(weekNumber).map((concept, index) => (
             <div key={index}>
-              <h3 className="text-[14px] font-medium text-[#111827] mb-3">
+              <h3 className="text-[14px] font-medium text-foreground mb-3">
                 {concept.title}
               </h3>
               <ul className="space-y-2">
                 {concept.points.map((point, pIndex) => (
-                  <li key={pIndex} className="flex items-start gap-2.5 text-[14px] text-[#4b5563]">
-                    <span className="text-[#d1d5db] mt-0.5">&#x2022;</span>
+                  <li key={pIndex} className="flex items-start gap-2.5 text-[14px] text-muted-foreground">
+                    <span className="text-muted-foreground/30 mt-0.5">&#x2022;</span>
                     {point}
                   </li>
                 ))}
@@ -207,18 +206,18 @@ export function TakeawaysContent({
 
       {/* What's Next */}
       <section className="mb-10">
-        <div className="p-6 bg-[#f9fafb] rounded-xl">
-          <h2 className="text-[15px] font-medium text-[#111827] mb-2">
+        <div className="p-6 bg-secondary rounded-xl">
+          <h2 className="text-[15px] font-medium text-foreground mb-2">
             {hasNextWeek ? "What's Next" : "You Did It!"}
           </h2>
-          <p className="text-[14px] text-[#4b5563] mb-5">
+          <p className="text-[14px] text-muted-foreground mb-5">
             {NEXT_WEEK_PREVIEWS[weekNumber]}
           </p>
 
           <div className="flex gap-3">
             <button
               onClick={() => router.push("/home")}
-              className="px-4 py-2 border border-[#e5e7eb] hover:bg-[#f9fafb] text-[#111827] text-[13px] font-medium rounded-lg transition-colors"
+              className="px-4 py-2 border border-border hover:bg-card text-foreground text-[13px] font-medium rounded-lg transition-colors"
             >
               Back to Dashboard
             </button>
@@ -226,7 +225,7 @@ export function TakeawaysContent({
             {hasNextWeek && (
               <button
                 onClick={() => router.push(`/week-${nextWeekNumber}`)}
-                className="text-[13px] font-medium text-[#111827] hover:text-[#3B82F6] transition-colors"
+                className="text-[13px] font-medium text-foreground hover:text-primary transition-colors"
               >
                 Start Week {nextWeekNumber}
               </button>
@@ -237,8 +236,8 @@ export function TakeawaysContent({
 
       {/* Quick Reflection */}
       <section>
-        <div className="p-5 border border-dashed border-[#e5e7eb] rounded-xl">
-          <p className="text-[14px] text-[#9ca3af] italic">
+        <div className="p-5 border border-dashed border-border rounded-xl">
+          <p className="text-[14px] text-muted-foreground italic">
             Quick reflection: What&apos;s one thing from this week you&apos;re excited to try in your classroom?
           </p>
         </div>

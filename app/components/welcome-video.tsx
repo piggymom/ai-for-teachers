@@ -13,14 +13,12 @@ export function WelcomeVideo() {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const initCalledRef = useRef(false);
 
-  const MAX_POLLS = 24; // 2 minutes at 5s intervals
+  const MAX_POLLS = 24;
 
   useEffect(() => {
-    // Guard against React StrictMode double-mount (prevents duplicate HeyGen calls)
     if (initCalledRef.current) return;
     initCalledRef.current = true;
 
-    // If user has already watched and dismissed the video, don't show again
     if (localStorage.getItem("skippy-welcome-video-dismissed") === "true") {
       setState("hidden");
       return;
@@ -56,15 +54,12 @@ export function WelcomeVideo() {
       if (!res.ok) { setState("hidden"); return; }
       const data = await res.json();
       if (data.videoUrl) {
-        // Completed video exists — play it
         setVideoUrl(data.videoUrl);
         setState("ready");
       } else if (data.videoId) {
-        // Video is in progress — resume polling instead of regenerating
         setVideoId(data.videoId);
         setState("processing");
       } else if (data.hasProfile) {
-        // No video at all — generate one
         generateVideo();
       } else {
         setState("hidden");
@@ -131,14 +126,14 @@ export function WelcomeVideo() {
   // Loading/generating
   if (state === "checking" || state === "generating" || state === "processing") {
     return (
-      <div className="mb-8 overflow-hidden rounded-xl bg-[#f9fafb] p-4">
+      <div className="mb-8 overflow-hidden rounded-xl bg-secondary p-4 animate-fade-in">
         <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#f3f4f6]">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#e5e7eb] border-t-[#111827]" />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-muted">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-border border-t-foreground" />
           </div>
           <div>
-            <p className="text-[14px] font-medium text-[#111827]">Preparing your welcome</p>
-            <p className="text-[13px] text-[#9ca3af]">A personalized video is being created...</p>
+            <p className="text-[14px] font-medium text-foreground">Preparing your welcome</p>
+            <p className="text-[13px] text-muted-foreground">A personalized video is being created...</p>
           </div>
         </div>
       </div>
@@ -148,8 +143,8 @@ export function WelcomeVideo() {
   // Video ready / playing / paused / ended
   if (videoUrl) {
     return (
-      <div className="mb-8 overflow-hidden rounded-xl border border-[#f3f4f6]">
-        <div className="relative aspect-video bg-[#111827]">
+      <div className="mb-8 overflow-hidden rounded-xl border border-border animate-scale-in">
+        <div className="relative aspect-video bg-foreground">
           <video
             ref={videoRef}
             src={videoUrl}
@@ -167,7 +162,7 @@ export function WelcomeVideo() {
               className="absolute inset-0 flex items-center justify-center bg-black/20 transition hover:bg-black/10"
             >
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm transition hover:scale-105">
-                <svg className="ml-0.5 h-6 w-6 text-[#111827]" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="ml-0.5 h-6 w-6 text-foreground" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </div>
@@ -177,8 +172,8 @@ export function WelcomeVideo() {
 
         {/* Caption */}
         <div className="px-4 py-3">
-          <p className="text-[14px] font-medium text-[#111827]">Your personalized welcome</p>
-          <p className="text-[13px] text-[#9ca3af]">A message from Asher, your course creator</p>
+          <p className="text-[14px] font-medium text-foreground">Your personalized welcome</p>
+          <p className="text-[13px] text-muted-foreground">A message from Asher, your course creator</p>
         </div>
       </div>
     );

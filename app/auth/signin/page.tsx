@@ -9,8 +9,8 @@ export default function SignInPage() {
   return (
     <Suspense
       fallback={
-        <main className="flex min-h-screen items-center justify-center bg-white">
-          <div className="text-[15px] text-[#9ca3af]">Loading…</div>
+        <main className="flex min-h-screen items-center justify-center bg-background">
+          <div className="text-[15px] text-muted-foreground">Loading…</div>
         </main>
       }
     >
@@ -25,7 +25,6 @@ function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // If already authenticated, redirect immediately
   useEffect(() => {
     if (status === "authenticated") {
       router.replace(searchParams.get("callbackUrl") || "/home");
@@ -34,8 +33,8 @@ function SignInContent() {
 
   if (status === "authenticated") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-white">
-        <div className="text-[15px] text-[#9ca3af]">Redirecting…</div>
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-[15px] text-muted-foreground">Redirecting…</div>
       </main>
     );
   }
@@ -43,20 +42,20 @@ function SignInContent() {
   const error = searchParams.get("error");
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white">
-      <div className="mx-auto flex max-w-md flex-col gap-10 px-6 py-14 text-center">
+    <main className="flex min-h-screen items-center justify-center bg-background">
+      <div className="mx-auto flex max-w-md flex-col gap-10 px-6 py-14 text-center animate-fade-in-up">
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700">
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-[13px] text-destructive">
             Sign-in failed — please try again. If this keeps happening, the database may be
             temporarily unavailable.
           </div>
         )}
 
         <div className="space-y-3">
-          <h1 className="text-[28px] font-semibold tracking-tight text-[#111827]">
+          <h1 className="text-[28px] font-semibold tracking-tight text-foreground font-display">
             Sign in to AI for Teachers
           </h1>
-          <p className="text-[15px] text-[#9ca3af]">
+          <p className="text-[15px] text-muted-foreground">
             Sign in to save your progress and access your course from any device.
           </p>
         </div>
@@ -67,15 +66,15 @@ function SignInContent() {
             type="checkbox"
             checked={agreed}
             onChange={(e) => setAgreed(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-[#d1d5db] text-[#111827] focus:ring-[#d1d5db] cursor-pointer"
+            className="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-ring cursor-pointer accent-primary"
           />
-          <span className="text-[13px] leading-relaxed text-[#4b5563]">
+          <span className="text-[13px] leading-relaxed text-muted-foreground">
             I have read and agree to the{" "}
-            <Link href="/legal/terms" className="text-[#111827] underline hover:text-[#3B82F6]" target="_blank">
+            <Link href="/legal/terms" className="text-foreground underline hover:text-primary" target="_blank">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link href="/legal/privacy" className="text-[#111827] underline hover:text-[#3B82F6]" target="_blank">
+            <Link href="/legal/privacy" className="text-foreground underline hover:text-primary" target="_blank">
               Privacy Policy
             </Link>
           </span>
@@ -88,7 +87,7 @@ function SignInContent() {
             }
           }}
           disabled={!agreed}
-          className="inline-flex items-center justify-center gap-3 rounded-lg border border-[#e5e7eb] bg-white px-6 py-3 text-[15px] font-medium text-[#111827] transition-all hover:bg-[#f9fafb] hover:border-[#d1d5db] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d5db] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-[#e5e7eb]"
+          className="inline-flex items-center justify-center gap-3 rounded-lg border border-border bg-card px-6 py-3 text-[15px] font-medium text-foreground shadow-sm transition-all hover:bg-secondary hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-card disabled:hover:shadow-sm"
         >
           <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -101,18 +100,18 @@ function SignInContent() {
 
         <Link
           href="/"
-          className="text-[13px] text-[#9ca3af] transition hover:text-[#4b5563]"
+          className="text-[13px] text-muted-foreground transition hover:text-foreground"
         >
           Back to course
         </Link>
 
         {/* Legal footer */}
-        <div className="text-[12px] text-[#d1d5db] space-x-3">
-          <Link href="/legal/privacy" className="hover:text-[#9ca3af] transition">Privacy</Link>
+        <div className="text-[12px] text-muted-foreground/40 space-x-3">
+          <Link href="/legal/privacy" className="hover:text-muted-foreground transition">Privacy</Link>
           <span>&middot;</span>
-          <Link href="/legal/terms" className="hover:text-[#9ca3af] transition">Terms</Link>
+          <Link href="/legal/terms" className="hover:text-muted-foreground transition">Terms</Link>
           <span>&middot;</span>
-          <Link href="/legal/ai-disclosure" className="hover:text-[#9ca3af] transition">AI Disclosure</Link>
+          <Link href="/legal/ai-disclosure" className="hover:text-muted-foreground transition">AI Disclosure</Link>
         </div>
       </div>
     </main>
