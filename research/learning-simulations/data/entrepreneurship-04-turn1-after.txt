@@ -1,0 +1,103 @@
+🚀
+Entrepreneurship
+Asher Research · Founder & CEO
+Sprint 1 of 16
+Round 1/4
+⚡
+Hustle
+100
+💡
+Innovation
+50
+💰
+Funding
+50
+🎯
+Market Fit
+30
+🤝
+Team
+50
+Exit Simulation
+🔄
+Pivot Point
+📋 MARKET_DYNAMICS
+ROUND 1 OF 4
+A Competitor Launches in Your Market
+
+You are working in the MCC Innovation Hub when you see a concerning email. A new startup called TechFlow just launched a product very similar to yours. They are based in Boston and have already raised $500,000 in funding. Your team is worried. You have less money and fewer people than TechFlow does. This is your first real test as a founder. You must decide how to respond to this competitive threat. The decisions you make now will shape whether your startup survives or gets left behind. Some community college founders have faced this exact situation in the Lowell and Merrimack Valley startup community. The concept of competitive advantage plays a key role in this situation. How you handle market positioning will shape what happens next. You need to act fast, but you also need to be smart about how you use your limited resources.
+
+KEY TERMS
+competitive advantage
+market positioning
+A
+
+Launch an aggressive price war. Drop your prices by 40 percent immediately to steal TechFlow's customers.
+
+HUSTLE
+18
+B
+
+Pivot your product to focus on a different customer group that TechFlow is ignoring.
+
+HUSTLE
+12
+C
+
+Double down on what makes you different. Invest heavily in research to improve your unique features.
+
+HUSTLE
+14
+D
+
+Reach out to TechFlow and explore a partnership or acquisition by them.
+
+HUSTLE
+8
+E
+
+Build partnerships with local Lowell businesses to create a distribution advantage TechFlow cannot easily copy.
+
+HUSTLE
+10
+F
+
+Launch a marketing campaign highlighting your deeper customer relationships and personalized service.
+
+HUSTLE
+9
+G
+
+Do nothing for now. Watch how TechFlow performs and learn from their moves.
+
+HUSTLE
+0
+Decision Made
+
+"Launch an aggressive price war. Drop your prices by 40 percent immediately to steal TechFlow's customers."
+
+You gain customers fast, but burn cash quickly. Your team gets stressed by the sudden change. Investors worry you cannot compete on quality.
+
+💡 Innovation
+50
+→
+47
+-3
+💰 Funding
+50
+→
+42
+-8
+🎯 Market Fit
+30
+→
+35
++5
+🤝 Team
+50
+→
+48
+-2
+⚡ Hustle Spent
+-18
+Continue

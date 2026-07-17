@@ -1,0 +1,103 @@
+🏨
+Hotel Management
+Asher Research · General Manager
+Week 2 of 16
+Round 1/4
+🔑
+GM Capacity
+82
+💼
+RevPAR
+44
+⭐
+Guest Satisfaction
+58
+👥
+Staff Retention
+54
+🏆
+Brand Equity
+60
+Exit Simulation
+✨
+Moments of Truth
+📋 REVENUE_MANAGEMENT
+ROUND 1 OF 4
+UMass Lowell Graduation Week: Price Now or Wait?
+
+It is May, and graduation week at UMass Lowell is coming in three weeks. Your hotel sits two blocks from campus. Last year, the hotel was fully booked that week, but you charged standard rates and left money on the table. This year, your owner is asking why you did not raise prices during that peak period. Right now, rooms are priced at $129 per night. You know families will come to celebrate graduates, and hotel rooms will fill quickly. The question is how much to raise prices and when to do it. If you raise prices too high too soon, guests will book competitors or stay with relatives. If you wait too long or do not raise prices enough, you lose revenue that your ownership demands. This situation is closely connected to Dynamic Pricing and how you manage it. This is your first big test as the new General Manager, and the owner is watching your yield management strategy closely.
+
+KEY TERMS
+Yield Management
+Dynamic Pricing
+A
+
+Aggressive pricing: Raise all graduation week rooms to $229 per night starting immediately. Also add a mandatory $50 graduation package fee for parking and breakfast.
+
+GM CAPACITY
+18
+B
+
+Moderate pricing increase: Raise graduation week rates to $169 per night. Launch a direct-booking discount (book on your website, save $20) to avoid paying commissions to Expedia and Booking.com.
+
+GM CAPACITY
+10
+C
+
+Tiered pricing: Charge $149 for early bookings (now through two weeks before), then jump to $189 in the final week. Send promotional emails to past guests and UMass Lowell parents to encourage early bookings.
+
+GM CAPACITY
+12
+D
+
+Premium service strategy: Keep base prices at $149, but add a high-value optional upgrade package (suite, welcome champagne, late checkout) for $80 that appeals to families celebrating. Train staff to upsell warmly during booking and check-in.
+
+GM CAPACITY
+14
+E
+
+Loyalty and local focus: Keep graduation week rates at $139. Offer free upgrades and perks to repeat guests and Lowell residents. Partner with local restaurants for welcome packages. Post stories on social media about families celebrating together.
+
+GM CAPACITY
+11
+F
+
+Inventory control: Raise graduation week rates to $179 for standard rooms, but hold 10 percent of rooms at $129 for walk-ins and same-day bookings. This creates urgency without blocking all budget-conscious guests.
+
+GM CAPACITY
+9
+G
+
+Wait and decide next week after checking competitor prices and early booking data.
+
+GM CAPACITY
+0
+Decision Made
+
+"Aggressive pricing: Raise all graduation week rooms to $229 per night starting immediately. Also add a mandatory $50 graduation package fee for parking and breakfast."
+
+Revenue jumps significantly, but angry guests leave negative reviews online. Some families book competitors instead. Staff feels pressure from unhappy guests.
+
+💼 RevPAR
+44
+→
+54
++10
+⭐ Guest Satisfaction
+58
+→
+52
+-6
+👥 Staff Retention
+54
+→
+51
+-3
+🏆 Brand Equity
+60
+→
+55
+-5
+🔑 GM Capacity Spent
+-18
+Continue

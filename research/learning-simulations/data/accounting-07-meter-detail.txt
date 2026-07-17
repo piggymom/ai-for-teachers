@@ -1,0 +1,76 @@
+📒
+Accounting
+Asher Research · Senior Accountant
+Month 5 of 16
+Round 2/4
+⏱️
+Billable Hours
+28
+🎯
+Accuracy
+70
+🤝
+Client Trust
+70
+📋
+Compliance
+65
+💵
+Firm Profit
+18
+Exit Simulation
+🔍
+Audit Roulette
+📋 AUDIT_AND_INVESTIGATION
+ROUND 2 OF 4
+Suspicious Expense Claims at Valley Manufacturing
+
+You just received a call from Valley Manufacturing, a local factory in Lowell that has been your client for three years. The owner thinks someone in their accounting department may have stolen money. She found expenses that do not match receipts. The company needs you to investigate the missing funds right away. This forensic accounting work could bring big fees to your firm, but it also takes a lot of time and special skills. Your team is already busy with tax returns for other Merrimack Valley clients. Good decisions here depend on understanding Audit Trail. You must decide how to help Valley Manufacturing while keeping your other work on track.
+
+KEY TERMS
+Forensic Accounting
+Audit Trail
+A
+
+Take on the full forensic investigation immediately. Hire a specialized forensic accounting firm to work with your team. Document everything carefully and pursue every suspicious transaction.
+
+BILLABLE HOURS
+20
+B
+
+Assign one of your staff accountants to help Valley Manufacturing trace the audit trail. Do basic forensic work in-house without hiring outside help. Charge the client fair rates for your time.
+
+BILLABLE HOURS
+12
+C
+
+Tell Valley Manufacturing you can do a quick review of their expenses. Spend just a few hours looking at suspicious items. Give them a brief report of what you find without deep investigation.
+
+BILLABLE HOURS
+6
+D
+
+Refer Valley Manufacturing to a specialized forensic firm. Keep good records of what you know. Stay available to answer questions about their accounting systems. Charge a small consulting fee.
+
+BILLABLE HOURS
+8
+E
+
+Contact the Lowell Police Department and ask about reporting fraud. Help Valley Manufacturing file a formal complaint. Work with police and let them lead the investigation.
+
+BILLABLE HOURS
+9
+F
+
+Meet with Valley Manufacturing and explain the costs of forensic accounting. Offer to investigate the top five suspicious expenses only. Agree on clear fees and timeline before starting work.
+
+BILLABLE HOURS
+10
+G
+
+Wait. Tell Valley Manufacturing you will help after tax season ends in May. Keep their file for now and focus on other clients.
+
+BILLABLE HOURS
+0
+✓
+Reflection complete! +10 Billable Hours recovered.

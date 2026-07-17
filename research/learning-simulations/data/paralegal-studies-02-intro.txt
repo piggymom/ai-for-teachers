@@ -1,0 +1,64 @@
+⚖️
+Paralegal Studies
+Asher Research · Lead Paralegal
+Week 1 of 16
+Round 1/4
+⏰
+Work Hours
+100
+📂
+Case Progress
+50
+🤝
+Client Satisfaction
+50
+🎯
+Accuracy
+50
+🏛️
+Firm Reputation
+50
+Exit Simulation
+📄
+Discovery Bombshell
+
+Generating scenario...
+
+Paralegal Studies
+
+Lead Paralegal
+
+Lowell, MA — Merrimack Valley Law Offices
+
+You're a paralegal at a busy law firm in downtown Lowell serving diverse clients — immigration cases, family law, personal injury, and small business disputes. Manage case files, assist attorneys, navigate ethical boundaries, and keep the firm running smoothly.
+
+Your Performance Meters
+
+Click any meter for details. If a meter drops too low, the simulation ends.
+
+📂
+Case Progress
+Starts at 50
+🤝
+Client Satisfaction
+Starts at 50
+🎯
+Accuracy
+Starts at 50
+🏛️
+Firm Reputation
+Starts at 50
+Resources & Abilities
+⏰
+Work Hours
+RESOURCE
+📄
+Discovery Bombshell
+ONE-TIME
+16
+TURNS
+4
+ROUNDS
+3
+REFLECTIONS
+Begin Simulation

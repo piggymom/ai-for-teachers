@@ -1,0 +1,55 @@
+Decision Lab
+Student: Asher Research
+Sign Out
+Select Your Path
+
+Step into a professional role. Each discipline plays differently with its own decisions, pressures, and outcomes.
+
+Business Management
+Run a growing business in the Merrimack Valley
+Accounting
+Manage the books for a growing Lowell firm
+Finance
+Manage investments for Merrimack Valley clients
+Culinary Arts
+Run a restaurant in Lowell's food scene
+Fashion Merchandising
+Curate fashion for New England retail
+Entrepreneurship
+Launch a startup from MCC's innovation hub
+Paralegal Studies
+Support justice at a Lowell law firm
+Criminal Justice
+Lead community justice in Lowell
+Education
+Lead a program at Middlesex Community College
+Personal Finance
+Build financial security after MCC — one month at a time
+Hotel Management
+Lead a riverfront hotel on the Merrimack
+Finance
+
+Financial Advisor
+
+LOWELL, MA — MERRIMACK VALLEY WEALTH MANAGEMENT
+
+You're a financial advisor at a Lowell wealth management firm. Build and protect portfolios for local families, retirees, and small business owners. Market swings, client emotions, and regulatory pressure make every decision count.
+
+STATS YOU'LL MANAGE
+📈 Portfolio Value
+The total performance of your clients' investment portfolios.
+⚡ Risk Exposure
+How vulnerable your portfolios are to market volatility and sudden downturns.
+🤝 Client Confidence
+How much your clients trust your judgment with their life savings and financial futures.
+📋 Compliance Score
+Your adherence to SEC regulations, fiduciary duties, and financial industry standards.
+SPECIAL MECHANIC
+Market Shock
+
+Every few turns, a random market event hits — flash crash, bull run, sector rotation, or black swan. Your Risk Exposure determines how badly you're affected. High risk = high reward OR high pain.
+
+Resource: Capital
+Q1 2026 – Q4 2029
+16 Quarters
+Begin Finance Sim

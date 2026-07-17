@@ -1,0 +1,64 @@
+🏨
+Hotel Management
+Asher Research · General Manager
+Week 1 of 16
+Round 1/4
+🔑
+GM Capacity
+100
+💼
+RevPAR
+50
+⭐
+Guest Satisfaction
+50
+👥
+Staff Retention
+50
+🏆
+Brand Equity
+50
+Exit Simulation
+✨
+Moments of Truth
+
+Generating scenario...
+
+Hotel Management
+
+General Manager
+
+Lowell, MA — Riverfront Hotel near Downtown
+
+You're the new General Manager of a mid-size hotel on the Merrimack River in Lowell, serving business travelers, tourists drawn to Lowell National Historical Park, and conference guests from UMass Lowell and MCC. Balance the art of hospitality — creating unforgettable guest experiences — with the science of operations: dynamic pricing, staff retention, online reputation, and a demanding ownership group watching every KPI.
+
+Your Performance Meters
+
+Click any meter for details. If a meter drops too low, the simulation ends.
+
+💼
+RevPAR
+Starts at 50
+⭐
+Guest Satisfaction
+Starts at 50
+👥
+Staff Retention
+Starts at 50
+🏆
+Brand Equity
+Starts at 50
+Resources & Abilities
+🔑
+GM Capacity
+RESOURCE
+✨
+Moments of Truth
+ONE-TIME
+16
+TURNS
+4
+ROUNDS
+3
+REFLECTIONS
+Begin Simulation

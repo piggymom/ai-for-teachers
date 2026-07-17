@@ -1,0 +1,64 @@
+💹
+Finance
+Asher Research · Financial Advisor
+Quarter 1 of 16
+Round 1/4
+🏦
+Capital
+100
+📈
+Portfolio Value
+50
+⚡
+Risk Exposure
+35
+🤝
+Client Confidence
+50
+📋
+Compliance Score
+50
+Exit Simulation
+🎰
+Market Shock
+
+Generating scenario...
+
+Finance
+
+Financial Advisor
+
+Lowell, MA — Merrimack Valley Wealth Management
+
+You're a financial advisor at a Lowell wealth management firm. Build and protect portfolios for local families, retirees, and small business owners. Market swings, client emotions, and regulatory pressure make every decision count.
+
+Your Performance Meters
+
+Click any meter for details. If a meter drops too low, the simulation ends.
+
+📈
+Portfolio Value
+Starts at 50
+⚡
+Risk Exposure
+Starts at 35
+🤝
+Client Confidence
+Starts at 50
+📋
+Compliance Score
+Starts at 50
+Resources & Abilities
+🏦
+Capital
+RESOURCE
+🎰
+Market Shock
+ONE-TIME
+16
+TURNS
+4
+ROUNDS
+3
+REFLECTIONS
+Begin Simulation

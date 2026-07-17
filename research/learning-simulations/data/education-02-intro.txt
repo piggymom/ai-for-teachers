@@ -1,0 +1,64 @@
+🎓
+Education
+Asher Research · Program Coordinator
+Month 1 of 16
+Round 1/4
+📋
+Initiative
+100
+🎯
+Student Success
+50
+📈
+Enrollment
+50
+💰
+Budget
+50
+👩‍🏫
+Faculty Morale
+50
+Exit Simulation
+📝
+Accreditation Visit
+
+Generating scenario...
+
+Education
+
+Program Coordinator
+
+Lowell, MA — Middlesex Community College
+
+You're the new program coordinator at MCC in Lowell. Grow enrollment, support diverse learners, manage a tight budget, and keep faculty motivated. Every decision affects real students trying to build better futures for themselves and their families.
+
+Your Performance Meters
+
+Click any meter for details. If a meter drops too low, the simulation ends.
+
+🎯
+Student Success
+Starts at 50
+📈
+Enrollment
+Starts at 50
+💰
+Budget
+Starts at 50
+👩‍🏫
+Faculty Morale
+Starts at 50
+Resources & Abilities
+📋
+Initiative
+RESOURCE
+📝
+Accreditation Visit
+ONE-TIME
+16
+TURNS
+4
+ROUNDS
+3
+REFLECTIONS
+Begin Simulation

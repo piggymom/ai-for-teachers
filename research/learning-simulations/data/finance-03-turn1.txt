@@ -1,0 +1,74 @@
+💹
+Finance
+Asher Research · Financial Advisor
+Quarter 1 of 16
+Round 1/4
+🏦
+Capital
+100
+📈
+Portfolio Value
+50
+⚡
+Risk Exposure
+35
+🤝
+Client Confidence
+50
+📋
+Compliance Score
+50
+Exit Simulation
+🎰
+Market Shock
+📋 PORTFOLIO_STRATEGY
+ROUND 1 OF 4
+The Inflation Problem: Protecting Client Savings
+
+You work at Merrimack Valley Wealth Management in downtown Lowell. This morning, your manager shows you reports about inflation. Prices for food, gas, and housing are going up fast in Massachusetts. Your clients are worried. They ask: will my savings be worth less next year? You have several clients from Middlesex Community College and small business owners in the Merrimack Valley. They trusted you to protect their money. You need to decide now how to help them fight inflation. If you do nothing, their savings will lose buying power. If you move too fast, you might take on too much risk or break compliance rules. How you handle Inflation Hedge will shape what happens next. This decision will shape how your clients see you and how safe their portfolios really are.
+
+KEY TERMS
+Inflation
+Inflation Hedge
+A
+
+Move 60% of client portfolios into commodities and real estate funds immediately
+
+CAPITAL
+20
+B
+
+Start a careful review of each client's needs. Suggest small inflation hedge positions over the next month
+
+CAPITAL
+14
+C
+
+Recommend Treasury Inflation-Protected Securities (TIPS) for all conservative clients
+
+CAPITAL
+8
+D
+
+Call a meeting with your top 10 clients. Let them choose their own inflation strategy with your guidance
+
+CAPITAL
+12
+E
+
+Focus only on your largest accounts. Offer premium inflation hedge strategies to them
+
+CAPITAL
+10
+F
+
+Research and recommend a low-cost gold ETF and a diversified real estate fund for moderate clients
+
+CAPITAL
+11
+G
+
+Wait. Monitor inflation trends for two more weeks before making changes
+
+CAPITAL
+0

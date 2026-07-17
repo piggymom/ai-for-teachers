@@ -1,0 +1,103 @@
+💹
+Finance
+Asher Research · Financial Advisor
+Quarter 2 of 16
+Round 1/4
+🏦
+Capital
+80
+📈
+Portfolio Value
+58
+⚡
+Risk Exposure
+45
+🤝
+Client Confidence
+56
+📋
+Compliance Score
+45
+Exit Simulation
+🎰
+Market Shock
+📋 INVESTMENT_STRATEGY
+ROUND 1 OF 4
+Tech Stock Surge: Should You Move Fast?
+
+You work at Merrimack Valley Wealth Management in Lowell. This morning, technology stocks jumped 8% after positive earnings reports. Several of your clients who work at local tech companies or who own tech stocks are calling. They want to know if they should buy more tech stocks right now while prices are rising. You must decide quickly because the stock market moves fast. One client, Mrs. Chen, who retired from a manufacturing job in nearby Lawrence, has asked you to help her understand if now is the time to invest more money in tech. Your decision will affect how much money her portfolio grows and how much risk she takes. If you push clients to buy now, you might gain quick profits, but you might also hurt them if prices fall suddenly. As a financial advisor, you need to think about Volatility before deciding. This is a real test of market timing, which is predicting when to buy and sell stocks for the best profits.
+
+KEY TERMS
+Market Timing
+Volatility
+A
+
+Call all clients immediately. Recommend they invest heavily in tech stocks right now while prices are climbing.
+
+CAPITAL
+18
+B
+
+Meet with each client one-on-one. Review their personal goals and time horizon. Recommend moderate tech increases only for clients with long-term plans and high risk tolerance.
+
+CAPITAL
+12
+C
+
+Tell clients to wait. Explain that after big price jumps, stocks often fall. Stay in current positions and avoid buying at the peak.
+
+CAPITAL
+8
+D
+
+Recommend a balanced move. Buy tech for 40% of available cash. Keep 60% in savings for other opportunities later.
+
+CAPITAL
+10
+E
+
+Partner with a local financial education program at MCC. Run a workshop explaining market timing risks and stock volatility before making moves.
+
+CAPITAL
+14
+F
+
+Research whether tech stocks are truly undervalued or just riding emotional buying. Present honest analysis to clients with clear pros and cons of buying now.
+
+CAPITAL
+11
+G
+
+Wait and do nothing for now. Tell clients to check in again tomorrow.
+
+CAPITAL
+0
+Decision Made
+
+"Call all clients immediately. Recommend they invest heavily in tech stocks right now while prices are climbing."
+
+Clients feel excited and invest large sums. Portfolio grows quickly if tech continues rising. But your aggressive push and lack of diversification increases risk. SEC compliance team flags your records for potential unsuitable recommendations.
+
+📈 Portfolio Value
+58
+→
+66
++8
+⚡ Risk Exposure
+45
+→
+55
++10
+🤝 Client Confidence
+56
+→
+62
++6
+📋 Compliance Score
+45
+→
+40
+-5
+🏦 Capital Spent
+-18
+Continue

@@ -1,0 +1,64 @@
+📊
+Business Management
+Asher Research · General Manager
+Quarter 1 of 16
+Round 1/4
+💵
+Budget
+100
+💰
+Revenue
+50
+⭐
+Customer Satisfaction
+50
+👥
+Employee Morale
+50
+🏆
+Reputation
+50
+Exit Simulation
+📈
+Market Pulse
+
+Generating scenario...
+
+Business Management
+
+General Manager
+
+Lowell, MA — Merrimack Valley Business District
+
+You've just been hired as General Manager of a mid-size company in Lowell's revitalized downtown. Balance profitability with employee welfare, customer satisfaction, and community impact. Every quarter brings new challenges.
+
+Your Performance Meters
+
+Click any meter for details. If a meter drops too low, the simulation ends.
+
+💰
+Revenue
+Starts at 50
+⭐
+Customer Satisfaction
+Starts at 50
+👥
+Employee Morale
+Starts at 50
+🏆
+Reputation
+Starts at 50
+Resources & Abilities
+💵
+Budget
+RESOURCE
+📈
+Market Pulse
+ONE-TIME
+16
+TURNS
+4
+ROUNDS
+3
+REFLECTIONS
+Begin Simulation

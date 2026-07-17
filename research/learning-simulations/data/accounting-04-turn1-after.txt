@@ -1,0 +1,103 @@
+📒
+Accounting
+Asher Research · Senior Accountant
+Month 1 of 16
+Round 1/4
+⏱️
+Billable Hours
+100
+🎯
+Accuracy
+50
+🤝
+Client Trust
+50
+📋
+Compliance
+50
+💵
+Firm Profit
+50
+Exit Simulation
+🔍
+Audit Roulette
+📋 CLIENT_MANAGEMENT
+ROUND 1 OF 4
+New Client Arrives With Messy Records
+
+A manufacturing company in Lowell called MetalWorks Inc. just hired your firm to handle their accounting. The owner, Maria, says she kept financial records on paper and in three different spreadsheets for the past two years. She wants you to organize everything before tax season starts in eight weeks. Your firm needs to complete an onboarding process, which means reviewing all the old records, fixing errors, and setting up a clean system for the future. If you do this work carefully, MetalWorks will trust you and pay well. But if you rush through it or miss problems, you might miss fraud, make tax filing mistakes, or lose the client. Understanding Reconciliation is important for making the right choice here. This decision will shape how much profit your firm makes and how accurate your work becomes.
+
+KEY TERMS
+Onboarding Process
+Reconciliation
+A
+
+Hire a temporary intern to work 60 hours scanning and organizing all MetalWorks records. You personally review and reconcile everything in detail. Spend three weeks on full onboarding.
+
+BILLABLE HOURS
+22
+B
+
+Work with MetalWorks for two weeks to understand their business. Set up a simple monthly reconciliation process. Ask them to organize their own old records and send you a summary.
+
+BILLABLE HOURS
+10
+C
+
+Perform a quick two-day review of MetalWorks records to spot obvious errors. Start monthly billing right away. Plan a deeper review later during slower season.
+
+BILLABLE HOURS
+6
+D
+
+Use your firm's accounting software to automatically import and organize MetalWorks data. Spend five days training the owner on the new system. Light reconciliation only.
+
+BILLABLE HOURS
+9
+E
+
+Request that MetalWorks hire a local bookkeeper to organize their records. You provide guidance but they do the work. You bill for consulting only.
+
+BILLABLE HOURS
+4
+F
+
+Perform full reconciliation of all two years of records with MetalWorks owner present. Use this as a training opportunity. Spend two weeks, but bill the client for most of your time.
+
+BILLABLE HOURS
+14
+G
+
+Wait. Tell MetalWorks you will start onboarding next month when current clients finish their work.
+
+BILLABLE HOURS
+0
+Decision Made
+
+"Hire a temporary intern to work 60 hours scanning and organizing all MetalWorks records. You personally review and reconcile everything in detail. Spend three weeks on full onboarding."
+
+MetalWorks gets a perfect, clean setup. You find two missing expense categories and fix them before taxes. But the intern costs $900 and your time investment reduces billable hours for other clients this month.
+
+🎯 Accuracy
+50
+→
+60
++10
+🤝 Client Trust
+50
+→
+58
++8
+📋 Compliance
+50
+→
+60
++10
+💵 Firm Profit
+50
+→
+36
+-14
+⏱️ Billable Hours Spent
+-22
+Continue

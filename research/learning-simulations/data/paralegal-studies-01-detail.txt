@@ -1,0 +1,55 @@
+Decision Lab
+Student: Asher Research
+Sign Out
+Select Your Path
+
+Step into a professional role. Each discipline plays differently with its own decisions, pressures, and outcomes.
+
+Business Management
+Run a growing business in the Merrimack Valley
+Accounting
+Manage the books for a growing Lowell firm
+Finance
+Manage investments for Merrimack Valley clients
+Culinary Arts
+Run a restaurant in Lowell's food scene
+Fashion Merchandising
+Curate fashion for New England retail
+Entrepreneurship
+Launch a startup from MCC's innovation hub
+Paralegal Studies
+Support justice at a Lowell law firm
+Criminal Justice
+Lead community justice in Lowell
+Education
+Lead a program at Middlesex Community College
+Personal Finance
+Build financial security after MCC — one month at a time
+Hotel Management
+Lead a riverfront hotel on the Merrimack
+Paralegal Studies
+
+Lead Paralegal
+
+LOWELL, MA — MERRIMACK VALLEY LAW OFFICES
+
+You're a paralegal at a busy law firm in downtown Lowell serving diverse clients — immigration cases, family law, personal injury, and small business disputes. Manage case files, assist attorneys, navigate ethical boundaries, and keep the firm running smoothly.
+
+STATS YOU'LL MANAGE
+📂 Case Progress
+How effectively your assigned cases move through the legal process toward resolution.
+🤝 Client Satisfaction
+How well you serve the diverse clients who come through your firm's doors.
+🎯 Accuracy
+The precision of your legal research, document preparation, and filing work.
+🏛️ Firm Reputation
+How the legal community, judges, and potential clients perceive your firm.
+SPECIAL MECHANIC
+Discovery Bombshell
+
+Periodically, new evidence surfaces that can completely change a case. If your Accuracy is high, you spot it early and use it. If low, you might miss it — and the opposing side won't.
+
+Resource: Work Hours
+Case intake through resolution
+16 Weeks
+Begin Paralegal Studies Sim

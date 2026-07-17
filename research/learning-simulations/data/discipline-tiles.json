@@ -1,0 +1,54 @@
+[
+  {
+    "text": "Sign Out",
+    "tag": "BUTTON"
+  },
+  {
+    "text": "Business Management\nRun a growing business in the Merrimack Valley",
+    "tag": "BUTTON"
+  },
+  {
+    "text": "Accounting\nManage the books for a growing Lowell firm",
+    "tag": "BUTTON"
+  },
+  {
+    "text": "Finance\nManage investments for Merrimack Valley clients",
+    "tag": "BUTTON"
+  },
+  {
+    "text": "Culinary Arts\nRun a restaurant in Lowell's food scene",
+    "tag": "BUTTON"
+  },
+  {
+    "text": "Fashion Merchandising\nCurate fashion for New England retail",
+    "tag": "BUTTON"
+  },
+  {
+    "text": "Entrepreneurship\nLaunch a startup from MCC's innovation hub",
+    "tag": "BUTTON"
+  },
+  {
+    "text": "Paralegal Studies\nSupport justice at a Lowell law firm",
+    "tag": "BUTTON"
+  },
+  {
+    "text": "Criminal Justice\nLead community justice in Lowell",
+    "tag": "BUTTON"
+  },
+  {
+    "text": "Education\nLead a program at Middlesex Community College",
+    "tag": "BUTTON"
+  },
+  {
+    "text": "Personal Finance\nBuild financial security after MCC — one month at a time",
+    "tag": "BUTTON"
+  },
+  {
+    "text": "Hotel Management\nLead a riverfront hotel on the Merrimack",
+    "tag": "BUTTON"
+  },
+  {
+    "text": "Select a Discipline to Begin",
+    "tag": "BUTTON"
+  }
+]

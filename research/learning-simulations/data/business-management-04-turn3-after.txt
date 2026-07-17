@@ -1,0 +1,103 @@
+📊
+Business Management
+Asher Research · General Manager
+Quarter 3 of 16
+Round 1/4
+💵
+Budget
+62
+💰
+Revenue
+34
+⭐
+Customer Satisfaction
+49
+👥
+Employee Morale
+56
+🏆
+Reputation
+51
+Exit Simulation
+📈
+Market Pulse
+📋 HUMAN_RESOURCES
+ROUND 1 OF 4
+New Hire Diversity Program Proposal
+
+Your HR manager brings you a proposal to start a diversity hiring initiative for your Lowell company. The plan would recruit more workers from the city's large Cambodian, Latino, and immigrant communities. Right now, your workforce does not match the diversity of Lowell itself. A local nonprofit called Merrimack Valley Community Partners wants to help you find qualified candidates from underrepresented groups. This initiative could improve your company's reputation in the community and bring fresh perspectives to your team. However, the program will require time, training resources, and changes to your hiring process. The concept of Stakeholder Engagement plays a key role in this situation. The decision you make now will shape what kind of employer your company becomes in Lowell.
+
+KEY TERMS
+Diversity Hiring
+Stakeholder Engagement
+A
+
+Launch a full diversity hiring program immediately with Merrimack Valley Community Partners. Invest in training for all managers on inclusive hiring. Set a goal to hire 40 percent of new positions from underrepresented groups within six months.
+
+BUDGET
+18
+B
+
+Partner with Merrimack Valley Community Partners to recruit for only your next ten open positions. No formal training or policy changes yet. See how this smaller test works before deciding on bigger changes.
+
+BUDGET
+8
+C
+
+Create an internal diversity committee with volunteers from your current workforce. Have them design the hiring program over the next three months. Get employee input before making any changes to the hiring process.
+
+BUDGET
+7
+D
+
+Hire a new Diversity and Inclusion Officer who will lead the program full-time. Budget for this salary, training materials, and community partnerships. Give them authority to redesign hiring practices.
+
+BUDGET
+14
+E
+
+Commit to diversity hiring goals but keep all changes voluntary for managers. Encourage teams to recruit from Merrimack Valley Community Partners without requiring it. Focus on education rather than rules.
+
+BUDGET
+4
+F
+
+Launch a paid internship program for Lowell high school students from underrepresented groups. Partner with Middlesex Community College to find candidates. Build the pipeline for future full-time hires.
+
+BUDGET
+11
+G
+
+Wait and do nothing for now. Focus on current operations. Revisit diversity hiring in six months if business improves.
+
+BUDGET
+0
+Decision Made
+
+"Launch a full diversity hiring program immediately with Merrimack Valley Community Partners. Invest in training for all managers on inclusive hiring. Set a goal to hire 40 percent of new positions from underrepresented groups within six months."
+
+Strong community support and improved morale. New hiring process costs money and training takes time. Some existing employees feel unsure about changes.
+
+💰 Revenue
+34
+→
+31
+-3
+⭐ Customer Satisfaction
+49
+→
+51
++2
+👥 Employee Morale
+56
+→
+61
++5
+🏆 Reputation
+51
+→
+57
++6
+💵 Budget Spent
+-18
+Continue

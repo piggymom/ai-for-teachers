@@ -1,0 +1,103 @@
+📊
+Business Management
+Asher Research · General Manager
+Quarter 2 of 16
+Round 1/4
+💵
+Budget
+80
+💰
+Revenue
+42
+⭐
+Customer Satisfaction
+47
+👥
+Employee Morale
+48
+🏆
+Reputation
+45
+Exit Simulation
+📈
+Market Pulse
+📋 OPERATIONS_AND_RISK
+ROUND 1 OF 4
+Safety Incident at Your Lowell Warehouse
+
+Last week, one of your warehouse workers in downtown Lowell slipped on a wet floor and broke his ankle. He was working in the shipping department when a water pipe leaked. The company paid for his hospital bill, but now you must decide what to do next. A safety audit shows your facility has many small hazards. You can spend money to fix these problems now, or wait and hope nothing else happens. Your workers are worried about safety, and the local Lowell community is starting to ask questions. As a general manager, you need to think about Hazard Assessment before deciding. How you handle Workplace Safety Program will shape what happens next. The choices you make will affect how much money you spend, how happy your employees feel, and what people in the Merrimack Valley think about your company.
+
+KEY TERMS
+Hazard Assessment
+Workplace Safety Program
+A
+
+Launch a complete safety overhaul: hire a safety consultant, fix all hazards immediately, and train all employees in new safety procedures.
+
+BUDGET
+18
+B
+
+Contract a local safety consulting firm from the Merrimack Valley to audit your facility and create a 6-month safety improvement plan.
+
+BUDGET
+10
+C
+
+Require all employees to attend a one-day safety training course. Fix only the most dangerous hazards (wet floors, broken stairs). Skip the full audit.
+
+BUDGET
+7
+D
+
+Create an employee safety committee. Give workers a chance to report hazards and suggest fixes. Pay for the most important repairs based on their feedback.
+
+BUDGET
+8
+E
+
+Increase worker insurance coverage and post clear hazard warning signs throughout the facility. Accept that accidents may happen.
+
+BUDGET
+4
+F
+
+Offer workers a small bonus ($200 each) to report safety hazards they find. Use this free feedback to decide which fixes to make later.
+
+BUDGET
+6
+G
+
+Wait. Monitor the situation for one more month before making any major changes.
+
+BUDGET
+0
+Decision Made
+
+"Launch a complete safety overhaul: hire a safety consultant, fix all hazards immediately, and train all employees in new safety procedures."
+
+Workers feel protected and valued. The community respects your commitment. But immediate costs are very high, cutting your profits this quarter.
+
+💰 Revenue
+42
+→
+34
+-8
+⭐ Customer Satisfaction
+47
+→
+49
++2
+👥 Employee Morale
+48
+→
+56
++8
+🏆 Reputation
+45
+→
+51
++6
+💵 Budget Spent
+-18
+Continue

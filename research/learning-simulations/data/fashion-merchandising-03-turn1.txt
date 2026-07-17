@@ -1,0 +1,74 @@
+👗
+Fashion Merchandising
+Asher Research · Merchandising Director
+Season 1 of 16
+Round 1/4
+💎
+Influence
+100
+🔮
+Trend Score
+50
+🛍️
+Sales
+50
+✨
+Brand Image
+50
+📦
+Inventory Health
+50
+Exit Simulation
+🔮
+Trend Forecast
+📋 INVENTORY_AND_FORECASTING
+ROUND 1 OF 4
+Fall Inventory Order: Spring Trend Data vs. Safe Classics
+
+It is July, and you must place your fall inventory order for the Lowell outlet store. Your senior buyer has two different recommendations. The first recommendation shows that Gen Z customers in the Merrimack Valley are buying more oversized blazers and earth tones. However, your warehouse manager says the outlet store still has a lot of classic fitted jeans and black clothing from last season. Your sales team wants you to buy more trendy pieces to match what social media shows customers want. Your finance team wants you to use the old inventory first before buying expensive new stock. You must decide now because factories need your order by next week. If you order the wrong items, you will waste money on overstock or lose sales from stockouts. Understanding Seasonal Planning is important for making the right choice here. How you handle Markdown will shape what happens next. This decision will shape your entire fall season.
+
+KEY TERMS
+Seasonal Planning
+Markdown
+A
+
+Order 70% new fall trend items. Cancel half your old inventory clearance plan. Invest heavily in oversized blazers and earth tones.
+
+INFLUENCE
+18
+B
+
+Order a balanced mix. Buy 50% new trends and 50% classic items. Clear old inventory slowly over eight weeks.
+
+INFLUENCE
+11
+C
+
+Order mostly trend items (60%) but keep strong relationships with your suppliers. Ask if they can deliver a second batch in September if trends shift.
+
+INFLUENCE
+12
+D
+
+Order 80% classics and safe basics. Trust that quality timeless items always sell at outlet stores.
+
+INFLUENCE
+6
+E
+
+Partner with a local Lowell fashion influencer to test trend items. Order a small batch of oversized blazers and earth tones. Monitor sales daily and adjust your next order.
+
+INFLUENCE
+14
+F
+
+Hire a data analyst for three days to study your store's past sales. Use that data to make the order decision instead of guessing.
+
+INFLUENCE
+9
+G
+
+Wait two more weeks. Watch social media trends more carefully. Place your order in late July instead.
+
+INFLUENCE
+0

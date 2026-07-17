@@ -1,0 +1,64 @@
+🚀
+Entrepreneurship
+Asher Research · Founder & CEO
+Sprint 1 of 16
+Round 1/4
+⚡
+Hustle
+100
+💡
+Innovation
+50
+💰
+Funding
+50
+🎯
+Market Fit
+30
+🤝
+Team
+50
+Exit Simulation
+🔄
+Pivot Point
+
+Generating scenario...
+
+Entrepreneurship
+
+Founder & CEO
+
+Lowell, MA — MCC Innovation Hub & Startup Incubator
+
+You're launching a tech startup out of Middlesex Community College's entrepreneurship incubator in Lowell. Turn your idea into a viable business. Pitch investors, build a team, find product-market fit, and survive the brutal early stages.
+
+Your Performance Meters
+
+Click any meter for details. If a meter drops too low, the simulation ends.
+
+💡
+Innovation
+Starts at 50
+💰
+Funding
+Starts at 50
+🎯
+Market Fit
+Starts at 30
+🤝
+Team
+Starts at 50
+Resources & Abilities
+⚡
+Hustle
+RESOURCE
+🔄
+Pivot Point
+ONE-TIME
+16
+TURNS
+4
+ROUNDS
+3
+REFLECTIONS
+Begin Simulation

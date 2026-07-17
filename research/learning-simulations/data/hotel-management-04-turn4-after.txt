@@ -1,0 +1,103 @@
+🏨
+Hotel Management
+Asher Research · General Manager
+Week 4 of 16
+Round 1/4
+🔑
+GM Capacity
+46
+💼
+RevPAR
+62
+⭐
+Guest Satisfaction
+49
+👥
+Staff Retention
+47
+🏆
+Brand Equity
+58
+Exit Simulation
+✨
+Moments of Truth
+📋 REVENUE_MANAGEMENT
+ROUND 1 OF 4
+UMass Lowell Conference Week: Price Now or Wait?
+
+It is Monday morning, and your assistant just told you that UMass Lowell is hosting a major engineering conference next week. The hotel expects 85 percent occupancy without any price increases. Right now, your rooms are priced at 120 dollars per night. You know that conference guests will pay more, and your competitors are already raising their prices. However, you also know that many guests will book directly with you if they see fair prices on your website. Your ownership group is pushing you to maximize revenue per available room this week. You have three days to decide your pricing strategy before the conference guests start booking. Good decisions here depend on understanding Dynamic Pricing. The concept of RevPAR (Revenue Per Available Room) plays a key role in this situation. This decision will affect your RevPAR, your guest satisfaction scores, and your reputation in the Merrimack Valley business community.
+
+KEY TERMS
+Dynamic Pricing
+RevPAR (Revenue Per Available Room)
+A
+
+Raise prices to 185 dollars per night for conference week. Update all booking sites today. Tell your sales team to push premium rooms.
+
+GM CAPACITY
+18
+B
+
+Raise prices to 155 dollars per night. Keep direct bookings on your website at 140 dollars to reward loyal customers. Send a special email offer to your mailing list today.
+
+GM CAPACITY
+12
+C
+
+Keep room prices at 120 dollars for all guests. Focus on upselling conference guests parking, room upgrades, and F&B packages during check-in.
+
+GM CAPACITY
+10
+D
+
+Raise prices to 165 dollars for three nights of the conference. Offer a 10 percent discount for guests who book five nights or more. Market this as a 'conference package' with free breakfast.
+
+GM CAPACITY
+14
+E
+
+Raise prices to 145 dollars. Partner with the UMass Lowell conference organizers to offer the hotel as an official partner at this rate. Send them a proposal by Wednesday.
+
+GM CAPACITY
+11
+F
+
+Keep prices at 120 dollars. Instead, hire two extra housekeeping staff and one front desk person for conference week. Offer them overtime pay at 1.5 times normal wage.
+
+GM CAPACITY
+13
+G
+
+Wait until Thursday to decide your pricing strategy. Watch how other Lowell hotels price their rooms first.
+
+GM CAPACITY
+0
+Decision Made
+
+"Raise prices to 185 dollars per night for conference week. Update all booking sites today. Tell your sales team to push premium rooms."
+
+Conference guests feel overcharged. Online reviews mention high prices. RevPAR jumps, but negative word-of-mouth spreads in the UMass Lowell and Lowell business community.
+
+💼 RevPAR
+62
+→
+72
++10
+⭐ Guest Satisfaction
+49
+→
+43
+-6
+👥 Staff Retention
+47
+→
+49
++2
+🏆 Brand Equity
+58
+→
+53
+-5
+🔑 GM Capacity Spent
+-18
+Continue

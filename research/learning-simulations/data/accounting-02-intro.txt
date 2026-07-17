@@ -1,0 +1,64 @@
+📒
+Accounting
+Asher Research · Senior Accountant
+Month 1 of 16
+Round 1/4
+⏱️
+Billable Hours
+100
+🎯
+Accuracy
+50
+🤝
+Client Trust
+50
+📋
+Compliance
+50
+💵
+Firm Profit
+50
+Exit Simulation
+🔍
+Audit Roulette
+
+Generating scenario...
+
+Accounting
+
+Senior Accountant
+
+Lowell, MA — Downtown Accounting Firm
+
+You're the new senior accountant at a mid-size firm serving businesses across the Merrimack Valley. Navigate tax season crunches, audit pressures, ethical dilemmas, and client demands while keeping the numbers honest.
+
+Your Performance Meters
+
+Click any meter for details. If a meter drops too low, the simulation ends.
+
+🎯
+Accuracy
+Starts at 50
+🤝
+Client Trust
+Starts at 50
+📋
+Compliance
+Starts at 50
+💵
+Firm Profit
+Starts at 50
+Resources & Abilities
+⏱️
+Billable Hours
+RESOURCE
+🔍
+Audit Roulette
+ONE-TIME
+16
+TURNS
+4
+ROUNDS
+3
+REFLECTIONS
+Begin Simulation

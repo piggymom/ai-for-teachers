@@ -1,0 +1,103 @@
+⚖️
+Paralegal Studies
+Asher Research · Lead Paralegal
+Week 3 of 16
+Round 1/4
+⏰
+Work Hours
+60
+📂
+Case Progress
+64
+🤝
+Client Satisfaction
+59
+🎯
+Accuracy
+64
+🏛️
+Firm Reputation
+57
+Exit Simulation
+📄
+Discovery Bombshell
+📋 CASE_MANAGEMENT
+ROUND 1 OF 4
+The Missing Court Precedent
+
+You are organizing legal research files for a personal injury case involving a car accident on Bridge Street in Lowell. Your supervising attorney, Ms. Chen, asked you to find similar court cases to support your client's claim for medical expenses and lost wages. You searched the law library database and found three cases that seem helpful, but you are not completely sure if they are the strongest examples. The problem is that your research is not finished, but Ms. Chen needs your findings tomorrow morning before the judge conference call. You must decide how much time to spend finding better cases and how much research quality to report. If you rush and miss important cases, your client might lose money they deserve. How you handle Legal precedent will shape what happens next. As a lead paralegal, you need to think about Due diligence before deciding. If you spend too much time, you might miss the deadline and disappoint your attorney and client.
+
+KEY TERMS
+Legal precedent
+Due diligence
+A
+
+Spend the entire night researching. Find every possible precedent. Submit a complete 40-page research memo with all cases examined and ranked by strength.
+
+WORK HOURS
+22
+B
+
+Spend three more hours tonight. Research five additional databases. Submit a detailed 15-page memo with your three original cases plus two stronger ones you discover.
+
+WORK HOURS
+10
+C
+
+Submit your three cases with a brief note saying more research is needed. Tell Ms. Chen you will continue searching after the morning conference call and provide updates by afternoon.
+
+WORK HOURS
+4
+D
+
+Call Ms. Chen tonight. Explain your current findings honestly. Ask her if the three cases are good enough or if she wants you to continue researching. Let her decide the standard.
+
+WORK HOURS
+5
+E
+
+Contact another paralegal who specializes in personal injury cases. Ask them to review your three cases and suggest gaps in your research. Work together for two hours to improve the quality.
+
+WORK HOURS
+8
+F
+
+Use a legal research AI tool that your firm just purchased. It scans thousands of cases in minutes and suggests the strongest precedents automatically. Review and verify the top five suggestions the tool offers.
+
+WORK HOURS
+6
+G
+
+Submit your three current cases as final research without any additional work tonight. Rest and prepare to explain your findings to Ms. Chen in the morning.
+
+WORK HOURS
+0
+Decision Made
+
+"Spend the entire night researching. Find every possible precedent. Submit a complete 40-page research memo with all cases examined and ranked by strength."
+
+Your research is thorough and impressive. Ms. Chen has excellent material for the conference call. However, you arrive at work exhausted and make small mistakes in other cases.
+
+📂 Case Progress
+64
+→
+72
++8
+🤝 Client Satisfaction
+59
+→
+61
++2
+🎯 Accuracy
+64
+→
+73
++9
+🏛️ Firm Reputation
+57
+→
+63
++6
+⏰ Work Hours Spent
+-22
+Continue

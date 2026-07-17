@@ -1,0 +1,74 @@
+🏨
+Hotel Management
+Asher Research · General Manager
+Week 1 of 16
+Round 1/4
+🔑
+GM Capacity
+100
+💼
+RevPAR
+50
+⭐
+Guest Satisfaction
+50
+👥
+Staff Retention
+50
+🏆
+Brand Equity
+50
+Exit Simulation
+✨
+Moments of Truth
+📋 REVENUE_AND_PARTNERSHIPS
+ROUND 1 OF 4
+Lowell National Park Partnership Opportunity
+
+The Lowell National Historical Park director called you today with an exciting idea. She wants your hotel to become the official partner hotel for park visitors. Right now, many tourists visit the park and sleep at chain hotels outside Lowell or drive an hour to other towns. Your hotel sits two blocks from the park entrance, making it the perfect choice. The park director offers to send you 30 to 50 park visitors each month through a special booking link on the park website. However, the partnership requires you to offer a lower room rate to park visitors, create a special welcome package about Lowell's history, and train your staff to answer questions about textile mills and the Merrimack River. You must decide quickly because the park director is meeting with a competitor hotel next week. This partnership could bring steady business, build your brand in the community, and attract guests who value cultural tourism. As a general manager, you need to think about Occupancy Rate before deciding. How you handle Yield Management will shape what happens next. But it also means less revenue per room, more staff training, and new operating costs that will stretch your team.
+
+KEY TERMS
+Occupancy Rate
+Yield Management
+A
+
+Commit fully to the partnership. Offer a 25 percent discount to park visitors, create an expensive welcome package with local artisan products, and dedicate one staff member full-time to park partnership coordination.
+
+GM CAPACITY
+18
+B
+
+Partner with modest terms. Offer a 12 percent discount to park visitors, create a simple welcome packet about local history, and train existing front desk staff during regular meetings.
+
+GM CAPACITY
+8
+C
+
+Partner only during the slow season. Offer park visitor discounts from November through March only, when your occupancy is weak. No special welcome package. Use existing staff.
+
+GM CAPACITY
+4
+D
+
+Negotiate a sponsorship instead of a discount deal. Ask the park to promote your hotel in exchange for you donating 2 percent of park visitor bookings to the park's education fund. Charge full rates.
+
+GM CAPACITY
+10
+E
+
+Offer a 15 percent discount, but only to families with children and seniors over 65. Create an age-specific welcome package. Partner with Middlesex Community College to offer student group rates as well.
+
+GM CAPACITY
+12
+F
+
+Start a pilot program. Partner for three months only with a 10 percent discount and minimal staff training. Then evaluate whether to continue, expand, or end the partnership.
+
+GM CAPACITY
+6
+G
+
+Do nothing. Tell the park director you need more time to think about it.
+
+GM CAPACITY
+0

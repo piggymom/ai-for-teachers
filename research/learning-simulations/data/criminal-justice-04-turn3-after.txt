@@ -1,0 +1,103 @@
+🔍
+Criminal Justice
+Asher Research · Program Director
+Month 3 of 16
+Round 1/4
+🏛️
+Authority
+64
+🛡️
+Public Safety
+64
+🤝
+Community Trust
+35
+🔄
+Rehabilitation
+44
+💰
+Program Budget
+56
+Exit Simulation
+📁
+Cold Case File
+📋 CRISIS_MANAGEMENT
+ROUND 1 OF 4
+Police and Social Workers Clash Over Lowell Street Crisis
+
+A homeless encampment has grown on Lowell Street near downtown, with about forty people living in tents. The Lowell Police Department wants to clear the area quickly for public safety. Your community justice program and the local homeless services organization want to move people to shelter beds and connect them with job training. Both groups asked you to choose a plan, but they disagree on how fast this should happen and who should lead the effort. The police say waiting causes more crime and disorder in the neighborhood. The social workers say rushing the clearance will push vulnerable people onto other streets without real help. This situation is closely connected to Interagency cooperation and how you manage it. Good decisions here depend on understanding Case management. You have one week to decide how these two agencies will work together, and your choice will affect how residents feel about public safety and how well people get support they need.
+
+KEY TERMS
+Interagency cooperation
+Case management
+A
+
+Let police lead an immediate clearance with social workers present for intake only
+
+AUTHORITY
+18
+B
+
+Create a joint task force with equal police and social work leadership, meet weekly for two months
+
+AUTHORITY
+12
+C
+
+Fund three case managers now to work one-on-one with encampment residents while police maintain distance
+
+AUTHORITY
+14
+D
+
+Negotiate a compromise: police clear the encampment over three weeks while case managers place people in emergency shelter first
+
+AUTHORITY
+16
+E
+
+Invite the police captain and homeless services director to a public community meeting to let residents decide the approach
+
+AUTHORITY
+8
+F
+
+Propose a pilot program: police and social workers jointly staff a mobile outreach team working the encampment for four weeks
+
+AUTHORITY
+11
+G
+
+Take no action this week. Wait to see if the issue resolves itself or federal grants appear
+
+AUTHORITY
+0
+Decision Made
+
+"Let police lead an immediate clearance with social workers present for intake only"
+
+Police clear the encampment in three days. Crime drops and complaints from downtown businesses fall. But advocates protest publicly, and trust in your program drops sharply. Many people leave without accepting shelter or services. Lowell Street feels safer but the underlying homelessness problem just moves elsewhere.
+
+🛡️ Public Safety
+64
+→
+71
++7
+🤝 Community Trust
+35
+→
+27
+-8
+🔄 Rehabilitation
+44
+→
+39
+-5
+💰 Program Budget
+56
+→
+53
+-3
+🏛️ Authority Spent
+-18
+Continue

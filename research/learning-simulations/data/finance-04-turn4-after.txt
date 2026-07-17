@@ -1,0 +1,103 @@
+💹
+Finance
+Asher Research · Financial Advisor
+Quarter 4 of 16
+Round 1/4
+🏦
+Capital
+44
+📈
+Portfolio Value
+58
+⚡
+Risk Exposure
+43
+🤝
+Client Confidence
+68
+📋
+Compliance Score
+36
+Exit Simulation
+🎰
+Market Shock
+📋 COMPLIANCE_AND_RISK
+ROUND 1 OF 4
+SEC Audit Notice Arrives at Your Firm
+
+This morning, your manager hands you a letter from the Securities and Exchange Commission. The SEC will audit your firm's records starting next week. They want to check that your clients received clear information about fees and investment risks. You have five days to prepare all your client files, trade records, and documentation. Your firm's compliance is at 50 percent, which is middle ground. Some of your files are organized well, but others are missing important paperwork. The audit could find problems and hurt your firm's reputation in the Merrimack Valley community. Good decisions here depend on understanding Fiduciary Duty. How you prepare now will decide if the audit helps your career or damages it.
+
+KEY TERMS
+Audit
+Fiduciary Duty
+A
+
+Hire an expensive outside compliance firm to rebuild all client files perfectly before the audit. Rush the process and charge the cost back to clients secretly.
+
+CAPITAL
+18
+B
+
+Spend the next five days organizing your best client files carefully. Be honest about which files need work. Present a clear plan to the SEC auditors for fixing weak areas.
+
+CAPITAL
+12
+C
+
+Call three of your most difficult clients. Explain the audit honestly. Offer them better fee structures now to show good faith before auditors review their accounts.
+
+CAPITAL
+8
+D
+
+Contact a lawyer who knows SEC rules well. Pay for a few hours of advice on how to present your records. Organize files based on the lawyer's guidance.
+
+CAPITAL
+9
+E
+
+Focus only on your largest client accounts. Make sure their files are perfect. Leave smaller accounts less organized. Hope the auditors focus on big accounts.
+
+CAPITAL
+6
+F
+
+Request a two-week delay on the audit. Tell the SEC your firm needs more time to prepare. Use those weeks to slowly fix problems without rushing.
+
+CAPITAL
+4
+G
+
+Do nothing special. Let the audit happen with your files as they are right now.
+
+CAPITAL
+0
+Decision Made
+
+"Hire an expensive outside compliance firm to rebuild all client files perfectly before the audit. Rush the process and charge the cost back to clients secretly."
+
+Files look perfect for the audit, but clients discover hidden fees. Trust collapses. Compliance rises but client confidence crashes.
+
+📈 Portfolio Value
+58
+→
+55
+-3
+⚡ Risk Exposure
+43
+→
+45
++2
+🤝 Client Confidence
+68
+→
+60
+-8
+📋 Compliance Score
+36
+→
+46
++10
+🏦 Capital Spent
+-18
+Continue

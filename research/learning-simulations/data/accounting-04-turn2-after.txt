@@ -1,0 +1,103 @@
+📒
+Accounting
+Asher Research · Senior Accountant
+Month 2 of 16
+Round 1/4
+⏱️
+Billable Hours
+78
+🎯
+Accuracy
+60
+🤝
+Client Trust
+58
+📋
+Compliance
+60
+💵
+Firm Profit
+36
+Exit Simulation
+🔍
+Audit Roulette
+📋 CLIENT_CRISIS
+ROUND 1 OF 4
+Payroll Error at Local Manufacturing Client
+
+You discover a serious mistake in the payroll processing for Merrimack Valley Manufacturing, one of your firm's largest clients in Lowell. Last week, your junior accountant miscalculated overtime hours for 47 employees, overpaying some workers and underpaying others by hundreds of dollars. The error happened because the reconciliation process was skipped to save time during tax season. The client's owner found the problem this morning and called your office in a panic. Employees are already asking questions about their paychecks. You must decide how to fix this quickly while protecting both the company's finances and your firm's reputation. Good decisions here depend on understanding Gross Pay Calculation. This situation tests whether you prioritize speed or accuracy, and whether you follow proper procedures even under pressure.
+
+KEY TERMS
+Reconciliation
+Gross Pay Calculation
+A
+
+Immediately issue corrected paychecks and file amended payroll records without waiting for full review. Tell the client to send notification to all employees today.
+
+BILLABLE HOURS
+18
+B
+
+Stop all other work for your team. Spend three days doing a complete audit of all 47 employee records before making any corrections. Document everything carefully.
+
+BILLABLE HOURS
+22
+C
+
+Hire a temporary contractor from the Middlesex Community College placement service to help verify records. You oversee the work but keep other clients on schedule.
+
+BILLABLE HOURS
+12
+D
+
+Call a meeting with the client. Propose a three-part plan: first, identify which employees were overpaid versus underpaid. Second, issue corrected paychecks with a clear explanation letter. Third, schedule a follow-up meeting in one week to review all procedures.
+
+BILLABLE HOURS
+8
+E
+
+Tell the client you will provide corrected information in two days. Use this time to train your junior accountant on payroll rules and require them to sign off on all overtime calculations before you finalize any corrections.
+
+BILLABLE HOURS
+10
+F
+
+Contact the Department of Revenue to ask if this error requires immediate state notification. Follow their guidance exactly while the client corrects paychecks with their own payroll system.
+
+BILLABLE HOURS
+6
+G
+
+Wait until tomorrow to respond. Let the client handle the immediate employee communication while you finish current client work.
+
+BILLABLE HOURS
+0
+Decision Made
+
+"Immediately issue corrected paychecks and file amended payroll records without waiting for full review. Tell the client to send notification to all employees today."
+
+The client appreciates the fast response, but your rush to fix it creates new errors. The IRS may question the amended filings later. You save the relationship but expose the firm to audit risk.
+
+🎯 Accuracy
+60
+→
+54
+-6
+🤝 Client Trust
+58
+→
+66
++8
+📋 Compliance
+60
+→
+52
+-8
+💵 Firm Profit
+36
+→
+39
++3
+⏱️ Billable Hours Spent
+-18
+Continue

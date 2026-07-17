@@ -1,0 +1,103 @@
+👨‍🍳
+Culinary Arts
+Asher Research · Head Chef & Owner
+Week 4 of 16
+Round 1/4
+⚡
+Energy
+42
+⭐
+Food Quality
+70
+📱
+Customer Reviews
+69
+💰
+Budget
+34
+🔥
+Kitchen Morale
+40
+Exit Simulation
+🍽️
+Critic's Table
+📋 OPERATIONS_AND_RESOURCES
+ROUND 1 OF 4
+Your Main Oven Is Breaking Down
+
+Your restaurant's main oven stops working correctly during lunch service. The oven heats unevenly. Some dishes cook fast, but others stay raw or burn. You call a repair company in Lowell, and they say the oven is ten years old. They can fix it today for eight hundred dollars, but the part might fail again soon. A new oven costs four thousand dollars and will work perfectly for many years. Right now, you have limited money in your budget. You must decide quickly because your line cooks cannot bake bread or roasted dishes without a good oven. Your customers expect consistent food quality. Without a solution today, tonight's dinner service will be very difficult. Good decisions here depend on understanding Line Cook. Understanding Mise en Place is important for making the right choice here. This decision will affect your food quality, your budget, your kitchen staff's stress level, and your restaurant's reputation in the Lowell community.
+
+KEY TERMS
+Line Cook
+Mise en Place
+A
+
+Buy a new oven today with a credit card. You will pay interest, but your kitchen will be perfect.
+
+ENERGY
+18
+B
+
+Pay for the eight hundred dollar repair today. Use your savings. Plan to save for a new oven next year.
+
+ENERGY
+8
+C
+
+Negotiate a payment plan with the oven company. Buy new equipment but pay over twelve months.
+
+ENERGY
+11
+D
+
+Repair the oven today. Then reduce your menu to only dishes that do not need the oven.
+
+ENERGY
+10
+E
+
+Share equipment with another restaurant. Rent oven time at a larger kitchen two blocks away.
+
+ENERGY
+12
+F
+
+Ask your equipment supplier for a discount on a used oven. Offer to be a regular customer.
+
+ENERGY
+6
+G
+
+Do nothing today. See if the oven works for tonight's service. Decide about repair or replacement tomorrow.
+
+ENERGY
+0
+Decision Made
+
+"Buy a new oven today with a credit card. You will pay interest, but your kitchen will be perfect."
+
+Your line cooks feel supported and work happily. Food quality jumps immediately. However, you now owe the credit card company money with high interest. Your budget drops sharply and monthly payments will hurt your cash flow for months.
+
+⭐ Food Quality
+70
+→
+80
++10
+📱 Customer Reviews
+69
+→
+77
++8
+💰 Budget
+34
+→
+19
+-15
+🔥 Kitchen Morale
+40
+→
+46
++6
+⚡ Energy Spent
+-18
+Continue

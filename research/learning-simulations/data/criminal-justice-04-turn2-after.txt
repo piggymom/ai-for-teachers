@@ -1,0 +1,103 @@
+🔍
+Criminal Justice
+Asher Research · Program Director
+Month 2 of 16
+Round 1/4
+🏛️
+Authority
+82
+🛡️
+Public Safety
+56
+🤝
+Community Trust
+45
+🔄
+Rehabilitation
+47
+💰
+Program Budget
+58
+Exit Simulation
+📁
+Cold Case File
+📋 COMMUNITY_JUSTICE
+ROUND 1 OF 4
+Outreach Worker Shot in Merrimack Valley
+
+Yesterday, Marcus Chen, one of your best outreach workers, was shot in the arm while trying to talk to gang members near Lowell High School. Marcus has worked for your program for two years and knows many young people in the neighborhoods. He was not killed, but he is now scared to go back to work. The shooting happened in broad daylight, and neighbors saw it but are afraid to talk to police. Your team is upset and worried about safety. This event forces you to decide how to respond to gang violence while keeping your staff and community safe. As a program director, you need to think about Gang Intervention before deciding. You must choose between aggressive enforcement, community healing, or focusing on jobs and hope for young people at risk.
+
+KEY TERMS
+Outreach
+Gang Intervention
+A
+
+Launch heavy police enforcement. Arrest gang members in the area. Stop and search young people. Work with federal agents.
+
+AUTHORITY
+18
+B
+
+Double down on outreach. Hire two more outreach workers. Visit neighborhoods daily. Meet with gang members to listen and offer alternatives.
+
+AUTHORITY
+14
+C
+
+Partner with police on a mediation team. Officers and outreach workers go together to neighborhoods. Focus on talking to gang leaders about truces.
+
+AUTHORITY
+11
+D
+
+Launch an emergency job and skills program. Offer paid training to young people ages 16 to 24 in construction and tech. Start within two weeks.
+
+AUTHORITY
+12
+E
+
+Support Marcus and staff with counseling. Show that you care about your team. Also, create a community healing event with neighborhood leaders and violence survivors.
+
+AUTHORITY
+7
+F
+
+Request emergency state funding for gang prevention. Apply for grants. Expand mentorship with local colleges like Middlesex Community College and youth organizations.
+
+AUTHORITY
+9
+G
+
+Wait. Take one week to gather more information before deciding. See if police make arrests. Listen to community feedback.
+
+AUTHORITY
+0
+Decision Made
+
+"Launch heavy police enforcement. Arrest gang members in the area. Stop and search young people. Work with federal agents."
+
+Police presence stops immediate violence, but your program loses community trust. Neighbors fear police more than gangs. Arrests spike, but young people see the justice system as punishment only.
+
+🛡️ Public Safety
+56
+→
+64
++8
+🤝 Community Trust
+45
+→
+35
+-10
+🔄 Rehabilitation
+47
+→
+44
+-3
+💰 Program Budget
+58
+→
+56
+-2
+🏛️ Authority Spent
+-18
+Continue

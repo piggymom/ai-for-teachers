@@ -1,0 +1,103 @@
+📒
+Accounting
+Asher Research · Senior Accountant
+Month 3 of 16
+Round 1/4
+⏱️
+Billable Hours
+60
+🎯
+Accuracy
+54
+🤝
+Client Trust
+66
+📋
+Compliance
+52
+💵
+Firm Profit
+39
+Exit Simulation
+🔍
+Audit Roulette
+📋 OPERATIONAL_MANAGEMENT
+ROUND 1 OF 4
+Junior Staff Member Makes Tax Return Errors
+
+Your newest junior accountant, Maria, just finished her first independent tax return for a local Lowell manufacturing company. You review her work and find five calculation errors and two missing documentation items. Maria is a good person and works hard, but she has not done this type of work before. She needs training to avoid these mistakes in the future. However, tax season is extremely busy right now, and you have many other clients waiting. You must decide how to handle Maria's training needs while keeping the firm's work moving forward. Training her now will improve accuracy and compliance for future work, but it will cost time and billable hours this week. As a senior accountant, you need to think about Internal Controls before deciding. The decision you make will affect whether your team stays strong and error-free or falls behind under pressure.
+
+KEY TERMS
+Internal Controls
+Documentation
+A
+
+Pull Maria off client work for three days. Run an intensive training program on tax returns, documentation, and internal controls. Make her redo her work with your direct oversight.
+
+BILLABLE HOURS
+20
+B
+
+Have Maria redo the errors while you do a quick 30-minute check-in about her mistakes. Then assign her to work alongside you on the next two returns, shadowing your work.
+
+BILLABLE HOURS
+11
+C
+
+Correct Maria's errors yourself and file the return. Give her a written guide about common mistakes and tell her to study it on her own time this weekend.
+
+BILLABLE HOURS
+8
+D
+
+Hire an online tax accounting course for Maria through Coursera or a similar platform. Have her work through it over the next month while continuing her normal duties. You review her work more carefully until she finishes.
+
+BILLABLE HOURS
+5
+E
+
+Pair Maria with your most experienced senior staff member, Carlos, for peer mentoring. Carlos spends one hour per day with her for the next two weeks, reviewing her work and answering questions.
+
+BILLABLE HOURS
+10
+F
+
+Tell Maria to attend a local workshop at Middlesex Community College about tax documentation and internal control procedures. The firm pays the registration fee. She goes on Friday afternoon.
+
+BILLABLE HOURS
+3
+G
+
+Do nothing right now. Let Maria continue with current work. Deal with staff training after tax season ends in April.
+
+BILLABLE HOURS
+0
+Decision Made
+
+"Pull Maria off client work for three days. Run an intensive training program on tax returns, documentation, and internal controls. Make her redo her work with your direct oversight."
+
+Maria learns well and her future work improves significantly. However, you fall behind on other client deadlines, and some clients notice slow responses. Three days of her billable time is lost.
+
+🎯 Accuracy
+54
+→
+62
++8
+🤝 Client Trust
+66
+→
+63
+-3
+📋 Compliance
+52
+→
+59
++7
+💵 Firm Profit
+39
+→
+27
+-12
+⏱️ Billable Hours Spent
+-20
+Continue

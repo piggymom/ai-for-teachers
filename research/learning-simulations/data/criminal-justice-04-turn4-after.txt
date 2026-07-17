@@ -1,0 +1,103 @@
+🔍
+Criminal Justice
+Asher Research · Program Director
+Month 4 of 16
+Round 1/4
+🏛️
+Authority
+46
+🛡️
+Public Safety
+71
+🤝
+Community Trust
+27
+🔄
+Rehabilitation
+39
+💰
+Program Budget
+53
+Exit Simulation
+📁
+Cold Case File
+📋 COMMUNITY_HEALTH_AND_SAFETY
+ROUND 1 OF 4
+Overdose Crisis in the Merrimack Valley
+
+Three people died from opioid overdoses in Lowell this week. Local hospitals report that overdose emergency room visits have increased 40 percent in the last six months. Your community justice program must decide how to respond quickly. Community leaders are asking you to take action, but you have limited money and staff. Some people want more arrests and stricter enforcement. Others want to focus on treatment and harm reduction services. This choice will affect how safe the community feels, how much people trust your program, and whether people with addiction get help to recover. You must decide now because waiting will allow the crisis to grow worse.
+
+KEY TERMS
+Harm reduction
+Enforcement
+A
+
+Launch aggressive enforcement operation. Work with state police to arrest drug dealers and users in high-crime areas.
+
+AUTHORITY
+18
+B
+
+Partner with local hospitals and clinics to offer free naloxone training and kits. Focus on saving lives immediately.
+
+AUTHORITY
+9
+C
+
+Create new treatment beds at local addiction services. Offer free counseling and job training through your program.
+
+AUTHORITY
+14
+D
+
+Apply for federal grant to fund a combined approach. Hire staff for enforcement AND treatment programs.
+
+AUTHORITY
+12
+E
+
+Form community overdose response team with residents, social workers, and police. Residents help decide response strategy.
+
+AUTHORITY
+8
+F
+
+Focus on prevention in schools and youth programs. Partner with Middlesex Community College for education.
+
+AUTHORITY
+10
+G
+
+Wait for state guidance. Do not respond yet. Monitor the situation.
+
+AUTHORITY
+0
+Decision Made
+
+"Launch aggressive enforcement operation. Work with state police to arrest drug dealers and users in high-crime areas."
+
+Police make arrests quickly. Some residents feel safer. But communities feel targeted and mistrusted. Few people seek treatment when they fear arrest.
+
+🛡️ Public Safety
+71
+→
+79
++8
+🤝 Community Trust
+27
+→
+21
+-6
+🔄 Rehabilitation
+39
+→
+34
+-5
+💰 Program Budget
+53
+→
+50
+-3
+🏛️ Authority Spent
+-18
+Continue

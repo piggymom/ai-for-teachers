@@ -1,0 +1,76 @@
+🏨
+Hotel Management
+Asher Research · General Manager
+Week 5 of 16
+Round 2/4
+🔑
+GM Capacity
+38
+💼
+RevPAR
+72
+⭐
+Guest Satisfaction
+43
+👥
+Staff Retention
+49
+🏆
+Brand Equity
+53
+Exit Simulation
+✨
+Moments of Truth
+📋 OPERATIONS_AND_REVENUE
+ROUND 2 OF 4
+Restaurant Menu Crisis: Local Favorites vs. Modern Appeal
+
+Your hotel restaurant, Riverfront Bistro, has served the same menu for three years. Business travelers and conference guests from UMass Lowell still come, but online reviews say the food feels tired. Last month, a popular competitor two blocks away opened with locally sourced dishes from Lowell-area farms. Your food and beverage manager wants to redesign the menu completely. The decision matters because your restaurant is not just a profit center, it is also a key touchpoint where guests form their first and last impression of your hotel. A strong restaurant experience can increase guest satisfaction scores and encourage repeat visits. However, changing the menu requires staff retraining, new supplier relationships, and kitchen investment. Good decisions here depend on understanding Food and Beverage (F&B) Revenue. How you handle Menu Engineering will shape what happens next. You must decide now, because ownership is asking about your restaurant's performance this week.
+
+KEY TERMS
+Food and Beverage (F&B) Revenue
+Menu Engineering
+A
+
+Complete menu redesign: Go farm-to-table, partner with local Merrimack Valley suppliers, retrain all kitchen staff, launch with a PR event and social media campaign.
+
+GM CAPACITY
+20
+B
+
+Refresh the menu: Keep 60% of old favorites, add 8-10 new local dishes, light staff training, no major PR push.
+
+GM CAPACITY
+8
+C
+
+Partner with a local chef consultant from UMass Lowell Culinary program. They redesign menu in exchange for credit and portfolio work. Phased training over 6 weeks.
+
+GM CAPACITY
+11
+D
+
+Keep current menu but improve execution: Invest in staff training, upgrade kitchen equipment, source better ingredients from existing suppliers, no menu changes.
+
+GM CAPACITY
+9
+E
+
+Offer two menus: Keep the original menu for regulars and business travelers. Add a new 'Local Harvest' section with farm dishes. Staff picks which recipes they most want to learn.
+
+GM CAPACITY
+10
+F
+
+Launch a guest feedback survey in-room and on your website. Ask specifically about menu desires. Use results to guide a small pilot menu (3-4 new dishes) in the restaurant for 4 weeks.
+
+GM CAPACITY
+6
+G
+
+Do nothing. Keep menu as is. Monitor competitor activity and guest reviews over the next month.
+
+GM CAPACITY
+0
+✓
+Reflection complete! +10 GM Capacity recovered.

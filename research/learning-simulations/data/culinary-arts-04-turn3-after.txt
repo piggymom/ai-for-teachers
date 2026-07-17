@@ -1,0 +1,103 @@
+👨‍🍳
+Culinary Arts
+Asher Research · Head Chef & Owner
+Week 3 of 16
+Round 1/4
+⚡
+Energy
+62
+⭐
+Food Quality
+64
+📱
+Customer Reviews
+61
+💰
+Budget
+46
+🔥
+Kitchen Morale
+38
+Exit Simulation
+🍽️
+Critic's Table
+📋 KITCHEN OPERATIONS & SAFETY
+ROUND 1 OF 4
+Health Inspector Finds Problem in Your Walk-In Cooler
+
+Your restaurant is busy this Tuesday afternoon when a health inspector arrives for a routine check. She opens your walk-in cooler in the back and finds old containers of sauce pushed to the back shelf. The labels show these sauces are three weeks old, past the safe storage date. You know you have been saving money by using every bit of food before throwing it away. However, the health code requires you to throw away old food, even if it looks and smells fine. In Lowell's competitive restaurant scene, a health code violation can damage your reputation badly. Understanding FIFO (First In, First Out) is important for making the right choice here. You must decide now what to tell the inspector and how to fix this problem before she writes a report.
+
+KEY TERMS
+FIFO (First In, First Out)
+Health Code Violation
+A
+
+Immediately throw away all old sauces and agree to full kitchen inspection today. Tell the inspector you take safety seriously and show her your best practices.
+
+ENERGY
+20
+B
+
+Remove the old sauces quickly, apologize to the inspector, and promise a new FIFO system starting tomorrow.
+
+ENERGY
+8
+C
+
+Admit the problem to the inspector, pay the fine immediately, and hire a kitchen consultant to train your staff on proper food storage.
+
+ENERGY
+18
+D
+
+Tell the inspector those sauces belong to a food donation program and offer to remove them immediately for charity.
+
+ENERGY
+6
+E
+
+Explain to the inspector that you are a new restaurant learning systems and ask for a 30-day warning instead of a violation.
+
+ENERGY
+7
+F
+
+Remove the old sauces, implement FIFO training for your kitchen team this week, and create a new daily checklist system.
+
+ENERGY
+14
+G
+
+Ask the inspector if you can discuss this later and continue your lunch service.
+
+ENERGY
+0
+Decision Made
+
+"Immediately throw away all old sauces and agree to full kitchen inspection today. Tell the inspector you take safety seriously and show her your best practices."
+
+You lose money on wasted food today, but the inspector leaves satisfied with no violation on record. Customers hear about your commitment to safety and respect your honesty.
+
+⭐ Food Quality
+64
+→
+70
++6
+📱 Customer Reviews
+61
+→
+69
++8
+💰 Budget
+46
+→
+34
+-12
+🔥 Kitchen Morale
+38
+→
+40
++2
+⚡ Energy Spent
+-20
+Continue

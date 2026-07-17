@@ -1,0 +1,64 @@
+💳
+Personal Finance
+Asher Research · MCC Graduate Managing Their Money
+Month 1 of 16
+Round 1/4
+💵
+Monthly Income
+100
+📊
+Net Worth
+35
+🛟
+Emergency Fund
+15
+🎯
+Credit Score
+50
+😰
+Financial Stress
+45
+Exit Simulation
+🎲
+Life Happens
+
+Generating scenario...
+
+Personal Finance
+
+MCC Graduate Managing Their Money
+
+Lowell, MA — Your First Adult Financial Year
+
+You just graduated from Middlesex Community College and landed your first full-time job in Lowell. Between rent, student loans, a starter credit card, and the dream of one day owning a home, every paycheck becomes a balancing act. Build an emergency fund, protect your credit, start investing, and resist lifestyle inflation — all while real life keeps throwing curveballs.
+
+Your Performance Meters
+
+Click any meter for details. If a meter drops too low, the simulation ends.
+
+📊
+Net Worth
+Starts at 35
+🛟
+Emergency Fund
+Starts at 15
+🎯
+Credit Score
+Starts at 50
+😰
+Financial Stress
+Starts at 45
+Resources & Abilities
+💵
+Monthly Income
+RESOURCE
+🎲
+Life Happens
+ONE-TIME
+16
+TURNS
+4
+ROUNDS
+3
+REFLECTIONS
+Begin Simulation

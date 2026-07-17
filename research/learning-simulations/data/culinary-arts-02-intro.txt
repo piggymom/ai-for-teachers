@@ -1,0 +1,64 @@
+👨‍🍳
+Culinary Arts
+Asher Research · Head Chef & Owner
+Week 1 of 16
+Round 1/4
+⚡
+Energy
+100
+⭐
+Food Quality
+50
+📱
+Customer Reviews
+50
+💰
+Budget
+50
+🔥
+Kitchen Morale
+50
+Exit Simulation
+🍽️
+Critic's Table
+
+Generating scenario...
+
+Culinary Arts
+
+Head Chef & Owner
+
+Lowell, MA — Downtown Restaurant District
+
+You've just opened a restaurant in Lowell's vibrant downtown, steps from the Merrimack River. Manage your kitchen, delight customers, control costs, and build your reputation in a competitive food scene influenced by the city's rich multicultural heritage.
+
+Your Performance Meters
+
+Click any meter for details. If a meter drops too low, the simulation ends.
+
+⭐
+Food Quality
+Starts at 50
+📱
+Customer Reviews
+Starts at 50
+💰
+Budget
+Starts at 50
+🔥
+Kitchen Morale
+Starts at 50
+Resources & Abilities
+⚡
+Energy
+RESOURCE
+🍽️
+Critic's Table
+ONE-TIME
+16
+TURNS
+4
+ROUNDS
+3
+REFLECTIONS
+Begin Simulation

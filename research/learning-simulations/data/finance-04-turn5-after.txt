@@ -1,0 +1,76 @@
+💹
+Finance
+Asher Research · Financial Advisor
+Quarter 5 of 16
+Round 2/4
+🏦
+Capital
+36
+📈
+Portfolio Value
+55
+⚡
+Risk Exposure
+45
+🤝
+Client Confidence
+60
+📋
+Compliance Score
+46
+Exit Simulation
+🎰
+Market Shock
+📋 MARKET_PRESSURE
+ROUND 2 OF 4
+Robo-Advisor Threat: Do You Compete or Partner?
+
+A new fintech company called WealthBot just launched in Boston. They offer automated investment advice to customers for very low fees. Three of your best clients from Lowell called this week asking why they should pay you more money when WealthBot charges half as much. You need to decide how to respond to this threat quickly. Your firm has always built trust by meeting clients face to face in the Lowell office. But WealthBot's technology is fast, cheap, and popular with younger investors. This is a real challenge to your business model and your ability to keep earning income. How you handle Robo-Advisor will shape what happens next. Good decisions here depend on understanding Competitive Advantage. Your decision will affect your portfolio performance, how much clients trust you, and whether regulators notice you are making risky moves to compete.
+
+KEY TERMS
+Robo-Advisor
+Competitive Advantage
+A
+
+Launch your own robo-advisor platform immediately. Hire a software developer. Invest in technology. Copy WealthBot's model.
+
+CAPITAL
+20
+B
+
+Partner with WealthBot instead of competing. Offer their service to clients who want low-cost investing. You keep clients for complex financial planning.
+
+CAPITAL
+8
+C
+
+Lower your fees to match WealthBot. Keep clients by proving you offer more personal attention than robots.
+
+CAPITAL
+6
+D
+
+Focus on high-net-worth clients only. Stop serving middle-income families. Offer white-glove service that robots cannot provide.
+
+CAPITAL
+10
+E
+
+Build trust by educating clients about fintech risks. Host free workshops at MCC about how robo-advisors fail in market crashes. Prove your value through community leadership.
+
+CAPITAL
+12
+F
+
+Hire a financial technology expert to study WealthBot. Make small improvements to your own service. Move slowly and carefully.
+
+CAPITAL
+14
+G
+
+Wait and watch. Do nothing for now. See how WealthBot performs over the next few months.
+
+CAPITAL
+0
+✓
+Reflection complete! +10 Capital recovered.

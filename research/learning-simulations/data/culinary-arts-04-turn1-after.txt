@@ -1,0 +1,103 @@
+👨‍🍳
+Culinary Arts
+Asher Research · Head Chef & Owner
+Week 1 of 16
+Round 1/4
+⚡
+Energy
+100
+⭐
+Food Quality
+50
+📱
+Customer Reviews
+50
+💰
+Budget
+50
+🔥
+Kitchen Morale
+50
+Exit Simulation
+🍽️
+Critic's Table
+📋 KITCHEN_OPERATIONS
+ROUND 1 OF 4
+The Vegetable Trim Problem
+
+You arrive at your restaurant near the Merrimack River in downtown Lowell on a busy Friday morning. Your prep cook is throwing away almost half of every vegetable that comes in. Yesterday alone, your kitchen discarded ten pounds of carrot peels, celery tops, and broccoli stems. You notice your budget is getting tight because you are buying too much food and wasting too much of it. Food waste is costing you real money each week. Your sous chef suggests you could use these scraps for stocks and sauces, but that would take more kitchen time. This situation is closely connected to Mise en place and how you manage it. Understanding Stock is important for making the right choice here. You need to make a decision now about how to handle the trim from today's lunch service.
+
+KEY TERMS
+Mise en place
+Stock
+A
+
+Start a zero-waste program immediately. Ban all vegetable scraps from the trash. Require your prep team to sort every piece into compost, stock, or donation bins. Implement strict tracking and daily meetings about waste.
+
+ENERGY
+18
+B
+
+Hire a part-time culinary student from Middlesex Community College to come in three afternoons a week. Have them focus only on making vegetable stocks and preparing vegetable scraps. Pay them $15 per hour.
+
+ENERGY
+9
+C
+
+Partner with a local farm in the Merrimack Valley to pick up your vegetable scraps twice a week for their animal feed and compost. There is no cost to you, and you get a small tax deduction.
+
+ENERGY
+6
+D
+
+Redesign your menu to use whole vegetables with less trim. Feature dishes that celebrate vegetable tops, peels, and stems as special ingredients. Train your cooks to think creatively about what looks like waste.
+
+ENERGY
+12
+E
+
+Keep the waste system as it is, but track how much you throw away each day. Use that data to order smaller amounts of vegetables from your suppliers. Buy more often in smaller quantities instead of one large order.
+
+ENERGY
+7
+F
+
+Talk to your prep team about the waste problem. Ask them for ideas on how to reduce waste without making their job harder. Offer a small bonus if waste drops by twenty percent in the next month.
+
+ENERGY
+5
+G
+
+Do nothing for now. Keep your current waste system. Focus on other problems in the restaurant.
+
+ENERGY
+0
+Decision Made
+
+"Start a zero-waste program immediately. Ban all vegetable scraps from the trash. Require your prep team to sort every piece into compost, stock, or donation bins. Implement strict tracking and daily meetings about waste."
+
+Your kitchen becomes much more organized and waste drops fast. Your food costs drop. But your prep cooks resent the new rules and extra work. One experienced cook starts looking for a job elsewhere. Tension fills your kitchen.
+
+⭐ Food Quality
+50
+→
+56
++6
+📱 Customer Reviews
+50
+→
+54
++4
+💰 Budget
+50
+→
+58
++8
+🔥 Kitchen Morale
+50
+→
+43
+-7
+⚡ Energy Spent
+-18
+Continue

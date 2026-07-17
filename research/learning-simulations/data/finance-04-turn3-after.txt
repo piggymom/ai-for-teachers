@@ -1,0 +1,103 @@
+💹
+Finance
+Asher Research · Financial Advisor
+Quarter 3 of 16
+Round 1/4
+🏦
+Capital
+62
+📈
+Portfolio Value
+66
+⚡
+Risk Exposure
+55
+🤝
+Client Confidence
+62
+📋
+Compliance Score
+40
+Exit Simulation
+🎰
+Market Shock
+📋 PORTFOLIO_MANAGEMENT
+ROUND 1 OF 4
+Stock Market Falls Fast. Clients Are Worried.
+
+The stock market dropped 8 percent overnight. Your clients at Merrimack Valley Wealth Management are calling with fear in their voices. Some own tech stocks and manufacturing companies, like the ones that used to operate here in Lowell. You must decide right now how to respond. Some clients want to sell everything and keep their money safe. Others want to hold on and wait for prices to go back up. Your job is to give them good advice, but you also need to protect their money and follow all the rules. Understanding Diversification is important for making the right choice here. As a financial advisor, you need to think about Market Panic before deciding. The decisions you make today will affect their trust in you and whether they stay as clients or take their money somewhere else.
+
+KEY TERMS
+Diversification
+Market Panic
+A
+
+Immediately shift all client portfolios to cash and bonds. Sell all stocks right now to lock in the losses before prices fall more.
+
+CAPITAL
+18
+B
+
+Call each client today. Listen to their fears. Explain your long-term plan and why they should not sell right now.
+
+CAPITAL
+14
+C
+
+Sell only the worst-performing stocks in each portfolio. Keep the strongest companies. Rebalance to buy more stocks at lower prices.
+
+CAPITAL
+12
+D
+
+Send a detailed email to all clients explaining what happened and your strategy. Include historical data showing that markets always recover. Offer to meet with anyone who wants to talk.
+
+CAPITAL
+8
+E
+
+Reach out to five of your most nervous clients. Offer to move part of their money to safer investments like bonds and savings accounts. Keep the rest in stocks for long-term growth.
+
+CAPITAL
+10
+F
+
+Review every client portfolio right now. Update their risk scores. For clients who took too much risk, move them to more stable investments. Document everything carefully.
+
+CAPITAL
+16
+G
+
+Wait and do nothing. Tell clients you are monitoring the situation and will contact them soon.
+
+CAPITAL
+0
+Decision Made
+
+"Immediately shift all client portfolios to cash and bonds. Sell all stocks right now to lock in the losses before prices fall more."
+
+You protect clients from more losses today, but you lock in real losses now. You sell at the worst time. Clients feel safe for a moment, but when stocks bounce back up in two weeks, they will be angry. You also sold without proper documentation, which triggers a compliance review.
+
+📈 Portfolio Value
+66
+→
+58
+-8
+⚡ Risk Exposure
+55
+→
+43
+-12
+🤝 Client Confidence
+62
+→
+68
++6
+📋 Compliance Score
+40
+→
+36
+-4
+🏦 Capital Spent
+-18
+Continue

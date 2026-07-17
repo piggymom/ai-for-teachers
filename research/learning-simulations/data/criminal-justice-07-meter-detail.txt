@@ -1,0 +1,76 @@
+🔍
+Criminal Justice
+Asher Research · Program Director
+Month 5 of 16
+Round 2/4
+🏛️
+Authority
+38
+🛡️
+Public Safety
+79
+🤝
+Community Trust
+21
+🔄
+Rehabilitation
+34
+💰
+Program Budget
+50
+Exit Simulation
+📁
+Cold Case File
+📋 CRIMINAL_JUSTICE_POLICY
+ROUND 2 OF 4
+State Prison Reports Overcrowding Crisis
+
+The state prison in nearby Shirley, Massachusetts is now holding 2,400 inmates in a facility built for 1,800 people. Officials say they must release 200 to 300 low-risk offenders in the next three months or face a federal lawsuit. Your community justice program in Lowell is being asked to help. You must decide whether to accept some of these released offenders into your reentry programs, knowing your current staff and budget are already stretched thin. The Merrimack Valley region is watching to see if Lowell will step up or push back. Some community members fear released prisoners will increase local crime. Others argue that jail overcrowding harms everyone and that reentry support actually prevents new crimes. As a program director, you need to think about Reentry Program before deciding. How you handle Recidivism will shape what happens next. Your decision will shape how the state views your program and whether other communities trust your leadership.
+
+KEY TERMS
+Reentry Program
+Recidivism
+A
+
+Accept 40 released offenders into an intensive new reentry program with expanded job training and housing support
+
+AUTHORITY
+18
+B
+
+Accept 15 offenders but only those with strong family support and existing jobs in the Lowell area
+
+AUTHORITY
+8
+C
+
+Partner with Middlesex Community College to create a job training pilot for 8 released offenders in construction and healthcare fields
+
+AUTHORITY
+12
+D
+
+Refuse to accept released offenders but advocate loudly for better mental health and drug treatment inside the prison
+
+AUTHORITY
+10
+E
+
+Accept 20 offenders but only with a strict condition: the state must fund two additional staff members and provide a 500,000 dollar grant
+
+AUTHORITY
+14
+F
+
+Create a community safety task force with police, neighborhood leaders, and social workers to design a reentry plan together before accepting anyone
+
+AUTHORITY
+11
+G
+
+Take no action and wait to see if other communities accept the released offenders
+
+AUTHORITY
+0
+✓
+Reflection complete! +10 Authority recovered.

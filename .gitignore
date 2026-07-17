@@ -45,3 +45,4 @@ next-env.d.ts
 
 # Debug loop session token
 debug-loop/.session
+.superpowers/

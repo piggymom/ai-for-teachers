@@ -1,0 +1,103 @@
+📊
+Business Management
+Asher Research · General Manager
+Quarter 1 of 16
+Round 1/4
+💵
+Budget
+100
+💰
+Revenue
+50
+⭐
+Customer Satisfaction
+50
+👥
+Employee Morale
+50
+🏆
+Reputation
+50
+Exit Simulation
+📈
+Market Pulse
+📋 LEGAL_AND_COMPLIANCE
+ROUND 1 OF 4
+A Local Designer Claims You Copied Their Product Design
+
+You own a small manufacturing company in downtown Lowell that makes home organization products. Last week, a local designer contacted you with serious news. They claim your new storage system uses their patented design without permission. They have documents showing they filed their patent three years ago. You need to decide how to respond quickly. If you ignore this, they may sue your company. If you act wrong, you could hurt your reputation or spend too much money. Understanding Licensing Agreement is important for making the right choice here. This situation will test how you handle intellectual property and protect your company's future in the Merrimack Valley business community.
+
+KEY TERMS
+Patent
+Licensing Agreement
+A
+
+Immediately hire a top intellectual property lawyer and take the designer to court to prove the designs are different
+
+BUDGET
+20
+B
+
+Offer to negotiate a licensing agreement with the designer so you can legally use their patented design
+
+BUDGET
+8
+C
+
+Redesign your storage system completely to avoid the patent and stop selling the current version immediately
+
+BUDGET
+14
+D
+
+Meet with the designer and apologize, offering them a small settlement payment to avoid legal conflict
+
+BUDGET
+6
+E
+
+Contact other similar companies in the Merrimack Valley to see if they also use this design, building evidence together
+
+BUDGET
+10
+F
+
+Ask a local intellectual property expert from Middlesex Community College for free or low-cost advice before deciding
+
+BUDGET
+4
+G
+
+Wait one month and see if the designer actually takes legal action before responding
+
+BUDGET
+0
+Decision Made
+
+"Immediately hire a top intellectual property lawyer and take the designer to court to prove the designs are different"
+
+Legal fees are very high. The public learns about the lawsuit and many customers worry about buying from you. Even if you win, the cost damages your budget heavily and the conflict hurts your brand in Lowell.
+
+💰 Revenue
+50
+→
+42
+-8
+⭐ Customer Satisfaction
+50
+→
+47
+-3
+👥 Employee Morale
+50
+→
+48
+-2
+🏆 Reputation
+50
+→
+45
+-5
+💵 Budget Spent
+-20
+Continue

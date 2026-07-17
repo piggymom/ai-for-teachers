@@ -1,0 +1,103 @@
+🏨
+Hotel Management
+Asher Research · General Manager
+Week 3 of 16
+Round 1/4
+🔑
+GM Capacity
+64
+💼
+RevPAR
+54
+⭐
+Guest Satisfaction
+52
+👥
+Staff Retention
+51
+🏆
+Brand Equity
+55
+Exit Simulation
+✨
+Moments of Truth
+📋 REVENUE_OPERATIONS
+ROUND 1 OF 4
+UMass Lowell Conference Booking: Big Money, Big Risk
+
+The UMass Lowell Business School wants to book your hotel for a three-day conference in eight weeks. They need 80 rooms, three meals per day, and meeting space. This is a 30,000 dollar opportunity that could boost your revenue significantly. However, you must decide now whether to block these dates or keep the rooms available for walk-in guests and smaller bookings that might come later. The conference organizers want a 20 percent discount because they are a nonprofit educational client. Your ownership team is watching your RevPAR closely, and this booking could lift your numbers or trap you with unsold rooms if the conference attendance drops. This situation is closely connected to Group Booking and how you manage it. This choice will teach you about yield management and how to balance guaranteed group revenue against the risk of losing higher-paying individual guests.
+
+KEY TERMS
+Yield Management
+Group Booking
+A
+
+Accept the full conference booking at their 20 percent discount. Block all 80 rooms for the three days. Hire temporary F&B staff and negotiate with suppliers now to lock in low costs.
+
+GM CAPACITY
+18
+B
+
+Accept the booking at a 10 percent discount instead of 20 percent. Block only 70 rooms, keeping 10 rooms available for higher-paying guests. Set up a simple welcome reception to enhance guest experience.
+
+GM CAPACITY
+11
+C
+
+Negotiate a tiered pricing model. Accept 60 rooms at 15 percent discount with bonus rooms available at full price if conference demand exceeds expectations. Include one free breakfast and a welcome amenity for all guests.
+
+GM CAPACITY
+13
+D
+
+Decline the discounted conference booking. Instead, contact local corporate clients to fill the dates with smaller high-margin bookings at full rates. Invest effort in direct sales outreach.
+
+GM CAPACITY
+12
+E
+
+Accept the conference at 15 percent discount. Require the organizers to commit to minimum 75 rooms or pay a penalty. Use this guaranteed revenue to invest in housekeeping training and equipment upgrades.
+
+GM CAPACITY
+10
+F
+
+Accept the full booking at 18 percent discount. Partner with a local catering company owned by a Lowell community member instead of using hotel F&B. Market this partnership as supporting local Merrimack Valley business.
+
+GM CAPACITY
+9
+G
+
+Tell the conference organizers you need two weeks to check your system before committing. Do nothing in the meantime.
+
+GM CAPACITY
+0
+Decision Made
+
+"Accept the full conference booking at their 20 percent discount. Block all 80 rooms for the three days. Hire temporary F&B staff and negotiate with suppliers now to lock in low costs."
+
+Revenue jumps, but temporary staff strain permanent team morale. If conference attendance drops below 60 rooms, you lose money. High effort to coordinate logistics with external partners.
+
+💼 RevPAR
+54
+→
+62
++8
+⭐ Guest Satisfaction
+52
+→
+49
+-3
+👥 Staff Retention
+51
+→
+47
+-4
+🏆 Brand Equity
+55
+→
+58
++3
+🔑 GM Capacity Spent
+-18
+Continue

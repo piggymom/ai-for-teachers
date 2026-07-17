@@ -1,0 +1,64 @@
+👗
+Fashion Merchandising
+Asher Research · Merchandising Director
+Season 1 of 16
+Round 1/4
+💎
+Influence
+100
+🔮
+Trend Score
+50
+🛍️
+Sales
+50
+✨
+Brand Image
+50
+📦
+Inventory Health
+50
+Exit Simulation
+🔮
+Trend Forecast
+
+Generating scenario...
+
+Fashion Merchandising
+
+Merchandising Director
+
+Lowell, MA — Merrimack Valley Retail & Outlets
+
+You're the new merchandising director for a fashion retailer expanding into the Lowell outlet district. Source trends, manage inventory, build brand identity, and keep sales strong in a fast-moving industry where last season's hit is this season's markdown.
+
+Your Performance Meters
+
+Click any meter for details. If a meter drops too low, the simulation ends.
+
+🔮
+Trend Score
+Starts at 50
+🛍️
+Sales
+Starts at 50
+✨
+Brand Image
+Starts at 50
+📦
+Inventory Health
+Starts at 50
+Resources & Abilities
+💎
+Influence
+RESOURCE
+🔮
+Trend Forecast
+ONE-TIME
+16
+TURNS
+4
+ROUNDS
+3
+REFLECTIONS
+Begin Simulation

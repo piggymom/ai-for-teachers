@@ -1,0 +1,64 @@
+🔍
+Criminal Justice
+Asher Research · Program Director
+Month 1 of 16
+Round 1/4
+🏛️
+Authority
+100
+🛡️
+Public Safety
+50
+🤝
+Community Trust
+50
+🔄
+Rehabilitation
+50
+💰
+Program Budget
+50
+Exit Simulation
+📁
+Cold Case File
+
+Generating scenario...
+
+Criminal Justice
+
+Program Director
+
+Lowell, MA — Community Justice Center
+
+You're the new director of a community justice program in Lowell, bridging law enforcement and community organizations. Balance public safety, community trust, rehabilitation, and tight budgets in a city working to reduce recidivism and build safer neighborhoods.
+
+Your Performance Meters
+
+Click any meter for details. If a meter drops too low, the simulation ends.
+
+🛡️
+Public Safety
+Starts at 50
+🤝
+Community Trust
+Starts at 50
+🔄
+Rehabilitation
+Starts at 50
+💰
+Program Budget
+Starts at 50
+Resources & Abilities
+🏛️
+Authority
+RESOURCE
+📁
+Cold Case File
+ONE-TIME
+16
+TURNS
+4
+ROUNDS
+3
+REFLECTIONS
+Begin Simulation

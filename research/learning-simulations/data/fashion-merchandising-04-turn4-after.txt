@@ -1,0 +1,103 @@
+👗
+Fashion Merchandising
+Asher Research · Merchandising Director
+Season 4 of 16
+Round 1/4
+💎
+Influence
+44
+🔮
+Trend Score
+74
+🛍️
+Sales
+64
+✨
+Brand Image
+68
+📦
+Inventory Health
+34
+Exit Simulation
+🔮
+Trend Forecast
+📋 INVENTORY_MANAGEMENT
+ROUND 1 OF 4
+End of Season Overstock Crisis at Lowell Outlet
+
+Your store in the Merrimack Valley Outlets has too much spring inventory left. Summer styles are coming in two weeks, but you still have 40 percent of spring clothes on the shelves. The problem is real: you ordered too much, and trends shifted faster than expected. You must decide now how to clear this old stock before the new summer merchandise arrives. If you do not move these items quickly, you will have no floor space for trending summer pieces. Your inventory health is already at risk, and holding old stock costs money every day. The Lowell community expects fresh fashion, and your competitors at the outlet mall are already marking down their spring items. Understanding Markdown is important for making the right choice here. You need a clearance strategy, which is your plan to sell leftover merchandise fast, but your choices will affect your brand image, sales numbers, and trend score in different ways.
+
+KEY TERMS
+Clearance Strategy
+Markdown
+A
+
+Aggressive flash sale: Mark all spring items down 60 percent for one week only. Partner with local Lowell social media influencers to promote the sale heavily.
+
+INFLUENCE
+18
+B
+
+Partner with local colleges near Middlesex Community College for a student discount event. Offer 35 percent off spring items only to students with valid ID. Market it as affordable fashion for budget-conscious students.
+
+INFLUENCE
+9
+C
+
+Create a 'Clearance Capsule' bundle: Package three spring items together at 40 percent off. Market it as affordable style sets for different occasions, not as leftover junk.
+
+INFLUENCE
+11
+D
+
+Donate 25 percent of unsold spring stock to local Lowell nonprofits like homeless shelters or job training programs. Mark down remaining items just 25 percent and extend the clearance over three weeks.
+
+INFLUENCE
+12
+E
+
+Keep spring items on shelves at 15 percent off. Focus your time and marketing budget on promoting new summer trends arriving next week. Let summer styles be the star of the store.
+
+INFLUENCE
+6
+F
+
+Move spring overstock to a separate 'Outlet Corner' section in the back of the store with 30 percent off. This keeps your main floor clean and trend-forward while still clearing inventory gradually.
+
+INFLUENCE
+8
+G
+
+Wait two more weeks and see what sells naturally as summer approaches. Do not start clearance yet.
+
+INFLUENCE
+0
+Decision Made
+
+"Aggressive flash sale: Mark all spring items down 60 percent for one week only. Partner with local Lowell social media influencers to promote the sale heavily."
+
+Inventory clears fast, but customers expect cheap prices in the future. Your brand looks like a discount store, not a trend leader.
+
+🔮 Trend Score
+74
+→
+71
+-3
+🛍️ Sales
+64
+→
+72
++8
+✨ Brand Image
+68
+→
+63
+-5
+📦 Inventory Health
+34
+→
+43
++9
+💎 Influence Spent
+-18
+Continue
