@@ -61,7 +61,7 @@ function devLog(tag: string, data: Record<string, unknown>) {
 }
 
 // Model configuration for speed
-const SKIPPY_MODEL = "claude-sonnet-4-20250514"; // Capable model for tutoring
+const SKIPPY_MODEL = "claude-sonnet-4-6"; // Capable model for tutoring
 const SKIPPY_MAX_TOKENS = 1500; // Substantive responses (~300-400 words)
 const SKIPPY_TEMPERATURE = 0.7;
 const MAX_HISTORY_MESSAGES = 10; // Only send last N messages

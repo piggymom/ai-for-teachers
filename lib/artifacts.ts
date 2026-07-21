@@ -237,7 +237,7 @@ Output ONLY the artifact text. No preamble, no explanation, no JSON wrapping.`;
 
   try {
     const response = await anthropic.messages.create({
-      model: "claude-3-haiku-20240307",
+      model: "claude-haiku-4-5",
       max_tokens: 1500,
       messages: [{ role: "user", content: prompt }],
     });
@@ -291,7 +291,7 @@ Respond ONLY with the JSON. No preamble.`;
 
   try {
     const response = await anthropic.messages.create({
-      model: "claude-3-haiku-20240307",
+      model: "claude-haiku-4-5",
       max_tokens: 200,
       messages: [{ role: "user", content: prompt }],
     });
