@@ -11,7 +11,7 @@ import { getModulePrompt } from "../lib/modules";
 const anthropic = new Anthropic();
 
 // Model to use for tests (should match production)
-const TEST_MODEL = "claude-sonnet-4-20250514";
+const TEST_MODEL = "claude-sonnet-4-6";
 const TEST_MAX_TOKENS = 1500;
 
 // ============================================

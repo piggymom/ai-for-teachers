@@ -28,10 +28,10 @@ import { formatProgressionForClassifier, getDiagnosticProbe } from "../lib/progr
 const anthropic = new Anthropic();
 
 // Models
-const SKIPPY_MODEL = "claude-sonnet-4-20250514";
+const SKIPPY_MODEL = "claude-sonnet-4-6";
 const PERSONA_MODEL = "claude-haiku-4-5-20251001";
 const CLASSIFIER_MODEL = "claude-haiku-4-5-20251001";
-const EVALUATOR_MODEL = "claude-sonnet-4-20250514";
+const EVALUATOR_MODEL = "claude-sonnet-4-6";
 
 const SKIPPY_MAX_TOKENS = 1500;
 const PERSONA_MAX_TOKENS = 500;
