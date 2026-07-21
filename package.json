@@ -15,7 +15,8 @@
     "debug:watch": "npx tsx debug-loop/watch.ts",
     "debug:session": "npx tsx debug-loop/get-session.ts",
     "review": "npx tsx debug-loop/review.ts",
-    "review:latest": "npx tsx debug-loop/review.ts --latest"
+    "review:latest": "npx tsx debug-loop/review.ts --latest",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
